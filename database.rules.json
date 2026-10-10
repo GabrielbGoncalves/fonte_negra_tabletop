@@ -1,0 +1,56 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "mestres": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".validate": "newData.isBoolean()"
+      }
+    },
+    "jogadores": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".validate": "newData.isBoolean()"
+      }
+    },
+
+    "combat_tracker": {
+      ".read": "auth != null && (root.child('mestres/' + auth.uid).val() === true || root.child('jogadores/' + auth.uid).val() === true)",
+      ".write": "auth != null && root.child('mestres/' + auth.uid).val() === true"
+    },
+    "conversor": {
+      ".read": "auth != null && (root.child('mestres/' + auth.uid).val() === true || root.child('jogadores/' + auth.uid).val() === true)",
+      ".write": "auth != null && root.child('mestres/' + auth.uid).val() === true"
+    },
+    "grid_map": {
+      ".read": "auth != null && (root.child('mestres/' + auth.uid).val() === true || root.child('jogadores/' + auth.uid).val() === true)",
+      ".write": "auth != null && root.child('mestres/' + auth.uid).val() === true"
+    },
+    "grimorio_state": {
+      ".read": "auth != null && (root.child('mestres/' + auth.uid).val() === true || root.child('jogadores/' + auth.uid).val() === true)",
+      ".write": "auth != null && root.child('mestres/' + auth.uid).val() === true"
+    },
+    "loja": {
+      ".read": "auth != null && (root.child('mestres/' + auth.uid).val() === true || root.child('jogadores/' + auth.uid).val() === true)",
+      ".write": "auth != null && root.child('mestres/' + auth.uid).val() === true"
+    },
+    "map_total": {
+      ".read": "auth != null && (root.child('mestres/' + auth.uid).val() === true || root.child('jogadores/' + auth.uid).val() === true)",
+      ".write": "auth != null && root.child('mestres/' + auth.uid).val() === true"
+    },
+    "sistema_de_confidentes": {
+      ".read": "auth != null && (root.child('mestres/' + auth.uid).val() === true || root.child('jogadores/' + auth.uid).val() === true)",
+      ".write": "auth != null && root.child('mestres/' + auth.uid).val() === true"
+    },
+    "teste_grid": {
+      ".read": "auth != null && (root.child('mestres/' + auth.uid).val() === true || root.child('jogadores/' + auth.uid).val() === true)",
+      ".write": "auth != null && root.child('mestres/' + auth.uid).val() === true"
+    },
+    "velvet_room": {
+      ".read": "auth != null && (root.child('mestres/' + auth.uid).val() === true || root.child('jogadores/' + auth.uid).val() === true)",
+      ".write": "auth != null && root.child('mestres/' + auth.uid).val() === true"
+    }
+  }
+}

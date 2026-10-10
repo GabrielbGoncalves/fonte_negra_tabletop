@@ -2,16 +2,20 @@
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://www.gstatic.com https://*.firebaseio.com https://*.firebasedatabase.app http://127.0.0.1:9000; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://*.firebaseio.com wss://*.firebaseio.com https://*.firebasedatabase.app wss://*.firebasedatabase.app https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com http://127.0.0.1:9099 http://127.0.0.1:9000 ws://127.0.0.1:9000; frame-src https://*.firebaseapp.com https://*.firebaseio.com http://127.0.0.1:9000; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hub do Sistema - Persona RPG</title>
     
     <!-- Tailwind CSS para estilização rápida -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
     
     <!-- Firebase SDK Compat (Modular build via compat for Realtime Database & Auth) -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" integrity="sha384-4gq9w/AGf72FXdNQ3Kn3EqWP7633NbCMjpYHt8YCZyXf23o2opcuAr4cif41tLrC" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js" integrity="sha384-5PDE6CZvnNIJI5xu68GIFoOO3U73lAnRLBwPBmmKjWnYnYwKEHWr/ghtGooEOXGb" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" integrity="sha384-xtdq4MQqPj1dB5DQsuw9O7dh4kHhMP/Wp5u8O1jiaWiou13ZfJIgiccjtVK2pBhL" crossorigin="anonymous"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/sessao.js"></script>
 
     <!-- Google Fonts: Oswald para manter o estilo visual dos menus do sistema -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -68,33 +72,28 @@
             
             <p class="text-xs text-slate-400 mb-4 uppercase tracking-wider text-center">Identifique-se para entrar na sessão</p>
             
-            <div class="space-y-4">
+            <form id="auth-form" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-bold uppercase tracking-wider text-blue-400 mb-1">Utilizador / Email</label>
-                    <input type="text" id="auth-user" placeholder="mestre@rpg.com ou jogador@rpg.com" class="w-full bg-black border-2 border-slate-700 p-3 text-sm text-white focus:border-blue-500 outline-none font-sans">
+                    <label for="auth-user" class="block text-xs font-bold uppercase tracking-wider text-blue-400 mb-1">Email</label>
+                    <input type="email" id="auth-user" autocomplete="username" required placeholder="seu@email.com" class="w-full bg-black border-2 border-slate-700 p-3 text-sm text-white focus:border-blue-500 outline-none font-sans">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold uppercase tracking-wider text-blue-400 mb-1">Palavra-passe</label>
-                    <input type="password" id="auth-pass" placeholder="••••••••" class="w-full bg-black border-2 border-slate-700 p-3 text-sm text-white focus:border-blue-500 outline-none font-sans">
+                    <label for="auth-pass" class="block text-xs font-bold uppercase tracking-wider text-blue-400 mb-1">Palavra-passe</label>
+                    <input type="password" id="auth-pass" autocomplete="current-password" required placeholder="••••••••" class="w-full bg-black border-2 border-slate-700 p-3 text-sm text-white focus:border-blue-500 outline-none font-sans">
                 </div>
-                
+
                 <div id="auth-error" class="text-xs text-red-500 font-bold uppercase tracking-wider hidden text-center"></div>
 
-                <div class="grid grid-cols-2 gap-3 pt-2">
-                    <button onclick="fazerLogin('mestre')" class="bg-blue-600 hover:bg-blue-500 text-black font-black py-3 px-4 text-xs uppercase tracking-wider transition-colors border-2 border-white shadow-[2px_2px_0px_#fff]">
-                        Entrar como Mestre
-                    </button>
-                    <button onclick="fazerLogin('jogador')" class="bg-slate-800 hover:bg-slate-700 text-blue-400 font-black py-3 px-4 text-xs uppercase tracking-wider transition-colors border-2 border-blue-500">
-                        Entrar como Jogador
+                <div class="pt-2">
+                    <button type="submit" id="auth-submit" class="w-full bg-blue-600 hover:bg-blue-500 text-black font-black py-3 px-4 text-xs uppercase tracking-wider transition-colors border-2 border-white shadow-[2px_2px_0px_#fff]">
+                        Entrar
                     </button>
                 </div>
-            </div>
-            
-            <div class="mt-6 text-center">
-                <button onclick="entrarModoConvidado()" class="text-[10px] text-slate-500 hover:text-slate-300 uppercase tracking-widest underline">
-                    Entrar rapidamente como Convidado (Leitura)
-                </button>
-            </div>
+            </form>
+
+            <p class="mt-6 text-center text-[10px] text-slate-500 uppercase tracking-widest">
+                O modo (Mestre ou Jogador) é definido pela sua conta.
+            </p>
         </div>
     </div>
 
@@ -116,7 +115,7 @@
         <div class="bg-black p-3 border-2 border-white flex flex-col items-center gap-2 skew-tag">
             <div class="unskew flex items-center gap-3">
                 <span class="text-xs font-bold uppercase tracking-wider text-white">Modo Atual:</span>
-                <span id-="label-modo-atual" class="px-3 py-1 font-black text-xs uppercase tracking-wider bg-blue-600 text-black border border-white" id="display-modo-ativo">Jogador</span>
+                <span class="px-3 py-1 font-black text-xs uppercase tracking-wider bg-blue-600 text-black border border-white" id="display-modo-ativo">Jogador</span>
                 <button onclick="terminarSessao()" class="px-2 py-1 font-bold text-[10px] uppercase tracking-wider bg-red-600 text-white hover:bg-red-500 transition-colors">
                     Sair / Trocar
                 </button>
@@ -225,79 +224,55 @@
     </main>
 
     <script>
-        // Configuração Direta do Firebase fornecida
-        const firebaseConfig = {
-            apiKey: "AIzaSyAygeIUCDk9yZLczUYGKls0NSzD46wgpGI",
-            authDomain: "fonte-d9637.firebaseapp.com",
-            databaseURL: "https://fonte-d9637-default-rtdb.firebaseio.com",
-            projectId: "fonte-d9637",
-            storageBucket: "fonte-d9637.firebasestorage.app",
-            messagingSenderId: "925243258445",
-            appId: "1:925243258445:web:d7cf4c3d6b66d50337ce04",
-            measurementId: "G-8762GDVEXY"
-        };
+        // Firebase, login e verificação de papel ficam em js/sessao.js.
+        // O papel (Mestre/Jogador) vem do banco, e as Regras do Firebase garantem que só Mestres escrevem.
+        const authModal = document.getElementById('auth-modal');
+        const authForm = document.getElementById('auth-form');
+        const authError = document.getElementById('auth-error');
+        const authSubmit = document.getElementById('auth-submit');
 
-        // Inicialização Segura do Firebase via compat
-        try {
-            if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
+        RPG.sessao.then((sessao) => {
+            if (sessao) {
+                aplicarModo(sessao.modo);
+                authModal.classList.add('hidden');
             }
-            console.log("Firebase inicializado com sucesso.");
-        } catch (error) {
-            console.error("Erro ao inicializar o Firebase:", error);
-            document.getElementById('status-conexao').textContent = "Firebase: Erro na Ligação ✕";
-            document.getElementById('status-conexao').className = "unskew text-[10px] text-red-500 font-bold uppercase tracking-widest";
-        }
+        });
 
-        // Gestão de Sessão e Controlo de Acesso (Mestre vs Jogador)
-        let modoAtual = localStorage.getItem('rpg_modo_sessao');
-        
-        if (modoAtual) {
-            aplicarModo(modoAtual);
-        }
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('auth-user').value.trim();
+            const senha = document.getElementById('auth-pass').value;
 
-        function fazerLogin(tipo) {
-            const userInput = document.getElementById('auth-user').value.trim();
-            const passInput = document.getElementById('auth-pass').value.trim();
-            const errorEl = document.getElementById('auth-error');
-
-            // Validação simples customizada para Mestre / Jogador
-            if (tipo === 'mestre') {
-                // Senha padrão configurável ou verificação livre para o seu grupo
-                if (userInput.toLowerCase().includes('mestre') || passInput === 'mestre123' || passInput === 'admin') {
-                    salvarSessao('mestre');
-                } else {
-                    // Se houver configuração de Firebase Auth opcional, tenta autenticar
-                    firebase.auth().signInWithEmailAndPassword(userInput || 'mestre@rpg.com', passInput || 'mestre123')
-                        .then(() => salvarSessao('mestre'))
-                        .catch(() => {
-                            errorEl.textContent = "Credenciais inválidas para Mestre. Use 'mestre123'";
-                            errorEl.classList.remove('hidden');
-                        });
-                    return;
-                }
-            } else {
-                salvarSessao('jogador');
+            authError.classList.add('hidden');
+            authSubmit.disabled = true;
+            try {
+                const modo = await RPG.entrar(email, senha);
+                document.getElementById('auth-pass').value = '';
+                aplicarModo(modo);
+                authModal.classList.add('hidden');
+            } catch (err) {
+                console.error('Falha no login:', err);
+                const codigo = (err && (err.code || err.message)) || '';
+                const mensagens = {
+                    'sem-permissao': 'Esta conta não tem acesso à sessão. Fale com o Mestre.',
+                    'banco-indisponivel': 'Login aceito, mas o banco de dados não respondeu. Tente novamente.',
+                    'auth-indisponivel': 'O serviço de login não respondeu. Tente novamente.',
+                    'auth/network-request-failed': 'Sem ligação com o serviço de login. Tente novamente.',
+                    'auth/too-many-requests': 'Muitas tentativas. Aguarde um pouco e tente novamente.'
+                };
+                authError.textContent = mensagens[codigo] || 'Email ou palavra-passe inválidos.';
+                authError.classList.remove('hidden');
+            } finally {
+                authSubmit.disabled = false;
             }
-        }
+        });
 
-        function entrarModoConvidado() {
-            salvarSessao('jogador');
-        }
-
-        function salvarSessao(modo) {
-            modoAtual = modo;
-            localStorage.setItem('rpg_modo_sessao', modo);
-            aplicarModo(modo);
-            document.getElementById('auth-modal').classList.add('hidden');
-        }
-
-        function terminarSessao() {
-            localStorage.removeItem('rpg_modo_sessao');
-            document.getElementById('auth-error').classList.add('hidden');
+        async function terminarSessao() {
+            await RPG.sair();
+            authError.classList.add('hidden');
             document.getElementById('auth-user').value = '';
             document.getElementById('auth-pass').value = '';
-            document.getElementById('auth-modal').classList.remove('hidden');
+            authModal.classList.remove('hidden');
         }
 
         function aplicarModo(modo) {
@@ -307,12 +282,14 @@
             if (modo === 'mestre') {
                 displayEl.textContent = "Mestre (Total)";
                 displayEl.className = "px-3 py-1 font-black text-xs uppercase tracking-wider bg-red-600 text-white border border-white";
-                if (cardEditor) cardEditor.style.opacity = "1";
-                if (cardEditor) cardEditor.style.pointerEvents = "auto";
+                if (cardEditor) {
+                    cardEditor.style.opacity = "1";
+                    cardEditor.title = "";
+                }
             } else {
                 displayEl.textContent = "Jogador (Leitura)";
                 displayEl.className = "px-3 py-1 font-black text-xs uppercase tracking-wider bg-blue-600 text-black border border-white";
-                // Exemplo de restrição visual para o editor de mapas caso seja jogador puro
+                // Restrição visual; a proteção real está nas Regras do Firebase
                 if (cardEditor) {
                     cardEditor.style.opacity = "0.5";
                     cardEditor.title = "Acesso restrito ao Mestre";

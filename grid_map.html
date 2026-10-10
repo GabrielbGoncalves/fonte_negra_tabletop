@@ -2,11 +2,16 @@
 <html lang="pt-PT">
 <head>
   <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://www.gstatic.com https://*.firebaseio.com https://*.firebasedatabase.app http://127.0.0.1:9000; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://*.firebaseio.com wss://*.firebaseio.com https://*.firebasedatabase.app wss://*.firebasedatabase.app https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com http://127.0.0.1:9099 http://127.0.0.1:9000 ws://127.0.0.1:9000; frame-src https://*.firebaseapp.com https://*.firebaseio.com http://127.0.0.1:9000; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>Visualizador e Jogador de Mapa Grid</title>
   
   <!-- Firebase SDK Compat -->
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" integrity="sha384-4gq9w/AGf72FXdNQ3Kn3EqWP7633NbCMjpYHt8YCZyXf23o2opcuAr4cif41tLrC" crossorigin="anonymous"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js" integrity="sha384-5PDE6CZvnNIJI5xu68GIFoOO3U73lAnRLBwPBmmKjWnYnYwKEHWr/ghtGooEOXGb" crossorigin="anonymous"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" integrity="sha384-xtdq4MQqPj1dB5DQsuw9O7dh4kHhMP/Wp5u8O1jiaWiou13ZfJIgiccjtVK2pBhL" crossorigin="anonymous"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/sessao.js" data-exigir-login></script>
 
   <style>
     body {
@@ -126,13 +131,16 @@
   <div id="info">
     <h2>Player Tático em Grid</h2>
     <span id="indicador-modo" class="modo-aviso">Modo: a carregar...</span>
-    <p id="descricao-instrucao">Cole o XML gerado pelo seu editor abaixo e clique em <strong>"Carregar Mapa"</strong>.</p>
+    <p id="descricao-instrucao">Cole o XML gerado pelo seu editor abaixo e clique em <strong>"Carregar Mapa"</strong>, ou use <strong>"Usar mapa do Editor"</strong>. Os jogadores veem o mapa em tempo real.</p>
     <p id="status">A aguardar sincronização...</p>
   </div>
 
   <div class="xml-input-area" id="painel-input-xml">
     <textarea id="xmlInput" placeholder="Cole seu XML exportado aqui..."></textarea>
-    <button onclick="carregarMapaDoInput()">🎮 Carregar Mapa</button>
+    <div style="display: flex; gap: 8px;">
+      <button onclick="carregarMapaDoInput()">🎮 Carregar Mapa</button>
+      <button onclick="carregarMapaDoEditor()" style="background-color: #1565c0;">🧩 Usar mapa do Editor</button>
+    </div>
   </div>
 
   <div id="grid-container"></div>
@@ -162,12 +170,8 @@
   </matriz>
 </mapa>`;
 
-    // Inicialização do Firebase
-    const configArmazenada = localStorage.getItem('rpg_firebase_config');
-    if (configArmazenada) {
-      firebase.initializeApp(JSON.parse(configArmazenada));
-    }
-    const db = firebase.database();
+    // Firebase e sessão vêm de js/sessao.js (o acesso ao banco aguarda o login)
+    const db = RPG.db;
 
     // Gestão de Modo (Mestre vs Jogador)
     const modoAtual = localStorage.getItem('rpg_modo_sessao') || 'jogador';
@@ -197,8 +201,10 @@
 
       if (!mapaNode) throw new Error("Tag <mapa> não encontrada.");
 
-      mapaConfig.largura = parseInt(mapaNode.getAttribute("largura"));
-      mapaConfig.altura = parseInt(mapaNode.getAttribute("altura"));
+      // Limita as dimensões para um XML malicioso não travar o navegador
+      const limitar = (v) => Math.min(100, Math.max(1, parseInt(v, 10) || 1));
+      mapaConfig.largura = limitar(mapaNode.getAttribute("largura"));
+      mapaConfig.altura = limitar(mapaNode.getAttribute("altura"));
       mapaConfig.grid = [];
       tokens = [];
       selectedTokenId = null;
@@ -260,7 +266,7 @@
 
       for (let y = 0; y < mapaConfig.altura; y++) {
         for (let x = 0; x < mapaConfig.largura; x++) {
-          const codigo = mapaConfig.grid[y][x];
+          const codigo = (mapaConfig.grid[y] || [])[x];
           const info = TABELA_CODIGOS[codigo] || TABELA_CODIGOS['0'];
 
           const cell = document.createElement("div");
@@ -306,7 +312,7 @@
 
       if (novoX < 0 || novoX >= mapaConfig.largura || novoY < 0 || novoY >= mapaConfig.altura) return;
 
-      const codigoCel = mapaConfig.grid[novoY][novoX];
+      const codigoCel = (mapaConfig.grid[novoY] || [])[novoX];
       const infoCel = TABELA_CODIGOS[codigoCel];
 
       if (infoCel && infoCel.bloqueado) return;
@@ -349,24 +355,48 @@
       if (xml.trim()) carregarMapaXML(xml);
     }
 
+    // Puxa o último mapa salvo pelo Editor de Grid (nó teste_grid) sem precisar copiar e colar o XML
+    function carregarMapaDoEditor() {
+      if (modoAtual !== 'mestre') return;
+      db.ref('teste_grid/xml').once('value').then((snapshot) => {
+        const xml = snapshot.val();
+        if (!xml) {
+          alert("O Editor de Grid ainda não tem nenhum mapa salvo.");
+          return;
+        }
+        document.getElementById("xmlInput").value = xml;
+        carregarMapaXML(xml);
+      });
+    }
+
     // Sincronização em tempo real com Firebase
     db.ref('grid_map').on('value', (snapshot) => {
       const dados = snapshot.val();
       if (!dados) {
         if (modoAtual === 'mestre') {
           carregarMapaXML(xmlPadrao);
+        } else {
+          document.getElementById("status").innerText = "O Mestre ainda não carregou nenhum mapa.";
         }
         return;
       }
 
       if (dados.xml) {
         try {
+          const selecionado = selectedTokenId;
           processarXML(dados.xml);
-          if (dados.tokens && modoAtual === 'jogador') {
+          // As posições gravadas valem para todos; senão o Mestre veria o token voltar ao início após cada movimento
+          if (Array.isArray(dados.tokens)) {
             tokens = dados.tokens;
           }
+          if (tokens.some(t => t.id === selecionado)) selectedTokenId = selecionado;
           renderizarMapa();
-        } catch(e) {}
+          if (modoAtual === 'jogador') {
+            document.getElementById("status").innerText = "Mapa sincronizado com o Mestre.";
+          }
+        } catch(e) {
+          document.getElementById("status").innerText = "Não foi possível ler o mapa enviado pelo Mestre.";
+        }
       }
     });
 
