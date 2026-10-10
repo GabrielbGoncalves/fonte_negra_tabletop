@@ -1,0 +1,383 @@
+<!DOCTYPE html> 
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <title>Visualizador e Jogador de Mapa Grid</title>
+  
+  <!-- Firebase SDK Compat -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #1e1e1e;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    #info {
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .xml-input-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 120px;
+      background-color: #111;
+      color: #75beff;
+      border: 1px solid #444;
+      border-radius: 4px;
+      padding: 8px;
+      font-family: monospace;
+      font-size: 12px;
+      resize: vertical;
+    }
+
+    button {
+      padding: 8px 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover { opacity: 0.9; }
+
+    #grid-container {
+      display: grid;
+      gap: 2px;
+      background-color: #555;
+      padding: 5px;
+      border-radius: 6px;
+      user-select: none;
+    }
+
+    .cell {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      cursor: pointer;
+      font-size: 18px;
+      border-radius: 2px;
+      background-color: #e0e0e0;
+      color: #000;
+    }
+
+    .cell.parede { background-color: #444; cursor: not-allowed; }
+    .cell.porta { background-color: #8B4513; cursor: not-allowed; }
+    .cell.armadilha { background-color: #d9534f; }
+    .cell.tesouro { background-color: #f0ad4e; }
+    .cell.fim { background-color: #0275d8; }
+
+    .token {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+      box-shadow: 0 0 6px rgba(0,0,0,0.7);
+      transition: all 0.12s ease-in-out;
+      position: absolute;
+      z-index: 10;
+    }
+
+    .token.player { background-color: #5cb85c; }
+    .token.inimigo { background-color: #d9534f; }
+
+    .token.selected {
+      outline: 3px solid #ffeb3b;
+      box-shadow: 0 0 10px #ffeb3b;
+      transform: scale(1.1);
+    }
+
+    .modo-aviso {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="info">
+    <h2>Player Tático em Grid</h2>
+    <span id="indicador-modo" class="modo-aviso">Modo: a carregar...</span>
+    <p id="descricao-instrucao">Cole o XML gerado pelo seu editor abaixo e clique em <strong>"Carregar Mapa"</strong>.</p>
+    <p id="status">A aguardar sincronização...</p>
+  </div>
+
+  <div class="xml-input-area" id="painel-input-xml">
+    <textarea id="xmlInput" placeholder="Cole seu XML exportado aqui..."></textarea>
+    <button onclick="carregarMapaDoInput()">🎮 Carregar Mapa</button>
+  </div>
+
+  <div id="grid-container"></div>
+
+  <script>
+    const TABELA_CODIGOS = {
+      '0': { classe: 'chao', bloqueado: false, icone: '' },
+      '1': { classe: 'parede', bloqueado: true, icone: '' },
+      '2': { classe: 'armadilha', bloqueado: false, icone: '💀' },
+      '3': { classe: 'tesouro', bloqueado: false, icone: '💎' },
+      'P': { classe: 'porta', bloqueado: true, icone: '🚪' },
+      'F': { classe: 'fim', bloqueado: false, icone: '🏁' }
+    };
+
+    let mapaConfig = { largura: 15, altura: 15, grid: [] };
+    let tokens = [];
+    let selectedTokenId = null;
+    let nextTokenId = 1;
+
+    const xmlPadrao = `<mapa largura="5" altura="5">
+  <matriz>
+    <linha y="0">1,1,1,1,1</linha>
+    <linha y="1">1,I,0,3,1</linha>
+    <linha y="2">1,0,P,0,1</linha>
+    <linha y="3">1,2,0,F,1</linha>
+    <linha y="4">1,1,1,1,1</linha>
+  </matriz>
+</mapa>`;
+
+    // Inicialização do Firebase
+    const configArmazenada = localStorage.getItem('rpg_firebase_config');
+    if (configArmazenada) {
+      firebase.initializeApp(JSON.parse(configArmazenada));
+    }
+    const db = firebase.database();
+
+    // Gestão de Modo (Mestre vs Jogador)
+    const modoAtual = localStorage.getItem('rpg_modo_sessao') || 'jogador';
+    const indicadorModo = document.getElementById('indicador-modo');
+
+    if (modoAtual === 'mestre') {
+      indicadorModo.textContent = "Modo: Mestre (Escrita Ativa)";
+      indicadorModo.style.background = "#4caf50";
+      indicadorModo.style.color = "#fff";
+    } else {
+      indicadorModo.textContent = "Modo: Jogador (Somente Leitura)";
+      indicadorModo.style.background = "#2196f3";
+      indicadorModo.style.color = "#fff";
+      
+      document.addEventListener("DOMContentLoaded", () => {
+        const painelInput = document.getElementById('painel-input-xml');
+        if (painelInput) painelInput.style.display = 'none';
+        const descInstrucao = document.getElementById('descricao-instrucao');
+        if (descInstrucao) descInstrucao.style.display = 'none';
+      });
+    }
+
+    function processarXML(xmlString) {
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(xmlString, "text/xml");
+      const mapaNode = xmlDoc.querySelector("mapa");
+
+      if (!mapaNode) throw new Error("Tag <mapa> não encontrada.");
+
+      mapaConfig.largura = parseInt(mapaNode.getAttribute("largura"));
+      mapaConfig.altura = parseInt(mapaNode.getAttribute("altura"));
+      mapaConfig.grid = [];
+      tokens = [];
+      selectedTokenId = null;
+      nextTokenId = 1;
+
+      const linhas = xmlDoc.querySelectorAll("matriz linha");
+      linhas.forEach((linhaNode) => {
+        const y = parseInt(linhaNode.getAttribute("y"));
+        const celulas = linhaNode.textContent.trim().split(",");
+        
+        mapaConfig.grid[y] = [];
+
+        celulas.forEach((codigo, x) => {
+          codigo = codigo.trim();
+          if (codigo === 'I' || codigo === 'E') {
+            const tipo = codigo === 'I' ? 'player' : 'inimigo';
+            tokens.push({
+              id: `token-${nextTokenId++}`,
+              tipo: tipo,
+              nome: tipo === 'player' ? 'Player (🟢)' : 'Inimigo (💀)',
+              x: x,
+              y: y
+            });
+            mapaConfig.grid[y][x] = '0';
+          } else {
+            mapaConfig.grid[y][x] = codigo;
+          }
+        });
+      });
+    }
+
+    function carregarMapaXML(xmlString) {
+      try {
+        processarXML(xmlString);
+        renderizarMapa();
+        document.getElementById("status").innerText = "Mapa carregado com sucesso!";
+        
+        if (modoAtual === 'mestre') {
+          guardarNoFirebase(xmlString);
+        }
+      } catch (err) {
+        alert("Erro ao ler o XML: " + err.message);
+      }
+    }
+
+    function guardarNoFirebase(xmlString) {
+      if (modoAtual !== 'mestre') return;
+      db.ref('grid_map').set({
+        xml: xmlString,
+        tokens: tokens
+      });
+    }
+
+    function renderizarMapa() {
+      const container = document.getElementById("grid-container");
+      container.innerHTML = "";
+      container.style.gridTemplateColumns = `repeat(${mapaConfig.largura}, 40px)`;
+      container.style.gridTemplateRows = `repeat(${mapaConfig.altura}, 40px)`;
+
+      for (let y = 0; y < mapaConfig.altura; y++) {
+        for (let x = 0; x < mapaConfig.largura; x++) {
+          const codigo = mapaConfig.grid[y][x];
+          const info = TABELA_CODIGOS[codigo] || TABELA_CODIGOS['0'];
+
+          const cell = document.createElement("div");
+          cell.className = `cell ${info.classe}`;
+          cell.dataset.x = x;
+          cell.dataset.y = y;
+          if (info.icone) cell.innerText = info.icone;
+
+          if (modoAtual === 'mestre') {
+            cell.addEventListener("click", () => moverParaPosicao(x, y));
+          }
+          container.appendChild(cell);
+        }
+      }
+
+      tokens.forEach((token) => {
+        const tokenElem = document.createElement("div");
+        tokenElem.className = `token ${token.tipo} ${token.id === selectedTokenId ? "selected" : ""}`;
+        tokenElem.innerText = token.tipo === 'player' ? '🟢' : '💀';
+
+        if (modoAtual === 'mestre') {
+          tokenElem.addEventListener("click", (e) => {
+            e.stopPropagation();
+            selecionarToken(token.id);
+          });
+        }
+
+        const cellAlvo = document.querySelector(`.cell[data-x="${token.x}"][data-y="${token.y}"]`);
+        if (cellAlvo) cellAlvo.appendChild(tokenElem);
+      });
+    }
+
+    function selecionarToken(id) {
+      if (modoAtual !== 'mestre') return;
+      selectedTokenId = id;
+      const token = tokens.find(t => t.id === id);
+      document.getElementById("status").innerText = `Token Ativo: ${token.nome} | Posição: (X:${token.x}, Y:${token.y})`;
+      renderizarMapa();
+    }
+
+    function moverParaPosicao(novoX, novoY) {
+      if (modoAtual !== 'mestre' || !selectedTokenId) return;
+
+      if (novoX < 0 || novoX >= mapaConfig.largura || novoY < 0 || novoY >= mapaConfig.altura) return;
+
+      const codigoCel = mapaConfig.grid[novoY][novoX];
+      const infoCel = TABELA_CODIGOS[codigoCel];
+
+      if (infoCel && infoCel.bloqueado) return;
+
+      const token = tokens.find(t => t.id === selectedTokenId);
+      token.x = novoX;
+      token.y = novoY;
+
+      let mensagem = `${token.nome} moveu para (X:${novoX}, Y:${novoY})`;
+      if (codigoCel === '2') mensagem += " ⚠️ Pisou em uma Armadilha!";
+      if (codigoCel === '3') mensagem += " 💎 Encontrou um Tesouro!";
+      if (codigoCel === 'F') mensagem += " 🏁 Chegou ao Objetivo!";
+
+      document.getElementById("status").innerText = mensagem;
+      renderizarMapa();
+
+      db.ref('grid_map/tokens').set(tokens);
+    }
+
+    window.addEventListener("keydown", (e) => {
+      if (modoAtual !== 'mestre' || !selectedTokenId) return;
+
+      const token = tokens.find(t => t.id === selectedTokenId);
+      let targetX = token.x;
+      let targetY = token.y;
+
+      switch (e.key.toLowerCase()) {
+        case "w": targetY -= 1; break;
+        case "s": targetY += 1; break;
+        case "a": targetX -= 1; break;
+        case "d": targetX += 1; break;
+        default: return;
+      }
+
+      moverParaPosicao(targetX, targetY);
+    });
+
+    function carregarMapaDoInput() {
+      const xml = document.getElementById("xmlInput").value;
+      if (xml.trim()) carregarMapaXML(xml);
+    }
+
+    // Sincronização em tempo real com Firebase
+    db.ref('grid_map').on('value', (snapshot) => {
+      const dados = snapshot.val();
+      if (!dados) {
+        if (modoAtual === 'mestre') {
+          carregarMapaXML(xmlPadrao);
+        }
+        return;
+      }
+
+      if (dados.xml) {
+        try {
+          processarXML(dados.xml);
+          if (dados.tokens && modoAtual === 'jogador') {
+            tokens = dados.tokens;
+          }
+          renderizarMapa();
+        } catch(e) {}
+      }
+    });
+
+    // Carga inicial padrão para o Mestre se o banco estiver vazio
+    window.addEventListener('DOMContentLoaded', () => {
+      db.ref('grid_map').once('value', (snapshot) => {
+        if (!snapshot.exists() && modoAtual === 'mestre') {
+          carregarMapaXML(xmlPadrao);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

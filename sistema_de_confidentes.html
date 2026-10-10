@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="pt-PT" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Confidentes - Persona RPG[cite: 7]</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Firebase SDK Compat -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+    <!-- Google Fonts: Oswald (Persona Style Sharp Sans) & Rajdhani -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --p-blue: #2710d3;
+            --p-blue-dark: #00008b;
+            --p-black: #121212;
+            --p-dark-gray: #1e1e1e;
+            --p-yellow: #ffeb3b;
+            --p-white: #f5f5f5;
+        }
+
+        body {
+            font-family: 'Oswald', sans-serif;
+            background-color: var(--p-black);
+            background-image: 
+                linear-gradient(135deg, rgba(39, 16, 211, 0.15) 25%, transparent 25%), 
+                linear-gradient(225deg, rgba(39, 16, 211, 0.15) 25%, transparent 25%), 
+                linear-gradient(45deg, rgba(39, 16, 211, 0.15) 25%, transparent 25%), 
+                linear-gradient(315deg, rgba(39, 16, 211, 0.15) 25%, #121212 25%);
+            background-position: 10px 0, 10px 0, 0 0, 0 0;
+            background-size: 20px 20px;
+            background-repeat: repeat;
+            color: var(--p-white);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .clip-angled-br {
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%);
+        }
+
+        .clip-angled-tl-br {
+            clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+        }
+
+        .clip-banner {
+            clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%);
+        }
+
+        .skew-tag {
+            transform: skewX(-12deg);
+        }
+
+        .unskew {
+            transform: skewX(12deg);
+        }
+
+        .persona-border-shadow {
+            box-shadow: 0px 6px 6px #000, 0px 8px 8px var(--p-blue);
+        }
+
+        .persona-card-hover {
+            transition: all 0.25s cubic-bezier(0.32, 0.885, 0.175, 1.275);
+        }
+
+        .persona-card-hover:hover {
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: 0px 8px 8px #000, 0px 12px 12px var(--p-blue);
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 22px;
+            width: 14px;
+            background: var(--p-yellow);
+            cursor: pointer;
+            border: 2px solid #000;
+            transform: skewX(-10deg);
+            box-shadow: 0 0 8px rgba(59, 235, 255, 0.8);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 10px;
+            cursor: pointer;
+            background: #333;
+            border: 1px solid #555;
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #121212;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--p-blue);
+            border-radius: 0px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3822ff;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- HEADER & PLAYER SELECTOR BAR -->
+    <header class="bg-black border-b-4 border-blue-600 sticky top-0 z-40 shadow-2xl">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
+            
+            <!-- App Title -->
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 text-black px-3 py-1 font-black text-2xl md:text-3xl skew-tag tracking-wider border-2 border-white shadow-[3px_3px_0px_#fff]">
+                    <span class="inline-block unskew">FN</span>
+                </div>
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-black tracking-widest text-white uppercase italic drop-shadow-[2px_2px_0px_#2710d3]">
+                        Sistema de Confidentes[cite: 7]
+                    </h1>
+                    <div class="flex items-center gap-2 mt-0.5">
+                        <p class="text-xs text-yellow-400 font-bold uppercase tracking-widest">Velvet Room Social Link Tracker[cite: 7]</p>
+                        <span id="indicador-modo" class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded">A carregar...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Player Controls -->
+            <div class="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
+                <div class="flex items-center bg-zinc-900 border-2 border-blue-600 p-1 rounded-none shadow-[3px_3px_0px_#000]">
+                    <span class="text-xs font-bold text-gray-400 px-2 uppercase">Player Active:</span>
+                    <select id="player-select" onchange="switchPlayer(this.value)" 
+                            class="bg-black text-yellow-400 font-black px-3 py-1 text-lg outline-none uppercase cursor-pointer border-l border-zinc-700">
+                        <!-- Populated via JS -->
+                    </select>
+                </div>
+
+                <button id="btn-novo-player" onclick="openPlayerModal()" 
+                        class="clip-angled-tl-br bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 text-sm uppercase tracking-wider transition-transform active:scale-95 border border-white flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Novo Player
+                </button>
+
+                <button id="btn-del-player" onclick="deleteCurrentPlayer()" 
+                        title="Excluir Player Atual"
+                        class="bg-zinc-800 hover:bg-black text-gray-400 hover:text-blue-500 p-2 border border-zinc-700 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- TOOLBAR & FILTERS -->
+    <section class="max-w-7xl mx-auto px-4 w-full pt-6 pb-2">
+        <div class="bg-zinc-900 border-2 border-zinc-700 p-4 flex flex-col md:flex-row justify-between items-center gap-4 clip-angled-br shadow-lg">
+            
+            <!-- Quick Add Confidant Button -->
+            <button id="btn-add-confidente" onclick="openConfidantModal()" 
+                    class="w-full md:w-auto bg-yellow-400 hover:bg-yellow-300 text-black font-black px-6 py-3 text-base uppercase tracking-widest border-2 border-black shadow-[4px_4px_0px_#2710d3] active:translate-x-1 active:translate-y-1 transition-all flex items-center justify-center gap-2">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path></svg>
+                + Adicionar Confidente
+            </button>
+
+            <!-- Search & Filters -->
+            <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                <div class="relative w-full sm:w-64">
+                    <input type="text" id="search-input" oninput="renderConfidants()" placeholder="BUSCAR CONFIDENTE / ARCANO..." 
+                           class="w-full bg-black border-2 border-zinc-600 text-white px-3 py-2 text-sm font-bold placeholder-gray-500 outline-none focus:border-blue-600">
+                </div>
+
+                <button id="filter-max-btn" onclick="toggleMaxFilter()" 
+                        class="w-full sm:w-auto px-4 py-2 border-2 border-zinc-600 bg-black text-gray-300 font-bold text-sm uppercase tracking-wider hover:border-yellow-400 transition-colors">
+                    Apenas MAX (Rank 10)
+                </button>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full">
+        <!-- Confidants Grid -->
+        <div id="confidants-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Dynamic Confidant Cards inserted via JS -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden text-center py-16 bg-zinc-950/80 border-2 border-dashed border-zinc-800 p-8 my-8">
+            <div class="inline-block p-4 bg-blue-950/40 rounded-full mb-4 border border-blue-600">
+                <svg class="w-16 h-16 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+            </div>
+            <h2 class="text-2xl font-black text-white uppercase tracking-widest">Nenhum Confidente Registrado[cite: 7]</h2>
+            <p class="text-gray-400 max-w-md mx-auto mt-2 text-sm font-medium">
+                Nenhum vínculo social cadastrado para o player selecionado[cite: 7]. Clique em "+ Adicionar Confidente" para começar seu diário de laços.
+            </p>
+        </div>
+    </main>
+
+    <!-- MODAL 1: ADD PLAYER -->
+    <div id="modal-player" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border-4 border-blue-600 p-6 w-full max-w-md clip-angled-tl-br shadow-[10px_10px_0px_#000]">
+            <div class="flex justify-between items-center mb-4 border-b-2 border-blue-600 pb-2">
+                <h3 class="text-2xl font-black text-white uppercase italic">Criar Novo Player</h3>
+                <button onclick="closePlayerModal()" class="text-gray-400 hover:text-white font-bold text-xl">&times;</button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-yellow-400 uppercase tracking-widest mb-1">Nome do Jogador / Protagonista</label>
+                    <input type="text" id="player-name-input" placeholder="Ex: Joker, Yu Narukami, Player 1" 
+                           class="w-full bg-black border-2 border-zinc-700 text-white px-3 py-2 font-bold outline-none focus:border-blue-600 uppercase">
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button onclick="closePlayerModal()" class="px-4 py-2 bg-zinc-800 text-gray-300 font-bold uppercase text-xs hover:bg-zinc-700">Cancelar</button>
+                    <button onclick="saveNewPlayer()" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-black uppercase text-sm border border-white">Salvar Player</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: ADD CONFIDANT -->
+    <div id="modal-confidant" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border-4 border-blue-600 p-6 w-full max-w-md clip-angled-tl-br shadow-[10px_10px_0px_#000]">
+            <div class="flex justify-between items-center mb-4 border-b-2 border-blue-600 pb-2">
+                <h3 class="text-2xl font-black text-white uppercase italic">Novo Confidente</h3>
+                <button onclick="closeConfidantModal()" class="text-gray-400 hover:text-white font-bold text-xl">&times;</button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-yellow-400 uppercase tracking-widest mb-1">Nome do Personagem</label>
+                    <input type="text" id="confidant-name-input" placeholder="Ex: Ryuji Sakamoto, Makoto Niijima" 
+                           class="w-full bg-black border-2 border-zinc-700 text-white px-3 py-2 font-bold outline-none focus:border-blue-600 uppercase">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-yellow-400 uppercase tracking-widest mb-1">Arcano / Categoria</label>
+                    <input type="text" id="confidant-arcana-input" placeholder="Ex: O Carro (The Chariot), A Sacerdotisa" 
+                           class="w-full bg-black border-2 border-zinc-700 text-white px-3 py-2 font-bold outline-none focus:border-blue-600 uppercase">
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button onclick="closeConfidantModal()" class="px-4 py-2 bg-zinc-800 text-gray-300 font-bold uppercase text-xs hover:bg-zinc-700">Cancelar</button>
+                    <button onclick="saveNewConfidant()" class="px-6 py-2 bg-yellow-400 hover:bg-yellow-300 text-black font-black uppercase text-sm border border-black shadow-[3px_3px_0px_#d31027]">Criar Confidente</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: RANK DETAILS & SCENES (10 RANKS) -->
+    <div id="modal-rank-details" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-2 sm:p-4">
+        <div class="bg-zinc-950 border-4 border-blue-600 w-full max-w-4xl h-[90vh] flex flex-col clip-angled-tl-br shadow-[15px_15px_0px_#000]">
+            
+            <!-- Modal Header -->
+            <div class="bg-gradient-to-r from-blue-700 to-black p-4 border-b-2 border-yellow-400 flex justify-between items-center flex-shrink-0">
+                <div>
+                    <span id="detail-arcana-tag" class="text-xs bg-black text-yellow-400 font-extrabold px-2 py-0.5 uppercase tracking-widest border border-yellow-400">
+                        THE CHARIOT
+                    </span>
+                    <h2 id="detail-confidant-name" class="text-2xl sm:text-3xl font-black text-white uppercase tracking-wider drop-shadow-[2px_2px_0px_#000] mt-1">
+                        RYUJI SAKAMOTO[cite: 7]
+                    </h2>
+                </div>
+                <button onclick="closeRankDetailsModal()" class="bg-black text-white hover:text-blue-500 border border-white p-2 font-black text-xl">
+                    &times; FECHAR
+                </button>
+            </div>
+
+            <!-- Subheader instructions -->
+            <div class="bg-zinc-900 px-4 py-2 border-b border-zinc-800 flex justify-between items-center text-xs text-gray-400 flex-shrink-0">
+                <span id="modal-subtitle">Anotações de Eventos de Cenas e Recompensas Mecânicas (Rank 1 até Rank 10)</span>
+                <span class="text-yellow-400 font-bold">Salvo Automaticamente</span>
+            </div>
+
+            <!-- 10 Ranks Scrollable Content -->
+            <div id="ranks-container" class="p-4 overflow-y-auto space-y-4 flex-grow">
+                <!-- 10 Rank Cards dynamically rendered via JavaScript -->
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="bg-zinc-900 p-3 border-t border-zinc-800 flex justify-end flex-shrink-0">
+                <button onclick="closeRankDetailsModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-black px-6 py-2 uppercase text-sm border border-white">
+                    Concluído
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // FIREBASE & MODE INITIALIZATION
+        const configArmazenada = localStorage.getItem('rpg_firebase_config');
+        if (configArmazenada) {
+            firebase.initializeApp(JSON.parse(configArmazenada));
+        }
+        const db = firebase.database();
+
+        const modoAtual = localStorage.getItem('rpg_modo_sessao') || 'jogador';
+        const indicadorModo = document.getElementById('indicador-modo');
+
+        if (modoAtual === 'mestre') {
+            indicadorModo.textContent = "Modo: Mestre (Escrita Ativa)";
+            indicadorModo.className = "px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded bg-emerald-600 text-white";
+        } else {
+            indicadorModo.textContent = "Modo: Jogador (Somente Leitura)";
+            indicadorModo.className = "px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded bg-blue-600 text-white";
+            
+            document.addEventListener("DOMContentLoaded", () => {
+                const btnNovoPlayer = document.getElementById('btn-novo-player');
+                const btnDelPlayer = document.getElementById('btn-del-player');
+                const btnAddConfidente = document.getElementById('btn-add-confidente');
+                if (btnNovoPlayer) btnNovoPlayer.style.display = 'none';
+                if (btnDelPlayer) btnDelPlayer.style.display = 'none';
+                if (btnAddConfidente) btnAddConfidente.style.display = 'none';
+            });
+        }
+
+        // APP STATE STRUCTURE
+        const STORAGE_KEY = 'persona_confidants_data_v3';
+
+        let appState = {
+            activePlayerId: null,
+            players: []
+        };
+
+        let filterMaxOnly = false;
+        let currentDetailConfidantId = null;
+
+        // INITIALIZATION
+        window.onload = function() {
+            db.ref('sistema_de_confidentes').once('value', (snapshot) => {
+                if (!snapshot.exists() && modoAtual === 'mestre') {
+                    initDefaultData();
+                    saveStateToFirebase();
+                } else if (snapshot.exists()) {
+                    appState = snapshot.val();
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+                    renderPlayerSelect();
+                    renderConfidants();
+                } else {
+                    loadState();
+                    renderPlayerSelect();
+                    renderConfidants();
+                }
+            });
+        };
+
+        // STATE PERSISTENCE
+        function loadState() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    appState = JSON.parse(saved);
+                } catch(e) {
+                    console.error("Error loading saved state", e);
+                    initDefaultData();
+                }
+            } else {
+                initDefaultData();
+            }
+        }
+
+        function saveState() {
+            if (modoAtual !== 'mestre') return;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+            saveStateToFirebase();
+        }
+
+        function saveStateToFirebase() {
+            if (modoAtual !== 'mestre') return;
+            db.ref('sistema_de_confidentes').set(appState);
+        }
+
+        function initDefaultData() {
+            const defaultPlayerId = 'p-' + Date.now();
+            appState = {
+                activePlayerId: defaultPlayerId,
+                players: [
+                    {
+                        id: defaultPlayerId,
+                        name: 'JOKER',
+                        confidants: [
+                            {
+                                id: 'c-1',
+                                name: 'RYUJI SAKAMOTO[cite: 7]',
+                                arcana: 'O CARRO (CHARIOT)',
+                                points: 45,
+                                events: [true, true, true, false, false, false, false, false, false, false],
+                                rankDetails: Array.from({length: 10}, (_, i) => ({
+                                    rank: i + 1,
+                                    scene: i === 0 ? "Encontro na pista de atletismo da escola." : "",
+                                    reward: i === 0 ? "Habilidade: Sprint e Ataque Furtivo." : ""
+                                }))
+                            }
+                        ]
+                    }
+                ]
+            };
+        }
+
+        // Realtime sync from Firebase
+        db.ref('sistema_de_confidentes').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data && modoAtual === 'jogador') {
+                appState = data;
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+                renderPlayerSelect();
+                renderConfidants();
+                if (currentDetailConfidantId) {
+                    openRankDetailsModal(currentDetailConfidantId);
+                }
+            }
+        });
+
+        // PLAYER MANAGEMENT
+        function getActivePlayer() {
+            return appState.players.find(p => p.id === appState.activePlayerId) || appState.players[0];
+        }
+
+        function renderPlayerSelect() {
+            const select = document.getElementById('player-select');
+            select.innerHTML = '';
+
+            appState.players.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = p.name;
+                if (p.id === appState.activePlayerId) opt.selected = true;
+                select.appendChild(opt);
+            });
+        }
+
+        function switchPlayer(playerId) {
+            appState.activePlayerId = playerId;
+            if (modoAtual === 'mestre') {
+                saveState();
+            }
+            renderConfidants();
+        }
+
+        function openPlayerModal() {
+            if (modoAtual !== 'mestre') return;
+            document.getElementById('player-name-input').value = '';
+            document.getElementById('modal-player').classList.remove('hidden');
+        }
+
+        function closePlayerModal() {
+            document.getElementById('modal-player').classList.add('hidden');
+        }
+
+        function saveNewPlayer() {
+            if (modoAtual !== 'mestre') return;
+            const nameInput = document.getElementById('player-name-input');
+            const name = nameInput.value.trim().toUpperCase();
+            if (!name) return;
+
+            const newPlayer = {
+                id: 'p-' + Date.now(),
+                name: name,
+                confidants: []
+            };
+
+            appState.players.push(newPlayer);
+            appState.activePlayerId = newPlayer.id;
+            saveState();
+            renderPlayerSelect();
+            renderConfidants();
+            closePlayerModal();
+        }
+
+        function deleteCurrentPlayer() {
+            if (modoAtual !== 'mestre') return;
+            if (appState.players.length <= 1) {
+                alert("Você precisa ter pelo menos um Player cadastrado!");
+                return;
+            }
+
+            const activePlayer = getActivePlayer();
+            if (confirm(`Tem certeza que deseja excluir o Player "${activePlayer.name}" e todos os seus confidantes?`)) {
+                appState.players = appState.players.filter(p => p.id !== activePlayer.id);
+                appState.activePlayerId = appState.players[0].id;
+                saveState();
+                renderPlayerSelect();
+                renderConfidants();
+            }
+        }
+
+        // CONFIDANT MANAGEMENT
+        function openConfidantModal() {
+            if (modoAtual !== 'mestre') return;
+            document.getElementById('confidant-name-input').value = '';
+            document.getElementById('confidant-arcana-input').value = '';
+            document.getElementById('modal-confidant').classList.remove('hidden');
+        }
+
+        function closeConfidantModal() {
+            document.getElementById('modal-confidant').classList.add('hidden');
+        }
+
+        function saveNewConfidant() {
+            if (modoAtual !== 'mestre') return;
+            const nameInput = document.getElementById('confidant-name-input');
+            const arcanaInput = document.getElementById('confidant-arcana-input');
+            const name = nameInput.value.trim().toUpperCase();
+            const arcana = arcanaInput.value.trim().toUpperCase() || 'GERAL';
+
+            if (!name) return;
+
+            const player = getActivePlayer();
+            const newConfidant = {
+                id: 'c-' + Date.now(),
+                name: name,
+                arcana: arcana,
+                points: 0,
+                events: new Array(10).fill(false),
+                rankDetails: Array.from({length: 10}, (_, i) => ({
+                    rank: i + 1,
+                    scene: '',
+                    reward: ''
+                }))
+            };
+
+            player.confidants.push(newConfidant);
+            saveState();
+            renderConfidants();
+            closeConfidantModal();
+        }
+
+        function deleteConfidant(confidantId) {
+            if (modoAtual !== 'mestre') return;
+            const player = getActivePlayer();
+            const conf = player.confidants.find(c => c.id === confidantId);
+            if (!conf) return;
+
+            if (confirm(`Remover confidente "${conf.name}"?`)) {
+                player.confidants = player.confidants.filter(c => c.id !== confidantId);
+                saveState();
+                renderConfidants();
+            }
+        }
+
+        function toggleEventMarker(confidantId, eventIndex) {
+            if (modoAtual !== 'mestre') return;
+            const player = getActivePlayer();
+            const conf = player.confidants.find(c => c.id === confidantId);
+            if (conf) {
+                conf.events[eventIndex] = !conf.events[eventIndex];
+                saveState();
+                renderConfidants();
+            }
+        }
+
+        function updateAffinityPoints(confidantId, val) {
+            if (modoAtual !== 'mestre') return;
+            let num = parseInt(val);
+            if (isNaN(num)) num = 0;
+            num = Math.max(0, Math.min(100, num));
+
+            const player = getActivePlayer();
+            const conf = player.confidants.find(c => c.id === confidantId);
+            if (conf) {
+                conf.points = num;
+                
+                const inputNum = document.getElementById(`pts-num-${confidantId}`);
+                const inputSlider = document.getElementById(`pts-slider-${confidantId}`);
+                const bar = document.getElementById(`pts-bar-${confidantId}`);
+
+                if (inputNum && document.activeElement !== inputNum) inputNum.value = num;
+                if (inputSlider) inputSlider.value = num;
+                if (bar) bar.style.width = `${num}%`;
+
+                saveState();
+            }
+        }
+
+        function toggleMaxFilter() {
+            filterMaxOnly = !filterMaxOnly;
+            const btn = document.getElementById('filter-max-btn');
+            if (filterMaxOnly) {
+                btn.classList.add('bg-yellow-400', 'text-black', 'border-yellow-400');
+                btn.classList.remove('bg-black', 'text-gray-300');
+            } else {
+                btn.classList.remove('bg-yellow-400', 'text-black', 'border-yellow-400');
+                btn.classList.add('bg-black', 'text-gray-300');
+            }
+            renderConfidants();
+        }
+
+        // RENDERING CONFIDANTS
+        function renderConfidants() {
+            const container = document.getElementById('confidants-grid');
+            const emptyState = document.getElementById('empty-state');
+            const searchQuery = document.getElementById('search-input').value.trim().toLowerCase();
+
+            const player = getActivePlayer();
+            let confidants = player ? player.confidants : [];
+
+            if (searchQuery) {
+                confidants = confidants.filter(c => 
+                    c.name.toLowerCase().includes(searchQuery) || 
+                    c.arcana.toLowerCase().includes(searchQuery)
+                );
+            }
+
+            if (filterMaxOnly) {
+                confidants = confidants.filter(c => {
+                    const completedRanks = c.events.filter(e => e).length;
+                    return completedRanks === 10;
+                });
+            }
+
+            if (confidants.length === 0) {
+                container.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            let html = '';
+
+            confidants.forEach(c => {
+                const completedRanks = c.events.filter(e => e).length;
+                const isMax = completedRanks === 10;
+                
+                let starsHtml = '';
+                for (let i = 0; i < 10; i++) {
+                    const active = c.events[i];
+                    starsHtml += `
+                        <button ${modoAtual === 'jogador' ? 'disabled' : ''} onclick="toggleEventMarker('${c.id}', ${i})" 
+                                title="Rank ${i+1}"
+                                class="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center font-black text-xs transition-all ${
+                                    active 
+                                    ? 'bg-blue-600 text-white border-2 border-yellow-400 shadow-[0_0_8px_rgba(255,235,59,0.6)] scale-105' 
+                                    : 'bg-zinc-800 text-gray-500 border border-zinc-700 hover:border-blue-500 hover:text-white'
+                                }">
+                            ${i + 1}
+                        </button>
+                    `;
+                }
+
+                html += `
+                    <div class="bg-zinc-900 border-2 border-zinc-700 p-4 clip-angled-tl-br flex flex-col justify-between persona-border-shadow persona-card-hover relative">
+                        
+                        <div>
+                            <div class="flex justify-between items-start mb-2 border-b-2 border-zinc-800 pb-2">
+                                <div class="pr-2">
+                                    <span class="text-[10px] font-bold bg-blue-950 text-blue-400 px-2 py-0.5 uppercase tracking-widest border border-blue-800 inline-block">
+                                        ${c.arcana}
+                                    </span>
+                                    <h3 class="text-xl sm:text-2xl font-black text-white uppercase italic tracking-wide mt-1 drop-shadow-[2px_2px_0px_#000]">
+                                        ${c.name}
+                                    </h3>
+                                </div>
+
+                                <div class="flex flex-col items-end">
+                                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">RANK</span>
+                                    ${
+                                        isMax ? 
+                                        `<span class="text-2xl font-black text-yellow-400 drop-shadow-[0_0_6px_rgba(255,235,59,0.8)] skew-tag">MAX</span>` :
+                                        `<span class="text-2xl font-black text-white">\${completedRanks} <span class="text-xs text-gray-500 font-normal">/10</span></span>`
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="my-4">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Eventos de Rank (1-10)</span>
+                                </div>
+                                <div class="grid grid-cols-5 gap-1.5 sm:gap-2">
+                                    ${starsHtml}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-3 border-t border-zinc-800 space-y-3">
+                            
+                            <div class="bg-black p-2 border border-zinc-800">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-[10px] font-bold text-yellow-400 uppercase tracking-widest">Pontos de Afinidade</span>
+                                    <div class="flex items-center gap-1">
+                                        <input type="number" id="pts-num-${c.id}" value="${c.points}" min="0" max="100"
+                                               ${modoAtual === 'jogador' ? 'disabled' : ''}
+                                               oninput="updateAffinityPoints('${c.id}', this.value)"
+                                               class="w-12 bg-zinc-900 border border-zinc-700 text-yellow-400 font-bold text-right text-xs px-1 py-0.5 outline-none focus:border-blue-600">
+                                        <span class="text-xs font-bold text-gray-500">/100</span>
+                                    </div>
+                                </div>
+
+                                <div class="w-full bg-zinc-800 h-2 border border-zinc-700 mb-2">
+                                    <div id="pts-bar-${c.id}" class="bg-gradient-to-r from-blue-600 to-yellow-400 h-full transition-all duration-200" style="width: ${c.points}%;"></div>
+                                </div>
+
+                                <input type="range" id="pts-slider-${c.id}" min="0" max="100" value="${c.points}" 
+                                       ${modoAtual === 'jogador' ? 'disabled' : ''}
+                                       oninput="updateAffinityPoints('${c.id}', this.value)">
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                <button onclick="openRankDetailsModal('${c.id}')" 
+                                        class="flex-grow bg-blue-600 hover:bg-blue-700 text-white font-black py-2 px-3 text-xs uppercase tracking-widest border border-white flex items-center justify-center gap-2 transition-transform active:scale-95 shadow-[2px_2px_0px_#000]">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                    Ver Cenas & Recompensas
+                                </button>
+
+                                ${modoAtual === 'mestre' ? `
+                                <button onclick="deleteConfidant('\${c.id}')" 
+                                        title="Remover Confidente" 
+                                        class="bg-zinc-800 hover:bg-black text-gray-400 hover:text-blue-500 p-2 border border-zinc-700">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                                ` : ''}
+                            </div>
+
+                        </div>
+
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // RANK DETAILS MODAL (SCENES & REWARDS)
+        function openRankDetailsModal(confidantId) {
+            currentDetailConfidantId = confidantId;
+            const player = getActivePlayer();
+            const conf = player.confidants.find(c => c.id === confidantId);
+            if (!conf) return;
+
+            document.getElementById('detail-confidant-name').textContent = conf.name;
+            document.getElementById('detail-arcana-tag').textContent = conf.arcana;
+            
+            const subtitle = document.getElementById('modal-subtitle');
+            if (modoAtual === 'jogador') {
+                subtitle.textContent = "Visualização de Cenas e Recompensas Mecânicas (Modo Leitura)";
+            } else {
+                subtitle.textContent = "Anotações de Eventos de Cenas e Recompensas Mecânicas (Rank 1 até Rank 10)";
+            }
+
+            const container = document.getElementById('ranks-container');
+            let html = '';
+
+            conf.rankDetails.forEach((rd, idx) => {
+                const isCompleted = conf.events[idx];
+
+                html += `
+                    <div class="bg-zinc-900 border-2 ${isCompleted ? 'border-blue-600' : 'border-zinc-800'} p-4 clip-angled-br relative">
+                        <div class="flex items-center justify-between mb-3 bg-black p-2 border border-zinc-800">
+                            <div class="flex items-center gap-2">
+                                <span class="bg-blue-600 text-white font-black text-sm px-2 py-0.5 skew-tag">
+                                    RANK ${rd.rank}
+                                </span>
+                                <span class="text-xs font-bold ${isCompleted ? 'text-yellow-400' : 'text-gray-500'}">
+                                    ${isCompleted ? '✓ EVENTO CONCLUÍDO' : '○ PENDENTE'}
+                                </span>
+                            </div>
+                            ${modoAtual === 'mestre' ? `
+                            <button onclick="toggleEventFromModal(\${idx})" 
+                                    class="text-xs font-black uppercase px-3 py-1 border \${isCompleted ? 'bg-zinc-800 text-blue-400 border-blue-600' : 'bg-blue-600 text-white border-white'}">
+                                \${isCompleted ? 'Desmarcar Concluído' : 'Marcar Concluído'}
+                            </button>
+                            ` : ''}
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-1">
+                                    Cena / Anotações do Evento:
+                                </label>
+                                <textarea ${modoAtual === 'jogador' ? 'readonly' : ''} oninput="saveRankDetail(${rd.rank}, 'scene', this.value)" 
+                                          rows="3" 
+                                          placeholder="Resumo do diálogo, local do encontro ou revelação..." 
+                                          class="w-full bg-black border border-zinc-700 text-white p-2 text-xs font-sans outline-none focus:border-blue-600 resize-none">${rd.scene || ''}</textarea>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-yellow-400 uppercase tracking-wider mb-1">
+                                    Recompensa / Habilidade Desbloqueada:
+                                </label>
+                                <textarea ${modoAtual === 'jogador' ? 'readonly' : ''} oninput="saveRankDetail(${rd.rank}, 'reward', this.value)" 
+                                          rows="3" 
+                                          placeholder="Bônus mecânico, habilidade de combate ou item recebido..." 
+                                          class="w-full bg-black border border-zinc-700 text-yellow-300 p-2 text-xs font-sans outline-none focus:border-yellow-400 resize-none">${rd.reward || ''}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+            document.getElementById('modal-rank-details').classList.remove('hidden');
+        }
+
+        function closeRankDetailsModal() {
+            document.getElementById('modal-rank-details').classList.add('hidden');
+            currentDetailConfidantId = null;
+            renderConfidants();
+        }
+
+        function saveRankDetail(rankNum, field, value) {
+            if (modoAtual !== 'mestre') return;
+            if (!currentDetailConfidantId) return;
+            const player = getActivePlayer();
+            const conf = player.confidants.find(c => c.id === currentDetailConfidantId);
+            if (conf) {
+                const detail = conf.rankDetails.find(r => r.rank === rankNum);
+                if (detail) {
+                    detail[field] = value;
+                    saveState();
+                }
+            }
+        }
+
+        function toggleEventFromModal(eventIndex) {
+            if (modoAtual !== 'mestre') return;
+            if (!currentDetailConfidantId) return;
+            toggleEventMarker(currentDetailConfidantId, eventIndex);
+            openRankDetailsModal(currentDetailConfidantId);
+        }
+    </script>
+</body>
+</html>

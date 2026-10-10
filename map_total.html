@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Persona 5 - Unified City Map & Calendar System[cite: 8]</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;700&family=Bebas+Neue&family=Mochiy+Pop+One&family=Montserrat:wght@800;900&family=Oswald:wght@700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDK Compat -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        p5blue: '#4169e1',
+                        p5blueCyan: '#00e5ff',
+                        p5blueDark: '#001a66',
+                        p5black: '#0b0b0b',
+                        p5yellow: '#ffe600',
+                        p5gray: '#1a1a1a'
+                    },
+                    fontFamily: {
+                        p5title: ['"Bebas Neue"', 'sans-serif'],
+                        p5sub: ['"Teko"', 'sans-serif'],
+                        p5jp: ['"Mochiy Pop One"', 'sans-serif'],
+                        p5body: ['"Montserrat"', 'sans-serif'],
+                        p5oswald: ['"Oswald"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --p5-blue: #4169e1;
+            --p5-cyan: #00e5ff;
+            --p5-black: #050505;
+        }
+
+        body {
+            background-color: var(--p5-black);
+            color: #ffffff;
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden;
+            user-select: none;
+            min-height: 100vh;
+        }
+
+        .halftone-bg {
+            background-image: radial-gradient(#1a2656 15%, transparent 16%), radial-gradient(#1a2656 15%, transparent 16%);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+        }
+
+        .skew-p5-left { transform: skewX(-12deg); }
+        .skew-p5-right { transform: skewX(12deg); }
+        .unskew { transform: skewX(12deg); }
+        .unskew-right { transform: skewX(-12deg); }
+
+        .shadow-p5 { filter: drop-shadow(6px 6px 0px #000000); }
+        .shadow-p5-blue { filter: drop-shadow(6px 6px 0px #4169e1); }
+        .shadow-p5-cyan { filter: drop-shadow(6px 6px 0px #00e5ff); }
+        .shadow-p5-white { filter: drop-shadow(6px 6px 0px #ffffff); }
+
+        .p5-btn {
+            position: relative;
+            background-color: #000;
+            color: #fff;
+            font-family: 'Teko', sans-serif;
+            font-size: 1.4rem;
+            letter-spacing: 2px;
+            padding: 6px 18px;
+            transform: skewX(-15deg);
+            border: 3px solid #fff;
+            transition: all 0.15s ease-in-out;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .p5-btn:hover {
+            background-color: #4169e1;
+            color: #fff;
+            transform: skewX(-15deg) scale(1.05) translateY(-2px);
+            box-shadow: 6px 6px 0px #000;
+            border-color: #00e5ff;
+        }
+        .p5-btn.active {
+            background-color: #4169e1;
+            color: #fff;
+            border-color: #ffe600;
+            box-shadow: 4px 4px 0px #000;
+        }
+        .p5-btn:disabled {
+            background-color: #333;
+            color: #777;
+            border-color: #555;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        @keyframes pinPulse {
+            0% { transform: scale(1) skewX(-10deg); }
+            50% { transform: scale(1.15) skewX(-10deg); filter: drop-shadow(0px 0px 10px #00e5ff); }
+            100% { transform: scale(1) skewX(-10deg); }
+        }
+        .pin-active-pulse {
+            animation: pinPulse 1.4s infinite ease-in-out;
+            z-index: 40 !important;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #111; }
+        ::-webkit-scrollbar-thumb { background: #4169e1; border: 2px solid #000; }
+    </style>
+</head>
+<body class="halftone-bg flex flex-col justify-between min-h-screen relative p-3 md:p-6">
+
+    <!-- GLOBAL HUD HEADER -->
+    <header class="relative z-30 flex flex-wrap justify-between items-center gap-4 mb-4">
+        <div class="flex items-center gap-3">
+            <div class="bg-black border-4 border-white p-3 skew-p5-left shadow-p5-blue flex items-center gap-4">
+                <div class="unskew text-center">
+                    <span id="hud-date" class="block font-p5title text-5xl text-p5blueCyan leading-none">4/11</span>
+                    <span id="hud-dayname" class="block font-p5sub text-xl text-white leading-none uppercase tracking-widest">QUARTA</span>
+                </div>
+                <div class="unskew border-l-2 border-white pl-4 flex flex-col items-center">
+                    <i id="hud-weather-icon" class="fa-solid fa-cloud-showers-heavy text-3xl text-cyan-400"></i>
+                    <span id="hud-weather-text" class="font-p5body text-xs text-white font-black mt-1">CHUVA</span>
+                </div>
+            </div>
+
+            <div class="bg-p5blue text-white font-p5title text-3xl px-5 py-2 skew-p5-left shadow-p5 border-3 border-white flex flex-col justify-center">
+                <span id="hud-period" class="unskew block tracking-wider uppercase">TARDE</span>
+                <span id="indicador-modo" class="unskew text-[10px] font-bold uppercase tracking-widest text-yellow-300">A carregar...</span>
+            </div>
+        </div>
+
+        <!-- Central Action Controls -->
+        <div class="flex items-center gap-3">
+            <button id="btn-advance" onclick="advanceTime()" class="p5-btn !bg-p5blueCyan !text-black border-4 !border-black font-p5sub font-bold text-2xl px-6 py-2 shadow-p5 hover:!bg-white">
+                <span class="unskew flex items-center gap-2">AVANÇAR TEMPO <i class="fa-solid fa-forward-step"></i></span>
+            </button>
+            <button id="btn-reset" onclick="clearSave()" class="p5-btn !bg-red-600 text-white border-2 border-black text-lg py-2 hover:!bg-red-700" title="Resetar Dados">
+                <span class="unskew"><i class="fa-solid fa-rotate-left"></i> RESET</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN SYSTEM CONTENT -->
+    <main class="grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10 flex-1">
+        
+        <!-- MAP CANVAS CONTAINER -->
+        <section class="lg:col-span-8 flex flex-col h-[75vh] min-h-[500px]">
+            <div id="map-container" class="relative w-full h-full bg-p5gray border-4 border-white shadow-p5-blue overflow-hidden flex flex-col">
+                
+                <div class="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-luminosity filter contrast-150"
+                     style="background-image: url('https://images.unsplash.com/photo-1503899036084-c55cdd92da26?q=80&w=1600&auto=format&fit=crop');">
+                </div>
+                
+                <div class="absolute inset-0 pointer-events-none">
+                    <div class="absolute -top-20 -left-20 w-96 h-96 bg-p5blue opacity-20 skew-p5-left"></div>
+                    <div class="absolute -bottom-20 -right-20 w-[500px] h-96 bg-black opacity-50 skew-p5-right"></div>
+                    <div class="w-full h-full opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                </div>
+
+                <div class="relative z-40 p-4 flex flex-wrap justify-between items-center gap-2 bg-gradient-to-b from-black/80 to-transparent pointer-events-auto">
+                    <div class="bg-black text-white px-4 py-1 skew-p5-left border-2 border-p5blue shadow-p5">
+                        <h1 class="unskew font-p5title text-2xl text-p5blueCyan tracking-wider">TOKYO NAVIGATION MAP[cite: 8]</h1>
+                    </div>
+
+                    <!-- Filter & Editor Buttons -->
+                    <div class="flex gap-1.5 flex-wrap">
+                        <button onclick="filterPins('all')" id="btn-filter-all" class="p5-btn active text-sm py-1 px-3"><i class="fa-solid fa-layer-group mr-1"></i>TODOS</button>
+                        <button onclick="filterPins('explorable')" id="btn-filter-explorable" class="p5-btn text-sm py-1 px-3"><i class="fa-solid fa-compass mr-1"></i>LOCAIS</button>
+                        <button onclick="filterPins('relationship')" id="btn-filter-relationship" class="p5-btn text-sm py-1 px-3"><i class="fa-solid fa-comments mr-1"></i>CONFIDANTS</button>
+                        <button onclick="filterPins('active')" id="btn-filter-active" class="p5-btn text-sm py-1 px-3 !border-p5yellow"><i class="fa-solid fa-bolt text-p5yellow mr-1"></i>ATIVOS AGORA</button>
+                        <button onclick="toggleMapEditor()" id="btn-map-editor" class="p5-btn text-sm py-1 px-3 bg-red-600"><i class="fa-solid fa-pen-to-square mr-1"></i>EDITAR</button>
+                        <button onclick="createLocation()" id="btn-novo-local" class="p5-btn text-sm py-1 px-3 bg-green-600"><i class="fa-solid fa-plus mr-1"></i>NOVO</button>
+                    </div>
+                </div>
+
+                <!-- MAP PINS LAYER -->
+                <div id="pins-layer" class="absolute inset-0 z-30 pointer-events-none"></div>
+
+                <div class="absolute bottom-3 left-4 z-20 pointer-events-none">
+                    <div class="bg-black/90 text-white px-3 py-1 skew-p5-left border border-white flex items-center gap-2">
+                        <span class="unskew font-p5sub text-base text-p5yellow"><i class="fa-solid fa-circle-info mr-1"></i> CLIQUE NO PONTO PARA NAVEGAR, VER DETALHES OU ANOTAÇÕES</span>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SIDEBAR -->
+        <section class="lg:col-span-4 flex flex-col gap-4 h-[75vh] overflow-y-auto pr-1">
+            
+            <div class="bg-black border-3 border-white p-4 skew-p5-left shadow-p5-blue">
+                <div class="unskew">
+                    <h2 class="font-p5title text-2xl text-p5blueCyan border-b-2 border-p5blue pb-1 mb-3 flex justify-between items-center">
+                        <span><i class="fa-solid fa-clock mr-2"></i>DISPONÍVEIS AGORA</span>
+                        <span id="avail-count-badge" class="bg-p5blue text-white text-xs font-p5body px-2 py-0.5 rounded">0</span>
+                    </h2>
+                    <ul id="avail-list" class="space-y-2 max-h-48 overflow-y-auto pr-1"></ul>
+                </div>
+            </div>
+
+            <div class="bg-black border-3 border-white p-4 skew-p5-left shadow-p5 flex-1 flex flex-col">
+                <div class="unskew flex flex-col h-full">
+                    <h2 class="font-p5title text-2xl text-p5yellow border-b-2 border-p5yellow pb-1 mb-3">
+                        <i class="fa-solid fa-scroll mr-2"></i>ANOTAÇÕES & MISSÕES
+                    </h2>
+
+                    <div id="painel-nova-anotacao" class="flex flex-col gap-2 mb-3">
+                        <input type="text" id="note-input" placeholder="Nova anotação ou lembrete..." class="bg-p5gray border-2 border-white text-white p-2 font-p5body text-xs focus:border-p5blueCyan outline-none">
+                        <div class="flex gap-2">
+                            <select id="note-location-select" class="bg-p5gray border border-white text-xs text-p5yellow p-1.5 flex-1 font-p5body">
+                                <option value="general">📍 Geral (Sem local fixo)</option>
+                            </select>
+                            <button onclick="addGlobalNote()" class="p5-btn !text-xs !py-1 !px-3 !bg-p5blue">ADICIONAR</button>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 overflow-y-auto">
+                        <ul id="notes-list" class="space-y-2 pr-1"></ul>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- FLOATING MAP TOOLTIP -->
+    <div id="p5-tooltip" class="fixed z-50 pointer-events-none opacity-0 transition-opacity duration-150 transform -translate-x-1/2 -translate-y-full mb-4">
+        <div class="bg-black text-white border-3 border-p5blue p-3 skew-p5-left shadow-p5 max-w-xs">
+            <div class="unskew">
+                <div id="tooltip-status" class="text-xs font-p5body font-black uppercase text-p5yellow tracking-widest mb-0.5">DISPONÍVEL</div>
+                <div id="tooltip-title" class="font-p5title text-2xl leading-none text-white">NOME DO LOCAL</div>
+                <div id="tooltip-desc" class="font-p5body text-xs text-gray-300 mt-1">Descrição curta...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 1: DISTRITO EXPLORÁVEL -->
+    <div id="explorable-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="relative w-full max-w-4xl bg-black border-4 border-p5blue shadow-p5-white p-6 md:p-8 skew-p5-left max-h-[90vh] overflow-y-auto">
+            <button onclick="closeModals()" class="absolute top-3 right-3 bg-p5blue text-white w-10 h-10 border-2 border-black font-p5title text-xl hover:bg-white hover:text-black transition-colors unskew shadow-p5">
+                X
+            </button>
+
+            <div class="unskew">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b-4 border-p5blue pb-3 mb-4">
+                    <div>
+                        <span class="bg-p5blue text-black px-2 py-0.5 font-p5body font-black text-xs uppercase tracking-widest inline-block mb-1">DISTRITO EXPLORÁVEL</span>
+                        <h2 id="exp-title" class="font-p5title text-4xl text-white leading-none">SHIBUYA</h2>
+                    </div>
+                    <div id="exp-subtitle" class="font-p5sub text-xl text-p5yellow tracking-wide mt-1 md:mt-0">
+                        Centro Urbano
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div class="relative bg-p5gray border-2 border-white h-48 overflow-hidden">
+                            <img id="exp-map-img" src="" alt="Map Preview" class="w-full h-full object-cover filter contrast-125">
+                            <div class="absolute bottom-2 left-2 bg-black/90 px-2 py-0.5 border border-p5blue font-p5sub text-sm text-white">
+                                MAPA INTERNO
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="font-p5title text-xl text-p5blue border-b border-p5blue mb-2">PONTOS DE INTERESSE (POIs)</h3>
+                            <div id="exp-poi-list" class="space-y-2 max-h-40 overflow-y-auto pr-1"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-p5gray/60 border-2 border-p5blue p-4 flex flex-col h-full">
+                        <h3 class="font-p5title text-xl text-p5yellow border-b border-p5yellow mb-2 flex justify-between items-center">
+                            <span><i class="fa-solid fa-sticky-note mr-2"></i>ANOTAÇÕES DESTE LOCAL</span>
+                        </h3>
+
+                        <div id="painel-exp-nota" class="flex gap-2 mb-3">
+                            <input type="text" id="exp-note-input" placeholder="Anotação para este local..." class="bg-black border border-white text-white p-2 font-p5body text-xs flex-1 outline-none">
+                            <button onclick="addLocationSpecificNote('exp')" class="p5-btn !text-xs !py-1 !px-3 !bg-p5blue">SALVAR</button>
+                        </div>
+
+                        <div id="exp-notes-list" class="flex-1 max-h-48 overflow-y-auto space-y-2 pr-1"></div>
+                    </div>
+                </div>
+
+                <div class="mt-6 pt-3 border-t border-gray-800 flex justify-end">
+                    <button onclick="visitLocation()" class="p5-btn active text-lg"><i class="fa-solid fa-walking mr-2"></i>VIAJAR PARA ESTE LOCAL</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: CONFIDANT SPOT -->
+    <div id="relationship-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="relative w-full max-w-3xl bg-p5gray border-4 border-p5yellow shadow-p5-blue p-6 md:p-8 skew-p5-left max-h-[90vh] overflow-y-auto">
+            <button onclick="closeModals()" class="absolute top-3 right-3 bg-p5yellow text-black w-10 h-10 border-2 border-black font-p5title text-xl hover:bg-p5blue hover:text-white transition-colors unskew shadow-p5">
+                X
+            </button>
+
+            <div class="unskew">
+                <div class="flex items-center gap-3 border-b-4 border-p5yellow pb-3 mb-4">
+                    <div class="bg-p5yellow text-black px-3 py-1 text-2xl font-bold">
+                        <i class="fa-solid fa-handshake"></i>
+                    </div>
+                    <div>
+                        <span class="bg-p5yellow text-black px-2 py-0.5 font-p5body font-black text-xs uppercase tracking-widest">CONFIDANT EVENT</span>
+                        <h2 id="rel-title" class="font-p5title text-3xl md:text-4xl text-white leading-none">PARQUE INOKASHIRA</h2>
+                    </div>
+                </div>
+
+                <div class="bg-black border-2 border-white p-4 relative overflow-hidden flex flex-col md:flex-row gap-4 items-center mb-4">
+                    <div id="rel-arcana" class="absolute -right-6 -bottom-6 font-p5title text-8xl text-p5gray/30 pointer-events-none select-none">
+                        LOVERS
+                    </div>
+
+                    <div class="w-28 h-36 bg-p5blue border-2 border-white flex-shrink-0 flex flex-col items-center justify-center relative shadow-p5">
+                        <i id="rel-icon" class="fa-solid fa-user-ninja text-4xl text-white mb-2"></i>
+                        <span id="rel-arcana-name" class="font-p5title text-base text-black bg-p5yellow px-1 py-0.5 w-full text-center">LOVERS</span>
+                    </div>
+
+                    <div class="flex-1 space-y-2 z-10">
+                        <div>
+                            <span class="text-xs font-p5body text-p5yellow font-bold uppercase">PERSONAGEM PRESENTE:</span>
+                            <h3 id="rel-character" class="font-p5title text-2xl text-white">Ann Takamaki</h3>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-xs font-p5body text-gray-400 mb-1">
+                                <span>RANK VÍNCULO</span>
+                                <span id="rel-rank-text">RANK 4 / 10</span>
+                            </div>
+                            <div class="w-full bg-p5gray h-2.5 border border-white">
+                                <div id="rel-rank-bar" class="bg-p5blue h-full" style="width: 40%"></div>
+                            </div>
+                        </div>
+
+                        <p id="rel-description" class="font-p5body text-xs text-gray-200 bg-p5gray/80 p-2 border-l-2 border-p5blue">
+                            "Descrição do evento..."
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-black/80 border border-p5yellow p-4 mb-4">
+                    <h3 class="font-p5title text-xl text-p5yellow mb-2"><i class="fa-solid fa-sticky-note mr-2"></i>ANOTAÇÕES DESTE CONFIDANTE</h3>
+                    <div id="painel-rel-nota" class="flex gap-2 mb-3">
+                        <input type="text" id="rel-note-input" placeholder="Anotação para este confidante..." class="bg-p5gray border border-white text-white p-2 font-p5body text-xs flex-1 outline-none">
+                        <button onclick="addLocationSpecificNote('rel')" class="p5-btn !text-xs !py-1 !px-3 !bg-p5yellow !text-black">SALVAR</button>
+                    </div>
+                    <div id="rel-notes-list" class="max-h-36 overflow-y-auto space-y-2"></div>
+                </div>
+
+                <div class="flex justify-between items-center pt-2 border-t border-gray-800">
+                    <span class="text-xs font-p5body text-gray-400"><i class="fa-solid fa-clock text-p5yellow"></i> O tempo avançará ao realizar esta atividade.</span>
+                    <button id="btn-passar-tempo" onclick="startRelationshipEvent()" class="p5-btn active text-lg"><i class="fa-solid fa-heart mr-2"></i>PASSAR TEMPO JUNTO</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT ENGINE -->
+    <script>
+        // Inicialização do Firebase
+        const configArmazenada = localStorage.getItem('rpg_firebase_config');
+        if (configArmazenada) {
+            firebase.initializeApp(JSON.parse(configArmazenada));
+        }
+        const db = firebase.database();
+
+        // Gestão de Modo (Mestre vs Jogador)
+        const modoAtual = localStorage.getItem('rpg_modo_sessao') || 'jogador';
+        const indicadorModo = document.getElementById('indicador-modo');
+
+        if (modoAtual === 'mestre') {
+            indicadorModo.textContent = "Modo: Mestre (Escrita Ativa)";
+            indicadorModo.className = "unskew text-[10px] font-bold uppercase tracking-widest text-emerald-400";
+        } else {
+            indicadorModo.textContent = "Modo: Jogador (Leitura)";
+            indicadorModo.className = "unskew text-[10px] font-bold uppercase tracking-widest text-cyan-400";
+            
+            document.addEventListener("DOMContentLoaded", () => {
+                const btnAdvance = document.getElementById('btn-advance');
+                const btnReset = document.getElementById('btn-reset');
+                const btnEditor = document.getElementById('btn-map-editor');
+                const btnNovoLocal = document.getElementById('btn-novo-local');
+                const painelNovaAnotacao = document.getElementById('painel-nova-anotacao');
+                const painelExpNota = document.getElementById('painel-exp-nota');
+                const painelRelNota = document.getElementById('painel-rel-nota');
+                const btnPassarTempo = document.getElementById('btn-passar-tempo');
+
+                if (btnAdvance) btnAdvance.style.display = 'none';
+                if (btnReset) btnReset.style.display = 'none';
+                if (btnEditor) btnEditor.style.display = 'none';
+                if (btnNovoLocal) btnNovoLocal.style.display = 'none';
+                if (painelNovaAnotacao) painelNovaAnotacao.style.display = 'none';
+                if (painelExpNota) painelExpNota.style.display = 'none';
+                if (painelRelNota) painelRelNota.style.display = 'none';
+                if (btnPassarTempo) btnPassarTempo.style.display = 'none';
+            });
+        }
+
+        const gameState = {
+            month: 4,
+            day: 11,
+            dayOfWeekIndex: 3,
+            periodIndex: 2,
+            weatherIndex: 2
+        };
+
+        const config = {
+            daysOfWeek: ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'],
+            daysOfWeekShort: ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'],
+            periods: ['Madrugada', 'Manhã', 'Tarde', 'Noite'],
+            weather: [
+                { name: 'ENSOLARADO', icon: 'fa-sun text-yellow-400' },
+                { name: 'NUBLADO', icon: 'fa-cloud text-gray-300' },
+                { name: 'CHUVA', icon: 'fa-cloud-showers-heavy text-cyan-400' },
+                { name: 'NEVOEIRO', icon: 'fa-smog text-indigo-300' }
+            ],
+            daysInMonth: { 4: 30, 5: 31, 6: 30, 7: 31, 8: 31, 9: 30, 10: 31, 11: 30, 12: 31, 1: 31, 2: 28, 3: 31 }
+        };
+
+        let locations = [
+            {
+                id: 'yongen',
+                name: 'YONGEN-JAYA',
+                type: 'explorable',
+                x: 22,
+                y: 65,
+                sub: 'Bairro Residencial Calmo',
+                desc: 'Onde fica o Café Leblanc e o seu sótão/residência.',
+                mapImg: 'https://images.unsplash.com/photo-1542051841857-5f90071e7989?q=80&w=800&auto=format&fit=crop',
+                available: { periods: [0, 1, 2, 3], days: [0, 1, 2, 3, 4, 5, 6], weatherBlocked: [] },
+                pois: [
+                    { name: 'Café Leblanc', desc: 'Sua casa base. Prepare café para aumentar SP ou converse com Sojiro.', icon: 'fa-mug-hot' },
+                    { name: 'LAVANDERIA', desc: 'Lave equipamentos sujos obtidos em dungeons.', icon: 'fa-shirt' },
+                    { name: 'LOJA DE CONVENIÊNCIA', desc: 'Compre suprimentos básicos e remédios.', icon: 'fa-store' }
+                ]
+            },
+            {
+                id: 'shibuya',
+                name: 'SHIBUYA',
+                type: 'explorable',
+                x: 48,
+                y: 42,
+                sub: 'O Coração de Tóquio',
+                desc: 'Centro movimentado cheio de lojas, estações e entretenimento.',
+                mapImg: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?q=80&w=800&auto=format&fit=crop',
+                available: { periods: [1, 2, 3], days: [0, 1, 2, 3, 4, 5, 6], weatherBlocked: [] },
+                pois: [
+                    { name: 'ESTAÇÃO DE TREM', desc: 'Acesso às linhas principais da cidade.', icon: 'fa-train' },
+                    { name: 'LOJA DE ARMAS (UNTOUCHABLE)', desc: 'Iwai vende réplicas de armas e protetores.', icon: 'fa-gun' },
+                    { name: 'UNDERGROUND MALL', desc: 'Lojas de cosméticos, plantas e acessórios.', icon: 'fa-bag-shopping' }
+                ]
+            },
+            {
+                id: 'shinjuku',
+                name: 'SHINJUKU',
+                type: 'explorable',
+                x: 72,
+                y: 32,
+                sub: 'Distrito Noturno & Luzes de Neon',
+                desc: 'Famoso pelos bares, videntes e vida noturna agitada.',
+                mapImg: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?q=80&w=800&auto=format&fit=crop',
+                available: { periods: [3], days: [0, 1, 2, 3, 4, 5, 6], weatherBlocked: [] },
+                pois: [
+                    { name: 'BAR CROSSROADS', desc: 'Trabalhe noitadas para ganhar dinheiro e Atração.', icon: 'fa-martini-glass' },
+                    { name: 'TENTÁCULOS DA FORTUNA', desc: 'Consulte a Vidente Chihaya para bônus de atributos.', icon: 'fa-crystal-ball' }
+                ]
+            },
+            {
+                id: 'inokashira',
+                name: 'PARQUE INOKASHIRA',
+                type: 'relationship',
+                x: 32,
+                y: 28,
+                sub: 'Encontro de Vínculo',
+                desc: 'Parque com lago bonito e pedalinhos.',
+                character: 'Ann Takamaki',
+                arcana: 'LOVERS',
+                icon: 'fa-heart',
+                rank: 4,
+                eventDesc: 'Ann está pensativa olhando para o lago. Parece uma boa oportunidade para conversarem sobre a carreira de modelo.',
+                available: { periods: [2], days: [2, 3, 4, 6], weatherBlocked: [2] }
+            },
+            {
+                id: 'maidcafe',
+                name: 'AKIHABARA',
+                type: 'relationship',
+                x: 82,
+                y: 58,
+                sub: 'Encontro de Vínculo',
+                desc: 'Bairro otaku e eletrônicos.',
+                character: 'Sadayo Kawakami',
+                arcana: 'TEMPERANCE',
+                icon: 'fa-user-tie',
+                rank: 6,
+                eventDesc: 'Kawakami está trabalhando em seu turno extra. Ajude-a a relaxar e converse sobre seu passado.',
+                available: { periods: [3], days: [1, 5, 6], weatherBlocked: [] }
+            },
+            {
+                id: 'ogikubo',
+                name: 'OGIKUBO',
+                type: 'relationship',
+                x: 15,
+                y: 82,
+                sub: 'Encontro de Vínculo',
+                desc: 'Restaurante tradicional de ramen famoso.',
+                character: 'Ryuji Sakamoto',
+                arcana: 'CHARIOT',
+                icon: 'fa-bowl-rice',
+                rank: 7,
+                eventDesc: 'Ryuji quer comer uma tigela de ramen reforçada e conversar sobre o antigo clube de atletismo.',
+                available: { periods: [2], days: [1, 3, 5], weatherBlocked: [2] }
+            }
+        ];
+
+        let notes = [
+            { id: '1', text: 'Comprar remédios de cura com Takemi na Clínica.', locationId: 'yongen', dateStr: '4/11 - Tarde' },
+            { id: '2', text: 'Devolver o livro na biblioteca da escola.', locationId: 'general', dateStr: '4/11 - Tarde' }
+        ];
+
+        let activeFilter = 'all';
+        let currentModalLocationId = null;
+        let mapEditorEnabled = false;
+        let draggedPin = null;
+        const STORAGE_KEY = 'p5_unified_map_save';
+
+        function saveData() {
+            if (modoAtual !== 'mestre') return;
+            const save = { gameState, notes, locations };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(save));
+            db.ref('map_total').set(save);
+        }
+
+        function loadData() {
+            const save = localStorage.getItem(STORAGE_KEY);
+            if (!save) return;
+            try {
+                const data = JSON.parse(save);
+                if (data.gameState) Object.assign(gameState, data.gameState);
+                if (Array.isArray(data.notes)) notes = data.notes;
+                if (Array.isArray(data.locations)) locations = data.locations;
+            } catch (err) {
+                console.error('Erro ao carregar save:', err);
+            }
+        }
+
+        function clearSave() {
+            if (modoAtual !== 'mestre') return;
+            localStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem('p5_map_locations');
+            db.ref('map_total').remove();
+            location.reload();
+        }
+
+        function isAvailableNow(loc) {
+            if (!loc.available) return true;
+            const { periods, days, weatherBlocked } = loc.available;
+            const periodValid = periods.includes(gameState.periodIndex);
+            const dayValid = days.includes(gameState.dayOfWeekIndex);
+            const weatherValid = !weatherBlocked.includes(gameState.weatherIndex);
+            return periodValid && dayValid && weatherValid;
+        }
+
+        function updateHUD() {
+            document.getElementById('hud-date').innerText = `${gameState.month}/${gameState.day}`;
+            document.getElementById('hud-dayname').innerText = config.daysOfWeekShort[gameState.dayOfWeekIndex];
+            
+            const weatherObj = config.weather[gameState.weatherIndex];
+            document.getElementById('hud-weather-text').innerText = weatherObj.name;
+            document.getElementById('hud-weather-icon').className = `fa-solid text-3xl ${weatherObj.icon}`;
+
+            document.getElementById('hud-period').innerText = config.periods[gameState.periodIndex];
+        }
+
+        function advanceTime() {
+            if (modoAtual !== 'mestre') return;
+            document.body.style.transform = `translate(${Math.random() * 4 - 2}px, ${Math.random() * 4 - 2}px)`;
+            setTimeout(() => { document.body.style.transform = 'none'; }, 60);
+
+            gameState.periodIndex++;
+
+            if (gameState.periodIndex >= config.periods.length) {
+                gameState.periodIndex = 0;
+                gameState.day++;
+                gameState.dayOfWeekIndex = (gameState.dayOfWeekIndex + 1) % 7;
+
+                const rand = Math.random();
+                if (rand < 0.55) gameState.weatherIndex = 0;
+                else if (rand < 0.75) gameState.weatherIndex = 1;
+                else if (rand < 0.92) gameState.weatherIndex = 2;
+                else gameState.weatherIndex = 3;
+
+                if (gameState.day > config.daysInMonth[gameState.month]) {
+                    gameState.day = 1;
+                    gameState.month++;
+                    if (gameState.month > 12) gameState.month = 1;
+                }
+            }
+
+            saveData();
+            updateHUD();
+            renderPins();
+            renderAvailability();
+            renderNotes();
+            showNotice(`O TEMPO AVANÇOU: ${config.periods[gameState.periodIndex].toUpperCase()}`);
+        }
+
+        function renderPins() {
+            const pinsLayer = document.getElementById('pins-layer');
+            pinsLayer.innerHTML = '';
+
+            locations.forEach(loc => {
+                const active = isAvailableNow(loc);
+                const hasNotes = notes.some(n => n.locationId === loc.id);
+
+                if (activeFilter === 'explorable' && loc.type !== 'explorable') return;
+                if (activeFilter === 'relationship' && loc.type !== 'relationship') return;
+                if (activeFilter === 'active' && !active) return;
+
+                const pinEl = document.createElement('div');
+                pinEl.dataset.id = loc.id;
+                
+                if (mapEditorEnabled && modoAtual === 'mestre') {
+                    pinEl.draggable = true;
+                }
+
+                pinEl.className = `absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-transform duration-200 hover:scale-125 z-30 pointer-events-auto ${active ? 'pin-active-pulse' : 'opacity-70'}`;
+                pinEl.style.left = `${loc.x}%`;
+                pinEl.style.top = `${loc.y}%`;
+
+                const isExplorable = loc.type === 'explorable';
+                let badgeStyle = isExplorable ? 'bg-black text-white border-p5blue' : 'bg-p5yellow text-black border-black';
+
+                if (active && !isExplorable) {
+                    badgeStyle = 'bg-p5yellow text-black border-white shadow-p5-cyan';
+                }
+
+                const iconClass = isExplorable ? 'fa-building' : (loc.icon || 'fa-handshake');
+
+                pinEl.innerHTML = `
+                    <div class="relative group" onclick="handlePinClick('${loc.id}')" onmouseenter="showTooltip(event, '${loc.id}')" onmouseleave="hideTooltip()">
+                        <div class="skew-p5-left ${badgeStyle} border-2 shadow-p5 px-2.5 py-0.5 flex items-center gap-1.5">
+                            <i class="fa-solid ${iconClass} text-sm"></i>
+                            <span class="font-p5title text-lg tracking-wide whitespace-nowrap">${loc.name}</span>
+                            ${active ? '<i class="fa-solid fa-bolt text-xs text-p5yellow animate-pulse ml-1" title="Ativo Agora"></i>' : ''}
+                        </div>
+                        
+                        ${hasNotes ? `
+                            <div class="absolute -top-2 -right-2 bg-p5blueCyan text-black font-p5body font-black text-[10px] w-4 h-4 rounded-full flex items-center justify-center border border-black shadow">
+                                <i class="fa-solid fa-sticky-note"></i>
+                            </div>
+                        ` : ''}
+
+                        <div class="w-2.5 h-2.5 bg-white border-2 border-black rounded-full mx-auto -mt-0.5 shadow-sm"></div>
+                    </div>
+                `;
+
+                if (mapEditorEnabled && modoAtual === 'mestre') {
+                    pinEl.addEventListener('dragstart', () => { draggedPin = loc.id; });
+                    pinEl.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        const action = prompt('1 = Editar\n2 = Excluir');
+                        if (action === '1') editLocation(loc.id);
+                        if (action === '2') deleteLocation(loc.id);
+                    });
+                }
+
+                pinsLayer.appendChild(pinEl);
+            });
+        }
+
+        function handlePinClick(id) {
+            if (mapEditorEnabled && modoAtual === 'mestre') {
+                editLocation(id);
+            } else {
+                openLocationModal(id);
+            }
+        }
+
+        function filterPins(filter) {
+            activeFilter = filter;
+            document.querySelectorAll('#map-container .p5-btn').forEach(btn => btn.classList.remove('active'));
+            const activeBtn = document.getElementById(`btn-filter-${filter}`);
+            if (activeBtn) activeBtn.classList.add('active');
+            renderPins();
+        }
+
+        function renderAvailability() {
+            const availList = document.getElementById('avail-list');
+            availList.innerHTML = '';
+
+            const availableLocs = locations.filter(l => isAvailableNow(l));
+            document.getElementById('avail-count-badge').innerText = availableLocs.length;
+
+            if (availableLocs.length === 0) {
+                availList.innerHTML = `<li class="text-xs text-gray-400 italic p-2 border border-dashed border-gray-700 text-center">Nenhum evento ou local ativo neste período.</li>`;
+                return;
+            }
+
+            availableLocs.forEach(loc => {
+                const li = document.createElement('li');
+                li.className = 'bg-black/90 border-l-4 border-p5blueCyan p-2 flex justify-between items-center cursor-pointer hover:bg-p5blue/20 transition-colors';
+                li.onclick = () => openLocationModal(loc.id);
+
+                const isConfidant = loc.type === 'relationship';
+                li.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid ${isConfidant ? 'fa-handshake text-p5yellow' : 'fa-location-dot text-p5blueCyan'} text-xs"></i>
+                        <span class="font-p5title text-base text-white">${loc.name}</span>
+                    </div>
+                    <span class="text-[10px] font-p5body px-1.5 py-0.5 ${isConfidant ? 'bg-p5yellow text-black' : 'bg-p5blue text-white'}">${isConfidant ? loc.character : 'Explorável'}</span>
+                `;
+                availList.appendChild(li);
+            });
+        }
+
+        function populateLocationSelect() {
+            const select = document.getElementById('note-location-select');
+            select.innerHTML = '<option value="general">📍 Geral (Sem local fixo)</option>';
+            locations.forEach(loc => {
+                const opt = document.createElement('option');
+                opt.value = loc.id;
+                opt.innerText = `📍 ${loc.name}`;
+                select.appendChild(opt);
+            });
+        }
+
+        function renderNotes() {
+            const notesList = document.getElementById('notes-list');
+            notesList.innerHTML = '';
+
+            if (notes.length === 0) {
+                notesList.innerHTML = `<li class="text-xs text-gray-500 italic text-center p-2">Nenhuma anotação registrada.</li>`;
+                return;
+            }
+
+            notes.forEach(note => {
+                const locObj = locations.find(l => l.id === note.locationId);
+                const locName = locObj ? locObj.name : 'Geral';
+
+                const li = document.createElement('li');
+                li.className = 'bg-p5blue/30 border border-p5blue p-2 relative text-xs font-p5body text-white flex justify-between items-start gap-2';
+                li.innerHTML = `
+                    <div>
+                        <div class="flex items-center gap-1.5 text-[10px] text-p5yellow font-bold mb-0.5">
+                            <span>[${note.dateStr}]</span>
+                            <span class="bg-black/80 px-1 border border-gray-700 text-p5blueCyan">${locName}</span>
+                        </div>
+                        <p class="text-gray-200">${note.text}</p>
+                    </div>
+                    ${modoAtual === 'mestre' ? `<button onclick="deleteNote('\${note.id}')" class="text-red-400 hover:text-white font-bold text-sm px-1">&times;</button>` : ''}
+                `;
+                notesList.appendChild(li);
+            });
+        }
+
+        function addGlobalNote() {
+            if (modoAtual !== 'mestre') return;
+            const input = document.getElementById('note-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const locId = document.getElementById('note-location-select').value;
+            const dateStr = `${gameState.month}/${gameState.day} - ${config.periods[gameState.periodIndex]}`;
+
+            notes.unshift({
+                id: Date.now().toString(),
+                text,
+                locationId: locId,
+                dateStr
+            });
+
+            input.value = '';
+            saveData();
+            renderNotes();
+            renderPins();
+            if (currentModalLocationId) renderModalNotes(currentModalLocationId);
+        }
+
+        function addLocationSpecificNote(modalType) {
+            if (modoAtual !== 'mestre') return;
+            const inputId = modalType === 'exp' ? 'exp-note-input' : 'rel-note-input';
+            const input = document.getElementById(inputId);
+            const text = input.value.trim();
+            if (!text || !currentModalLocationId) return;
+
+            const dateStr = `${gameState.month}/${gameState.day} - ${config.periods[gameState.periodIndex]}`;
+
+            notes.unshift({
+                id: Date.now().toString(),
+                text,
+                locationId: currentModalLocationId,
+                dateStr
+            });
+
+            input.value = '';
+            saveData();
+            renderNotes();
+            renderPins();
+            renderModalNotes(currentModalLocationId);
+        }
+
+        function deleteNote(id) {
+            if (modoAtual !== 'mestre') return;
+            notes = notes.filter(n => n.id !== id);
+            saveData();
+            renderNotes();
+            renderPins();
+            if (currentModalLocationId) renderModalNotes(currentModalLocationId);
+        }
+
+        function renderModalNotes(locId) {
+            const targetListId = locations.find(l => l.id === locId)?.type === 'explorable' ? 'exp-notes-list' : 'rel-notes-list';
+            const container = document.getElementById(targetListId);
+            if (!container) return;
+
+            container.innerHTML = '';
+            const locNotes = notes.filter(n => n.locationId === locId);
+
+            if (locNotes.length === 0) {
+                container.innerHTML = `<p class="text-xs text-gray-400 italic p-2">Sem anotações registradas para este local.</p>`;
+                return;
+            }
+
+            locNotes.forEach(note => {
+                const div = document.createElement('div');
+                div.className = 'bg-black border border-p5blue p-2 text-xs font-p5body flex justify-between items-start gap-2';
+                div.innerHTML = `
+                    <div>
+                        <span class="text-[10px] text-p5yellow block mb-0.5">${note.dateStr}</span>
+                        <p class="text-white">${note.text}</p>
+                    </div>
+                    ${modoAtual === 'mestre' ? `<button onclick="deleteNote('\${note.id}')" class="text-red-400 hover:text-white font-bold">&times;</button>` : ''}
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        const tooltip = document.getElementById('p5-tooltip');
+
+        function showTooltip(e, id) {
+            const loc = locations.find(l => l.id === id);
+            if (!loc) return;
+
+            const active = isAvailableNow(loc);
+
+            document.getElementById('tooltip-status').innerText = active ? 'DISPONÍVEL AGORA' : 'INDISPONÍVEL';
+            document.getElementById('tooltip-status').className = active 
+                ? 'text-xs font-p5body font-black uppercase text-p5blueCyan tracking-widest mb-0.5' 
+                : 'text-xs font-p5body font-black uppercase text-red-500 tracking-widest mb-0.5';
+
+            document.getElementById('tooltip-title').innerText = loc.name;
+            document.getElementById('tooltip-desc').innerText = loc.desc;
+
+            tooltip.style.left = `${e.clientX}px`;
+            tooltip.style.top = `${e.clientY - 10}px`;
+            tooltip.classList.remove('opacity-0');
+        }
+
+        function hideTooltip() {
+            tooltip.classList.add('opacity-0');
+        }
+
+        window.addEventListener('mousemove', (e) => {
+            if (!tooltip.classList.contains('opacity-0')) {
+                tooltip.style.left = `${e.clientX}px`;
+                tooltip.style.top = `${e.clientY - 10}px`;
+            }
+        });
+
+        function openLocationModal(id) {
+            hideTooltip();
+            const loc = locations.find(l => l.id === id);
+            if (!loc) return;
+
+            currentModalLocationId = loc.id;
+
+            if (loc.type === 'explorable') {
+                document.getElementById('exp-title').innerText = loc.name;
+                document.getElementById('exp-subtitle').innerText = loc.sub;
+                document.getElementById('exp-map-img').src = loc.mapImg || 'https://images.unsplash.com/photo-1542051841857-5f90071e7989?q=80&w=800&auto=format&fit=crop';
+
+                const poiContainer = document.getElementById('exp-poi-list');
+                poiContainer.innerHTML = '';
+                (loc.pois || []).forEach(poi => {
+                    const item = document.createElement('div');
+                    item.className = 'bg-black border-l-2 border-p5blue p-2';
+                    item.innerHTML = `
+                        <div class="flex items-center gap-1.5 text-p5yellow font-p5title text-lg">
+                            <i class="fa-solid ${poi.icon || 'fa-map-pin'}"></i>
+                            <span>${poi.name}</span>
+                        </div>
+                        <p class="text-[11px] font-p5body text-gray-300">${poi.desc}</p>
+                    `;
+                    poiContainer.appendChild(item);
+                });
+
+                renderModalNotes(loc.id);
+                document.getElementById('explorable-modal').classList.remove('hidden');
+            } else {
+                document.getElementById('rel-title').innerText = loc.name;
+                document.getElementById('rel-character').innerText = loc.character || 'Personagem';
+                document.getElementById('rel-arcana-name').innerText = loc.arcana || 'ARCANA';
+                document.getElementById('rel-arcana').innerText = loc.arcana || 'ARCANA';
+                document.getElementById('rel-description').innerText = `"${loc.eventDesc || loc.desc}"`;
+                document.getElementById('rel-rank-text').innerText = `RANK ${loc.rank || 1} / 10`;
+                document.getElementById('rel-rank-bar').style.width = `${((loc.rank || 1) / 10) * 100}%`;
+
+                renderModalNotes(loc.id);
+                document.getElementById('relationship-modal').classList.remove('hidden');
+            }
+        }
+
+        function closeModals() {
+            document.getElementById('explorable-modal').classList.add('hidden');
+            document.getElementById('relationship-modal').classList.add('hidden');
+            currentModalLocationId = null;
+        }
+
+        function visitLocation() {
+            closeModals();
+            showNotice('VIAJANDO PARA O LOCAL SELECIONADO...');
+        }
+
+        function startRelationshipEvent() {
+            if (modoAtual !== 'mestre') return;
+            closeModals();
+            advanceTime();
+        }
+
+        function showNotice(msg) {
+            const notice = document.createElement('div');
+            notice.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-p5blue border-4 border-black text-white font-p5title text-2xl md:text-3xl px-8 py-4 skew-p5-left shadow-p5-white text-center animate-bounce';
+            notice.innerHTML = `<span class="unskew block">${msg}</span>`;
+            document.body.appendChild(notice);
+
+            setTimeout(() => { notice.remove(); }, 2200);
+        }
+
+        function toggleMapEditor() {
+            if (modoAtual !== 'mestre') return;
+            mapEditorEnabled = !mapEditorEnabled;
+            const btn = document.getElementById('btn-map-editor');
+
+            if (mapEditorEnabled) {
+                btn.classList.add('active');
+                showNotice('MODO EDIÇÃO ATIVADO');
+            } else {
+                btn.classList.remove('active');
+                showNotice('MODO EDIÇÃO DESATIVADO');
+            }
+
+            renderPins();
+        }
+
+        function createLocation() {
+            if (modoAtual !== 'mestre') return;
+            const name = prompt('Nome do novo local:');
+            if (!name) return;
+
+            locations.push({
+                id: 'custom_' + Date.now(),
+                name: name.toUpperCase(),
+                type: 'explorable',
+                x: 50,
+                y: 50,
+                sub: 'Novo Local Personalizado',
+                desc: 'Local adicionado pelo usuário.',
+                mapImg: 'https://images.unsplash.com/photo-1542051841857-5f90071e7989?q=80&w=800&auto=format&fit=crop',
+                available: {
+                    periods: [0, 1, 2, 3],
+                    days: [0, 1, 2, 3, 4, 5, 6],
+                    weatherBlocked: []
+                },
+                pois: []
+            });
+
+            saveData();
+            populateLocationSelect();
+            renderPins();
+            renderAvailability();
+        }
+
+        function editLocation(id) {
+            if (modoAtual !== 'mestre') return;
+            const loc = locations.find(l => l.id === id);
+            if (!loc) return;
+
+            const name = prompt('Nome do local:', loc.name);
+            if (name === null) return;
+
+            const desc = prompt('Descrição:', loc.desc);
+            if (desc === null) return;
+
+            loc.name = name.toUpperCase();
+            loc.desc = desc;
+
+            saveData();
+            populateLocationSelect();
+            renderPins();
+            renderAvailability();
+        }
+
+        function deleteLocation(id) {
+            if (modoAtual !== 'mestre') return;
+            if (!confirm('Deseja realmente excluir este local?')) return;
+
+            locations = locations.filter(l => l.id !== id);
+
+            saveData();
+            populateLocationSelect();
+            renderPins();
+            renderAvailability();
+        }
+
+        // Sincronização em tempo real com Firebase
+        db.ref('map_total').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                if (data.gameState) Object.assign(gameState, data.gameState);
+                if (Array.isArray(data.notes)) notes = data.notes;
+                if (Array.isArray(data.locations)) locations = data.locations;
+
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                updateHUD();
+                populateLocationSelect();
+                renderPins();
+                renderAvailability();
+                renderNotes();
+                if (currentModalLocationId) renderModalNotes(currentModalLocationId);
+            } else if (modoAtual === 'mestre') {
+                saveData();
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('map-container');
+            if (!container) return;
+
+            container.addEventListener('dragover', e => {
+                if (mapEditorEnabled && modoAtual === 'mestre') e.preventDefault();
+            });
+
+            container.addEventListener('drop', e => {
+                if (modoAtual !== 'mestre' || !mapEditorEnabled || !draggedPin) return;
+
+                const rect = container.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+                const loc = locations.find(l => l.id === draggedPin);
+                if (!loc) return;
+
+                loc.x = Number(Math.max(5, Math.min(95, x)).toFixed(2));
+                loc.y = Number(Math.max(5, Math.min(95, y)).toFixed(2));
+
+                saveData();
+                renderPins();
+                draggedPin = null;
+            });
+        });
+
+        window.onload = function() {
+            db.ref('map_total').once('value', (snapshot) => {
+                if (!snapshot.exists() && modoAtual === 'mestre') {
+                    saveData();
+                } else if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    if (data.gameState) Object.assign(gameState, data.gameState);
+                    if (Array.isArray(data.notes)) notes = data.notes;
+                    if (Array.isArray(data.locations)) locations = data.locations;
+                } else {
+                    loadData();
+                }
+                updateHUD();
+                populateLocationSelect();
+                renderPins();
+                renderAvailability();
+                renderNotes();
+            });
+        };
+    </script>
+</body>
+</html>

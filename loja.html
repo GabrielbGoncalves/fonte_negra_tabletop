@@ -1,0 +1,522 @@
+<!DOCTYPE html> 
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Remédios da Escuridão - Loja GDC (Edição Azul Royal)</title>
+  
+  <!-- Firebase SDK Compat -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+  <style>
+    :root {
+      --p5-royal-blue: #4169e1;
+      --p5-dark-blue: #002366;
+      --p5-black: #121212;
+      --p5-white: #ffffff;
+      --p5-gray: #2a2a2a;
+      --p5-yellow: #ffea00;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Impact', 'Arial Black', sans-serif;
+      text-transform: uppercase;
+    }
+
+    body {
+      background-color: var(--p5-black);
+      color: var(--p5-white);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      background-image: repeating-linear-gradient(
+        -45deg,
+        #000,
+        #000 20px,
+        #0a1128 20px,
+        #0a1128 40px
+      );
+    }
+
+    header {
+      background: var(--p5-royal-blue);
+      color: var(--p5-white);
+      padding: 15px 30px;
+      transform: rotate(-2deg);
+      margin-bottom: 25px;
+      box-shadow: 8px 8px 0px var(--p5-white);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      letter-spacing: 2px;
+      text-shadow: 3px 3px 0px var(--p5-black);
+    }
+
+    .wallet {
+      background: var(--p5-black);
+      color: var(--p5-yellow);
+      padding: 8px 16px;
+      transform: skew(-10deg);
+      border: 2px solid var(--p5-white);
+      font-size: 1.4rem;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+      flex-grow: 1;
+    }
+
+    .dialogue-box {
+      grid-column: 1 / -1;
+      background: var(--p5-white);
+      color: var(--p5-black);
+      padding: 15px 20px;
+      border-left: 10px solid var(--p5-royal-blue);
+      transform: skew(-3deg);
+      margin-bottom: 15px;
+      box-shadow: 5px 5px 0px var(--p5-royal-blue);
+      font-size: 1.1rem;
+      font-family: Arial, sans-serif;
+      font-weight: bold;
+    }
+
+    .panel {
+      background: rgba(18, 18, 18, 0.95);
+      border: 3px solid var(--p5-royal-blue);
+      padding: 20px;
+      box-shadow: 6px 6px 0px var(--p5-white);
+    }
+
+    .panel-title {
+      background: var(--p5-white);
+      color: var(--p5-black);
+      display: inline-block;
+      padding: 5px 15px;
+      transform: rotate(-1deg);
+      margin-bottom: 15px;
+      font-size: 1.5rem;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background: var(--p5-royal-blue);
+      color: var(--p5-white);
+      border: none;
+      padding: 10px 18px;
+      cursor: pointer;
+      font-size: 1rem;
+      transform: skew(-8deg);
+      transition: all 0.1s ease;
+      box-shadow: 3px 3px 0px var(--p5-white);
+    }
+
+    .btn:hover {
+      background: var(--p5-white);
+      color: var(--p5-black);
+      transform: skew(-8deg) scale(1.05);
+      box-shadow: 3px 3px 0px var(--p5-royal-blue);
+    }
+
+    .btn:disabled {
+      background: var(--p5-gray);
+      color: #777;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .item-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .item-card {
+      background: var(--p5-black);
+      border: 2px solid var(--p5-white);
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: border-color 0.2s;
+    }
+
+    .item-card:hover {
+      border-color: var(--p5-royal-blue);
+    }
+
+    .item-info {
+      flex-grow: 1;
+    }
+
+    .item-name {
+      font-size: 1.2rem;
+      color: var(--p5-white);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .item-tag {
+      font-size: 0.75rem;
+      padding: 2px 6px;
+      background: var(--p5-royal-blue);
+      color: var(--p5-white);
+    }
+
+    .item-desc {
+      font-family: Arial, sans-serif;
+      text-transform: none;
+      font-size: 0.85rem;
+      color: #ccc;
+      margin-top: 4px;
+    }
+
+    .item-effect {
+      font-family: Arial, sans-serif;
+      text-transform: none;
+      font-size: 0.85rem;
+      color: var(--p5-yellow);
+      margin-top: 2px;
+      font-weight: bold;
+    }
+
+    .item-price {
+      font-size: 1.3rem;
+      color: var(--p5-yellow);
+      margin: 0 15px;
+      text-align: right;
+    }
+
+    .price-discount {
+      text-decoration: line-through;
+      color: #888;
+      font-size: 0.9rem;
+      display: block;
+    }
+
+    .inventory-list {
+      list-style: none;
+    }
+
+    .inventory-item {
+      padding: 10px;
+      border-bottom: 1px dashed var(--p5-royal-blue);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .inventory-item span {
+      font-family: Arial, sans-serif;
+      text-transform: none;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <h1>Remédios da Escuridão[cite: 6]</h1>
+      <span id="indicador-modo" class="inline-block mt-2 px-2 py-1 text-xs font-bold uppercase tracking-wider">Modo: a carregar...</span>
+    </div>
+    <div class="wallet">PR: <span id="pr-display">10.0</span></div>
+  </header>
+
+  <div class="dialogue-box" id="dialogue">
+    "Vai comprar alguma coisa ou só veio fazer sombra? Escolha logo."[cite: 6]
+  </div>
+
+  <div class="container">
+    <!-- PAINEL DA LOJA -->
+    <div class="panel">
+      <div class="panel-title">Estoque da Loja[cite: 6]</div>
+
+      <div class="actions">
+        <button class="btn" id="btn-pechinchar" onclick="pechinchar()">Pechinchar (Teste Charme)[cite: 6]</button>
+        <button class="btn" id="btn-imperatriz" onclick="ativarImperatriz()">Arcana III: A Imperatriz (-2 PR)[cite: 6]</button>
+      </div>
+
+      <div class="item-list" id="shop-items"></div>
+    </div>
+
+    <!-- PAINEL DO INVENTÁRIO DO JOGADOR -->
+    <div class="panel">
+      <div class="panel-title">Seu Inventário[cite: 6]</div>
+      <div class="inventory-list" id="inventory-items"></div>
+    </div>
+  </div>
+
+  <script>
+    // Inicialização do Firebase
+    const configArmazenada = localStorage.getItem('rpg_firebase_config');
+    if (configArmazenada) {
+      firebase.initializeApp(JSON.parse(configArmazenada));
+    }
+    const db = firebase.database();
+
+    // Gestão de Modo (Mestre vs Jogador)
+    const modoAtual = localStorage.getItem('rpg_modo_sessao') || 'jogador';
+    const indicadorModo = document.getElementById('indicador-modo');
+
+    if (modoAtual === 'mestre') {
+      indicadorModo.textContent = "Modo: Mestre (Escrita Ativa)";
+      indicadorModo.className = "inline-block mt-2 bg-emerald-600 text-white px-2 py-1 text-xs font-bold uppercase tracking-wider rounded";
+    } else {
+      indicadorModo.textContent = "Modo: Jogador (Somente Leitura)";
+      indicadorModo.className = "inline-block mt-2 bg-blue-600 text-white px-2 py-1 text-xs font-bold uppercase tracking-wider rounded";
+      
+      document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById('btn-pechinchar').disabled = true;
+        document.getElementById('btn-imperatriz').disabled = true;
+      });
+    }
+
+    let playerPR = 10.0;
+    let multiplierDesconto = 1.0;
+    let descontoImperatrizAtivo = false;
+
+    let storeCatalog = [
+      {
+        id: '1',
+        nome: 'Energético Soul-UP',
+        tipo: 'Consumível',
+        precoBase: 0.5,
+        estoque: 5,
+        efeito: 'Recupera +2 de Energia.',
+        desc: 'Sabor guaraná sintético e taurina extrema. Sinta seu coração palpitar no ritmo do Metaverso.'
+      },
+      {
+        id: '2',
+        nome: 'Bálsamo de Aglaia',
+        tipo: 'Consumível',
+        precoBase: 1.0,
+        estoque: 2,
+        efeito: 'Remove todos os Status Mentais de um aliado.',
+        desc: 'Cheiro forte de eucalipto e menta pura. Queima as narinas, mas limpa a mente instantaneamente.'
+      },
+      {
+        id: '3',
+        nome: 'Jaqueta de Espinhos',
+        tipo: 'Armadura',
+        precoBase: 3.0,
+        estoque: 1,
+        efeito: 'RD +3; +1 FOR.',
+        desc: 'Uma jaqueta pesada com detalhes em metal pontiagudo. Faz você parecer perigoso.'
+      },
+      {
+        id: '4',
+        nome: 'Anel da Fortuna',
+        tipo: 'Acessório',
+        precoBase: 4.0,
+        estoque: 1,
+        efeito: 'Concede +1 Carga de Sorte temporária no início do combate.',
+        desc: 'Um anel prateado com gravuras de cartas de Tarô. Dá a sensação de que a sorte está com você.'
+      }
+    ];
+
+    let inventory = [
+      { id: 'loot1', nome: 'Relógio Cognitivo Quebrado', tipo: 'Loot', valorVenda: 1.5, desc: 'Saque obtido no Palácio. Vale PR no mundo real.' },
+      { id: 'loot2', nome: 'Gema do Desejo Opaca', tipo: 'Loot', valorVenda: 3.0, desc: 'Cristal raro purificado do Metaverso.' }
+    ];
+
+    function setDialogue(text) {
+      document.getElementById('dialogue').innerText = `"${text}"`;
+    }
+
+    function updatePRDisplay() {
+      document.getElementById('pr-display').innerText = playerPR.toFixed(1);
+    }
+
+    function renderShop() {
+      const shopContainer = document.getElementById('shop-items');
+      shopContainer.innerHTML = '';
+
+      storeCatalog.forEach(item => {
+        let precoFinal = item.precoBase * multiplierDesconto;
+        if (descontoImperatrizAtivo) {
+          precoFinal = Math.max(0.25, precoFinal - 2.0);
+        }
+
+        const temDesconto = precoFinal < item.precoBase;
+
+        const card = document.createElement('div');
+        card.className = 'item-card';
+        card.innerHTML = `
+          <div class="item-info">
+            <div class="item-name">
+              ${item.nome}
+              <span class="item-tag">${item.tipo}</span>
+              <span style="font-size: 0.8rem; color: #888;">[Qtd: ${item.estoque}]</span>
+            </div>
+            <div class="item-desc">${item.desc}</div>
+            <div class="item-effect">Efeito: ${item.efeito}</div>
+          </div>
+          <div class="item-price">
+            ${temDesconto ? `<span class="price-discount">\${item.precoBase.toFixed(1)} PR</span>` : ''}
+            ${precoFinal.toFixed(2)} PR
+          </div>
+          <button class="btn" ${modoAtual === 'jogador' || item.estoque <= 0 ? 'disabled' : ''} onclick="comprarItem('${item.id}', ${precoFinal})">
+            ${item.estoque > 0 ? 'Comprar' : 'Esgotado'}
+          </button>
+        `;
+        shopContainer.appendChild(card);
+      });
+    }
+
+    function renderInventory() {
+      const invContainer = document.getElementById('inventory-items');
+      invContainer.innerHTML = '';
+
+      if (inventory.length === 0) {
+        invContainer.innerHTML = '<div style="font-family: Arial; text-transform: none; color: #777;">Inventário vazio.</div>';
+        return;
+      }
+
+      inventory.forEach((item, index) => {
+        const li = document.createElement('li');
+        li.className = 'inventory-item';
+        
+        let valorVenda = item.valorVenda || (item.precoBase ? item.precoBase * 0.5 : 0.5);
+
+        li.innerHTML = `
+          <div>
+            <strong>${item.nome}</strong> <span style="font-size: 0.8rem; color:#aaa;">(${item.tipo})</span>
+            <div style="font-size: 0.8rem; color: #ccc;">${item.desc || item.efeito}</div>
+          </div>
+          ${modoAtual === 'mestre' ? `<button class="btn" style="padding: 5px 10px; font-size: 0.8rem;" onclick="venderItem(\${index}, ${valorVenda})">Vender (+${valorVenda.toFixed(1)} PR)</button>` : ''}
+        `;
+        invContainer.appendChild(li);
+      });
+    }
+
+    function guardarNoFirebase() {
+      if (modoAtual !== 'mestre') return;
+      db.ref('loja').set({
+        playerPR: playerPR,
+        multiplierDesconto: multiplierDesconto,
+        descontoImperatrizAtivo: descontoImperatrizAtivo,
+        storeCatalog: storeCatalog,
+        inventory: inventory,
+        dialogueText: document.getElementById('dialogue').innerText
+      });
+    }
+
+    function comprarItem(itemId, precoFinal) {
+      if (modoAtual !== 'mestre') return;
+      const item = storeCatalog.find(i => i.id === itemId);
+
+      if (!item || item.estoque <= 0) return;
+
+      if (playerPR < precoFinal) {
+        setDialogue("Acha que isso é caridade, garoto? Volte quando tiver Pontos de Recurso suficientes.");
+        guardarNoFirebase();
+        return;
+      }
+
+      playerPR -= precoFinal;
+      item.estoque -= 1;
+      inventory.push({ ...item });
+
+      if (descontoImperatrizAtivo) {
+        descontoImperatrizAtivo = false;
+        document.getElementById('btn-imperatriz').disabled = true;
+      }
+
+      setDialogue(`Volte sempre. O ${item.nome} agora é seu.`);
+      updatePRDisplay();
+      renderShop();
+      renderInventory();
+      guardarNoFirebase();
+    }
+
+    function venderItem(index, valorVenda) {
+      if (modoAtual !== 'mestre') return;
+      const itemVendido = inventory.splice(index, 1)[0];
+      playerPR += valorVenda;
+
+      setDialogue(`Aceito este ${itemVendido.nome}. Aqui estão seus PRs.`);
+      updatePRDisplay();
+      renderShop();
+      renderInventory();
+      guardarNoFirebase();
+    }
+
+    function pechinchar() {
+      if (modoAtual !== 'mestre') return;
+      const d20 = Math.floor(Math.random() * 20) + 1;
+      
+      if (d20 >= 10) {
+        multiplierDesconto = 0.85;
+        setDialogue(`Tche... você realmente sabe negociar. Vou fazer um preço especial hoje.`);
+      } else {
+        multiplierDesconto = 1.10;
+        setDialogue(`Sua tentativa infeliz de me enrolar só fez meus preços subirem. Pague mais ou caia fora.`);
+      }
+
+      renderShop();
+      guardarNoFirebase();
+    }
+
+    function ativarImperatriz() {
+      if (modoAtual !== 'mestre') return;
+      descontoImperatrizAtivo = true;
+      setDialogue("Uma aura majestosa envolve a negociação. O valor da sua próxima compra caiu drasticamente!");
+      renderShop();
+      guardarNoFirebase();
+    }
+
+    // Sincronização em tempo real com Firebase
+    db.ref('loja').on('value', (snapshot) => {
+      const dados = snapshot.val();
+      if (!dados) {
+        if (modoAtual === 'mestre') {
+          guardarNoFirebase();
+        }
+        return;
+      }
+
+      if (modoAtual === 'jogador') {
+        playerPR = dados.playerPR !== undefined ? dados.playerPR : playerPR;
+        multiplierDesconto = dados.multiplierDesconto !== undefined ? dados.multiplierDesconto : multiplierDesconto;
+        descontoImperatrizAtivo = dados.descontoImperatrizAtivo !== undefined ? dados.descontoImperatrizAtivo : descontoImperatrizAtivo;
+        if (dados.storeCatalog) storeCatalog = dados.storeCatalog;
+        if (dados.inventory) inventory = dados.inventory;
+        if (dados.dialogueText) document.getElementById('dialogue').innerText = dados.dialogueText;
+
+        updatePRDisplay();
+        renderShop();
+        renderInventory();
+      }
+    });
+
+    window.onload = () => {
+      db.ref('loja').once('value', (snapshot) => {
+        if (!snapshot.exists() && modoAtual === 'mestre') {
+          guardarNoFirebase();
+        }
+      });
+      updatePRDisplay();
+      renderShop();
+      renderInventory();
+    };
+  </script>
+</body>
+</html>

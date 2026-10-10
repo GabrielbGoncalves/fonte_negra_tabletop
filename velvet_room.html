@@ -1,0 +1,366 @@
+<!DOCTYPE html> 
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Fusão - Grimório do Coração[cite: 10]</title>
+
+<!-- Firebase SDK Compat -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #1a1a1a;
+        color: #f0f0f0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+    }
+    .calculator-container {
+        background-color: #2d2d2d;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        width: 100%;
+        max-width: 500px;
+        border-top: 5px solid #1976d2;
+    }
+    h2 {
+        text-align: center;
+        color: #1976d2;
+        margin-top: 0;
+    }
+    .input-group {
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+    }
+    .input-row {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 10px;
+    }
+    .input-row > div {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    label {
+        margin-bottom: 5px;
+        font-size: 0.9em;
+        color: #aaaaaa;
+    }
+    select, input {
+        padding: 10px;
+        border: 1px solid #444;
+        border-radius: 4px;
+        background-color: #1e1e1e;
+        color: #fff;
+        font-size: 1em;
+        width: 100%;
+    }
+    button {
+        width: 100%;
+        padding: 12px;
+        background-color: #1976d2;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 1.1em;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background-color 0.3s;
+    }
+    button:hover {
+        background-color: #115293;
+    }
+    button:disabled {
+        background-color: #444;
+        color: #888;
+        cursor: not-allowed;
+    }
+    .result {
+        margin-top: 25px;
+        padding: 15px;
+        background-color: #1e1e1e;
+        border: 1px solid #444;
+        border-radius: 4px;
+        text-align: center;
+        min-height: 50px;
+    }
+    .result span {
+        display: block;
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #1976d2;
+    }
+    .modo-aviso {
+        margin-bottom: 20px;
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        font-weight: bold;
+        text-align: center;
+        text-transform: uppercase;
+    }
+</style>
+</head>
+<body>
+
+<div id="indicador-modo" class="modo-aviso">Modo: a carregar...</div>
+
+<div class="calculator-container">
+    <h2>Fusão de Personae[cite: 10]</h2>
+    
+    <div class="input-group">
+        <div class="input-row">
+            <div>
+                <label for="arcana1">Arcana da Persona 1[cite: 10]</label>
+                <select id="arcana1" onchange="atualizarOuCalcular()"></select>
+            </div>
+            <div>
+                <label for="level1">Nível[cite: 10]</label>
+                <input type="number" id="level1" min="1" max="99" value="1" oninput="atualizarOuCalcular()">
+            </div>
+        </div>
+        
+        <div class="input-row">
+            <div>
+                <label for="arcana2">Arcana da Persona 2[cite: 10]</label>
+                <select id="arcana2" onchange="atualizarOuCalcular()"></select>
+            </div>
+            <div>
+                <label for="level2">Nível[cite: 10]</label>
+                <input type="number" id="level2" min="1" max="99" value="1" oninput="atualizarOuCalcular()">
+            </div>
+        </div>
+    </div>
+    
+    <button id="btn-calcular" onclick="calcularFusao()">Calcular Fusão[cite: 10]</button>
+    
+    <div class="result" id="result-box">
+        Insira os dados das Personae.[cite: 10]
+    </div>
+</div>
+
+<script>
+    const configArmazenada = localStorage.getItem('rpg_firebase_config');
+    if (configArmazenada) {
+        firebase.initializeApp(JSON.parse(configArmazenada));
+    }
+    const db = firebase.database();
+
+    const modoAtual = localStorage.getItem('rpg_modo_sessao') || 'jogador';
+    const indicadorModo = document.getElementById('indicador-modo');
+
+    if (modoAtual === 'mestre') {
+        indicadorModo.textContent = "Modo: Mestre (Escrita Ativa)";
+        indicadorModo.style.backgroundColor = "#2e7d32";
+        indicadorModo.style.color = "#fff";
+    } else {
+        indicadorModo.textContent = "Modo: Jogador (Somente Leitura)";
+        indicadorModo.style.backgroundColor = "#1565c0";
+        indicadorModo.style.color = "#fff";
+        
+        document.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll('select, input').forEach(el => el.disabled = true);
+            const btnCalc = document.getElementById('btn-calcular');
+            if (btnCalc) btnCalc.style.display = 'none';
+        });
+    }
+
+    const arcanas = [
+        "Tolo", "Mago", "Sacerdotisa", "Imperatriz", "Imperador", 
+        "Hierofante", "Amantes", "Carruagem", "Justiça", "Eremita", 
+        "Fortuna", "Força", "Enforcado", "Morte", "Temperança", 
+        "Demônio", "Torre", "Estrela", "Lua", "Sol", "Julgamento"
+    ];
+
+    window.onload = function() {
+        const select1 = document.getElementById('arcana1');
+        const select2 = document.getElementById('arcana2');
+        
+        arcanas.forEach(arcana => {
+            let option1 = new Option(arcana, arcana);
+            let option2 = new Option(arcana, arcana);
+            select1.add(option1);
+            select2.add(option2);
+        });
+
+        db.ref('velvet_room').once('value', (snapshot) => {
+            if (!snapshot.exists() && modoAtual === 'mestre') {
+                guardarNoFirebase();
+            }
+        });
+    };
+
+    const tabelaFusao = {
+        "Tolo": { 
+            "Mago": "Morte", "Sacerdotisa": "Lua", "Imperatriz": "Enforcado", "Imperador": "Temperança", 
+            "Hierofante": "Eremita", "Amantes": "Carruagem", "Carruagem": "Lua", "Justiça": "Estrela", 
+            "Eremita": "Sacerdotisa", "Fortuna": "Amantes", "Força": "Morte", "Enforcado": "Torre", 
+            "Morte": "Força", "Temperança": "Hierofante", "Demônio": "Temperança", "Torre": "Imperatriz", 
+            "Estrela": "Mago", "Lua": "Justiça", "Sol": "Justiça", "Julgamento": "Sol" 
+        },
+        "Mago": { 
+            "Sacerdotisa": "Temperança", "Imperatriz": "Justiça", "Imperador": "Enforcado", "Hierofante": "Morte", 
+            "Amantes": "Demônio", "Carruagem": "Sacerdotisa", "Justiça": "Imperador", "Eremita": "Amantes", 
+            "Fortuna": "Justiça", "Força": "Tolo", "Enforcado": "Imperatriz", "Morte": "Eremita", 
+            "Temperança": "Carruagem", "Demônio": "Hierofante", "Torre": "Temperança", "Estrela": "Sacerdotisa", 
+            "Lua": "Amantes", "Sol": "Hierofante", "Julgamento": "Força" 
+        },
+        "Sacerdotisa": { 
+            "Imperatriz": "Imperador", "Imperador": "Imperatriz", "Hierofante": "Mago", "Amantes": "Fortuna", 
+            "Carruagem": "Hierofante", "Justiça": "Morte", "Eremita": "Temperança", "Fortuna": "Mago", 
+            "Força": "Demônio", "Enforcado": "Morte", "Morte": "Mago", "Temperança": "Demônio", 
+            "Demônio": "Lua", "Torre": "Enforcado", "Estrela": "Eremita", "Lua": "Hierofante", 
+            "Sol": "Carruagem", "Julgamento": "Justiça" 
+        },
+        "Imperatriz": { 
+            "Imperador": "Justiça", "Hierofante": "Tolo", "Amantes": "Julgamento", "Carruagem": "Estrela", 
+            "Justiça": "Amantes", "Eremita": "Força", "Fortuna": "Eremita", "Força": "Carruagem", 
+            "Enforcado": "Sacerdotisa", "Morte": "Tolo", "Temperança": "Sacerdotisa", "Demônio": "Sol", 
+            "Torre": "Imperador", "Estrela": "Amantes", "Lua": "Fortuna", "Sol": "Torre", "Julgamento": "Imperador" 
+        },
+        "Imperador": { 
+            "Hierofante": "Fortuna", "Amantes": "Tolo", "Carruagem": "Força", "Justiça": "Carruagem", 
+            "Eremita": "Hierofante", "Fortuna": "Sol", "Força": "Torre", "Enforcado": "Demônio", 
+            "Morte": "Eremita", "Temperança": "Demônio", "Demônio": "Justiça", "Torre": "Estrela", 
+            "Estrela": "Amantes", "Lua": "Torre", "Sol": "Julgamento", "Julgamento": "Sacerdotisa" 
+        },
+        "Hierofante": { 
+            "Amantes": "Força", "Carruagem": "Estrela", "Justiça": "Enforcado", "Eremita": "Fortuna", 
+            "Fortuna": "Justiça", "Força": "Tolo", "Enforcado": "Sol", "Morte": "Carruagem", 
+            "Temperança": "Morte", "Demônio": "Enforcado", "Torre": "Julgamento", "Estrela": "Torre", 
+            "Lua": "Sacerdotisa", "Sol": "Amantes", "Julgamento": "Imperatriz" 
+        },
+        "Amantes": { 
+            "Carruagem": "Temperança", "Justiça": "Julgamento", "Eremita": "Carruagem", "Fortuna": "Força", 
+            "Força": "Morte", "Enforcado": "Sol", "Morte": "Temperança", "Temperança": "Força", 
+            "Demônio": "Lua", "Torre": "Imperatriz", "Estrela": "Carruagem", "Lua": "Mago", 
+            "Sol": "Imperatriz", "Julgamento": "Enforcado" 
+        },
+        "Carruagem": { 
+            "Justiça": "Lua", "Eremita": "Demônio", "Fortuna": "Sacerdotisa", "Força": "Eremita", 
+            "Enforcado": "Tolo", "Morte": "Demônio", "Temperança": "Força", "Demônio": "Temperança", 
+            "Torre": "Fortuna", "Estrela": "Lua", "Lua": "Amantes", "Sol": "Sacerdotisa", "Julgamento": "Hierofante" 
+        },
+        "Justiça": { 
+            "Eremita": "Mago", "Fortuna": "Imperador", "Força": "Hierofante", "Enforcado": "Amantes", 
+            "Morte": "Tolo", "Temperança": "Imperador", "Demônio": "Tolo", "Torre": "Sol", 
+            "Estrela": "Imperatriz", "Lua": "Demônio", "Sol": "Enforcado", "Julgamento": "Torre" 
+        },
+        "Eremita": { 
+            "Fortuna": "Estrela", "Força": "Hierofante", "Enforcado": "Estrela", "Morte": "Força", 
+            "Temperança": "Força", "Demônio": "Sacerdotisa", "Torre": "Julgamento", "Estrela": "Força", 
+            "Lua": "Sacerdotisa", "Sol": "Demônio", "Julgamento": "Imperador" 
+        },
+        "Fortuna": { 
+            "Força": "Força", "Enforcado": "Temperança", "Morte": "Hierofante", "Temperança": "Carruagem", 
+            "Demônio": "Morte", "Torre": "Carruagem", "Estrela": "Lua", "Lua": "Mago", "Sol": "Lua", 
+            "Julgamento": "Fortuna" 
+        },
+        "Força": { 
+            "Enforcado": "Enforcado", "Morte": "Lua", "Temperança": "Morte", "Demônio": "Fortuna", 
+            "Torre": "Eremita", "Estrela": "Justiça", "Lua": "Força", "Sol": "Hierofante", "Julgamento": "Estrela" 
+        },
+        "Enforcado": { 
+            "Morte": "Morte", "Temperança": "Enforcado", "Demônio": "Carruagem", "Torre": "Sol", 
+            "Estrela": "Demônio", "Lua": "Hierofante", "Sol": "Sacerdotisa", "Julgamento": "Mago" 
+        },
+        "Morte": { 
+            "Temperança": "Temperança", "Demônio": "Tolo", "Torre": "Fortuna", "Estrela": "Sol", 
+            "Lua": "Fortuna", "Sol": "Mago", "Julgamento": "Eremita" 
+        },
+        "Temperança": { 
+            "Demônio": "Demônio", "Torre": "Mago", "Estrela": "Força", "Lua": "Carruagem", "Sol": "Eremita", 
+            "Julgamento": "Amantes" 
+        },
+        "Demônio": { 
+            "Torre": "Torre", "Estrela": "Morte", "Lua": "Eremita", "Sol": "Imperador", "Julgamento": "Lua" 
+        },
+        "Torre": { 
+            "Estrela": "Estrela", "Lua": "Temperança", "Sol": "Julgamento", "Julgamento": "Fortuna" 
+        },
+        "Estrela": { 
+            "Lua": "Lua", "Sol": "Imperatriz", "Julgamento": "Tolo" 
+        },
+        "Lua": { 
+            "Sol": "Sol", "Julgamento": "Morte" 
+        },
+        "Sol": { 
+            "Julgamento": "Julgamento" 
+        },
+        "Julgamento": {}
+    };
+
+    function obterArcanaResultante(arcana1, arcana2) {
+        if (arcana1 === arcana2) return arcana1;
+        if (tabelaFusao[arcana1] && tabelaFusao[arcana1][arcana2]) {
+            return tabelaFusao[arcana1][arcana2];
+        } else if (tabelaFusao[arcana2] && tabelaFusao[arcana2][arcana1]) {
+            return tabelaFusao[arcana2][arcana1];
+        }
+        return "Combinação a ser mapeada"; 
+    }
+
+    function calcularFusao() {
+        const arcana1 = document.getElementById('arcana1').value;
+        const level1 = parseInt(document.getElementById('level1').value);
+        const arcana2 = document.getElementById('arcana2').value;
+        const level2 = parseInt(document.getElementById('level2').value);
+        const resultBox = document.getElementById('result-box');
+
+        if (isNaN(level1) || isNaN(level2) || level1 < 1 || level2 < 1) {
+            resultBox.innerHTML = "Por favor, insira níveis válidos.";
+            return;
+        }
+
+        const nivelResultante = Math.floor((level1 + level2) / 2) + 1;
+        const arcanaResultante = obterArcanaResultante(arcana1, arcana2);
+
+        if (arcanaResultante === "Combinação a ser mapeada") {
+            resultBox.innerHTML = `<span>Resultado pendente</span><br>Adicione o cruzamento de ${arcana1} e ${arcana2} na matriz do código conforme as imagens.`;
+        } else {
+            resultBox.innerHTML = `A Persona resultante será da Arcana: <br><span>${arcanaResultante}</span> Nível Base Aproximado: <span>${nivelResultante}</span>`;
+        }
+    }
+
+    function guardarNoFirebase() {
+        if (modoAtual !== 'mestre') return;
+        const dados = {
+            arcana1: document.getElementById('arcana1').value,
+            level1: document.getElementById('level1').value,
+            arcana2: document.getElementById('arcana2').value,
+            level2: document.getElementById('level2').value
+        };
+        db.ref('velvet_room').set(dados);
+    }
+
+    function atualizarOuCalcular() {
+        calcularFusao();
+        if (modoAtual === 'mestre') {
+            guardarNoFirebase();
+        }
+    }
+
+    db.ref('velvet_room').on('value', (snapshot) => {
+        const dados = snapshot.val();
+        if (dados && modoAtual === 'jogador') {
+            if (dados.arcana1) document.getElementById('arcana1').value = dados.arcana1;
+            if (dados.level1) document.getElementById('level1').value = dados.level1;
+            if (dados.arcana2) document.getElementById('arcana2').value = dados.arcana2;
+            if (dados.level2) document.getElementById('level2').value = dados.level2;
+            calcularFusao();
+        }
+    });
+</script>
+
+</body>
+</html>

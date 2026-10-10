@@ -1,0 +1,441 @@
+<!DOCTYPE html> 
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel do Narrador - Persona RPG</title>
+  
+  <!-- Firebase SDK Compat -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+  <style>
+    :root {
+      --bg-color: #f0f4f9;
+      --card-bg: #ffffff;
+      --royal-blue: #4169e1;
+      --royal-blue-dark: #1d3557;
+      --royal-blue-light: #eef2ff;
+      --text-color: #2b2d42;
+      --border-color: #d1d5db;
+      --input-bg: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    header {
+      background-color: var(--royal-blue);
+      color: white;
+      padding: 18px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      padding: 20px;
+      border-left: 6px solid var(--royal-blue);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      border-top: 1px solid var(--border-color);
+      border-right: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    h2 {
+      color: var(--royal-blue-dark);
+      margin-bottom: 15px;
+      font-size: 1.25rem;
+      border-bottom: 2px solid var(--royal-blue-light);
+      padding-bottom: 8px;
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      border: 1px solid var(--border-color);
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: var(--royal-blue);
+      color: white;
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) {
+      background-color: var(--royal-blue-light);
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    label {
+      font-weight: 600;
+      color: var(--royal-blue-dark);
+      font-size: 0.9rem;
+    }
+
+    input, select, textarea {
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background-color: var(--input-bg);
+      color: var(--text-color);
+      font-size: 14px;
+      width: 100%;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--royal-blue);
+      box-shadow: 0 0 0 3px rgba(65, 105, 225, 0.2);
+    }
+
+    button {
+      background-color: var(--royal-blue);
+      color: white;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    button:hover {
+      background-color: #3154b3;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .checkbox-group {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      width: auto;
+    }
+
+    .modo-aviso {
+      background: #ffeb3b;
+      color: #000;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Painel do Narrador - Combate & Negociação[cite: 2]</h1>
+    <span id="indicador-modo" class="modo-aviso">Modo: a carregar...</span>
+  </header>
+
+  <!-- 1. Painel de Iniciativa -->
+  <section class="card">
+    <h2>1. Matriz de Combate e Iniciativa[cite: 2]</h2>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 70px;">Ini</th>
+            <th>Nome / Unidade</th>
+            <th style="width: 60px;">Lv</th>
+            <th style="width: 110px;">HP Atual / Máx</th>
+            <th>Disposição</th>
+            <th>Fraqueza / Resistência</th>
+            <th>Ações / Status</th>
+          </tr>
+        </thead>
+        <tbody id="tabela-iniciativa">
+          <!-- Preenchido dinamicamente pelo Firebase ou padrão -->
+        </tbody>
+      </table>
+    </div>
+    <br>
+    <button id="btn-adicionar" onclick="adicionarLinha()">+ Adicionar Unidade</button>
+  </section>
+
+  <div class="grid-2">
+    <!-- 2. Painel de Negociação -->
+    <section class="card">
+      <h2>2. Negociação com Sombras[cite: 2]</h2>
+      <div class="form-group">
+        <label for="disposicao">Disposição da Sombra:</label>
+        <select id="disposicao" class="sync-field">
+          <option>Friendly</option>
+          <option>Snobbish</option>
+          <option>Devilish</option>
+          <option>Childish</option>
+          <option>Flirty</option>
+          <option>Insane</option>
+          <option>Chaotic</option>
+          <option>Aggressive</option>
+          <option>Anthropophagous</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="tier">Nível da Sombra (Tier):</label>
+        <select id="tier" class="sync-field">
+          <option>Nível 1–5 (Tier I)</option>
+          <option>Nível 6–10 (Tier II)</option>
+          <option>Nível 11–15 (Tier III)</option>
+          <option>Nível 16–20 (Tier V)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="resultado-dado">Resultado da Rolagem:</label>
+        <input type="number" id="resultado-dado" class="sync-field" placeholder="Insira o valor final do teste">
+      </div>
+
+      <button type="button" id="btn-negociacao">Calcular Resultado da Negociação</button>
+    </section>
+
+    <!-- 3. Controle de Recarga e Status -->
+    <section class="card">
+      <h2>3. Recursos & Interrupções[cite: 2]</h2>
+      <div class="form-group">
+        <label>Ação de Interrupção Disponível:</label>
+        <div class="checkbox-group">
+          <input type="checkbox" id="interrupcao" class="sync-field">
+          <label for="interrupcao" style="font-weight: normal;">Pronto para Interromper</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Contadores de Status (Counters):</label>
+        <div class="checkbox-group">
+          <input type="checkbox" id="c1" class="sync-field"><label for="c1" style="font-weight: normal;">1</label>
+          <input type="checkbox" id="c2" class="sync-field"><label for="c2" style="font-weight: normal;">2</label>
+          <input type="checkbox" id="c3" class="sync-field"><label for="c3" style="font-weight: normal;">3</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="reacoes">Limites de Reação (Esquiva/Contra-ataque):</label>
+        <input type="number" id="reacoes" class="sync-field" value="0" min="0">
+      </div>
+    </section>
+  </div>
+
+  <!-- 4. Ficha Rápida de NPC -->
+  <section class="card">
+    <h2>4. Cadastro / Bloco Rápido de NPC[cite: 2]</h2>
+    <div class="grid-2">
+      <div class="form-group">
+        <label for="npc-nome">Nome do NPC / Sombra:</label>
+        <input type="text" id="npc-nome" class="sync-field" placeholder="Ex: Archangel">
+      </div>
+      <div class="form-group">
+        <label for="npc-carta">Carta de Magia (Recompensa):</label>
+        <input type="text" id="npc-carta" class="sync-field" placeholder="Ex: Carta de Hama">
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="npc-hab">Ataques & Habilidades:</label>
+      <textarea id="npc-hab" class="sync-field" rows="3" placeholder="- Hama: Dano/Efeito&#10;- Shining Arrows: Alcance/Dano"></textarea>
+    </div>
+  </section>
+</div>
+
+<script>
+  // Inicialização do Firebase
+  const configArmazenada = localStorage.getItem('rpg_firebase_config');
+  if (configArmazenada) {
+    firebase.initializeApp(JSON.parse(configArmazenada));
+  }
+  const db = firebase.database();
+
+  // Gestão de Modo (Mestre vs Jogador)
+  const modoAtual = localStorage.getItem('rpg_modo_sessao') || 'jogador';
+  const indicadorModo = document.getElementById('indicador-modo');
+
+  if (modoAtual === 'mestre') {
+    indicadorModo.textContent = "Modo: Mestre (Escrita Ativa)";
+    indicadorModo.style.background = "#4caf50";
+    indicadorModo.style.color = "#fff";
+  } else {
+    indicadorModo.textContent = "Modo: Jogador (Somente Leitura)";
+    indicadorModo.style.background = "#2196f3";
+    indicadorModo.style.color = "#fff";
+    
+    // Desativar controlos para jogadores
+    document.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
+      const btnAdicionar = document.getElementById('btn-adicionar');
+      if (btnAdicionar) btnAdicionar.style.display = 'none';
+      const btnNegoc = document.getElementById('btn-negociacao');
+      if (btnNegoc) btnNegoc.style.display = 'none';
+    });
+  }
+
+  // Funções de Sincronização
+  function adicionarLinha(dados = null) {
+    const tabela = document.getElementById('tabela-iniciativa');
+    const novaLinha = document.createElement('tr');
+    
+    const ini = dados ? dados.ini : 20;
+    const nome = dados ? dados.nome : "Unidade";
+    const lv = dados ? dados.lv : 1;
+    const hp = dados ? dados.hp : "45 / 45";
+    const disp = dados ? dados.disp : "-";
+    const fraq = dados ? dados.fraq : "-";
+    const acoes = dados ? dados.acoes : "Atacando";
+
+    novaLinha.innerHTML = `
+      <td><input type="number" value="${ini}" class="t-ini" ${modoAtual === 'jogador' ? 'disabled' : ''}></td>
+      <td><input type="text" value="${nome}" class="t-nome" ${modoAtual === 'jogador' ? 'disabled' : ''}></td>
+      <td><input type="number" value="${lv}" class="t-lv" ${modoAtual === 'jogador' ? 'disabled' : ''}></td>
+      <td><input type="text" value="${hp}" class="t-hp" ${modoAtual === 'jogador' ? 'disabled' : ''}></td>
+      <td><input type="text" value="${disp}" class="t-disp" ${modoAtual === 'jogador' ? 'disabled' : ''}></td>
+      <td><input type="text" value="${fraq}" class="t-fraq" ${modoAtual === 'jogador' ? 'disabled' : ''}></td>
+      <td><input type="text" value="${acoes}" class="t-acoes" ${modoAtual === 'jogador' ? 'disabled' : ''}></td>
+    `;
+    tabela.appendChild(novaLinha);
+
+    if (modoAtual === 'mestre') {
+      novaLinha.querySelectorAll('input').forEach(input => {
+        input.addEventListener('input', guardarDadosCombate);
+      });
+    }
+  }
+
+  // Se for mestre, escuta alterações nos campos gerais para salvar no Firebase
+  if (modoAtual === 'mestre') {
+    document.querySelectorAll('.sync-field').forEach(el => {
+      el.addEventListener('input', guardarDadosCombate);
+      el.addEventListener('change', guardarDadosCombate);
+    });
+  }
+
+  function guardarDadosCombate() {
+    if (modoAtual !== 'mestre') return;
+
+    // Recolher dados da tabela
+    const linhas = document.querySelectorAll('#tabela-iniciativa tr');
+    const unidades = [];
+    linhas.forEach(linha => {
+      unidades.push({
+        ini: linha.querySelector('.t-ini')?.value || 0,
+        nome: linha.querySelector('.t-nome')?.value || '',
+        lv: linha.querySelector('.t-lv')?.value || 1,
+        hp: linha.querySelector('.t-hp')?.value || '',
+        disp: linha.querySelector('.t-disp')?.value || '',
+        fraq: linha.querySelector('.t-fraq')?.value || '',
+        acoes: linha.querySelector('.t-acoes')?.value || ''
+      });
+    });
+
+    const dadosGerais = {
+      unidades: unidades,
+      disposicao: document.getElementById('disposicao').value,
+      tier: document.getElementById('tier').value,
+      resultadoDado: document.getElementById('resultado-dado').value,
+      interrupcao: document.getElementById('interrupcao').checked,
+      c1: document.getElementById('c1').checked,
+      c2: document.getElementById('c2').checked,
+      c3: document.getElementById('c3').checked,
+      reacoes: document.getElementById('reacoes').value,
+      npcNome: document.getElementById('npc-nome').value,
+      npcCarta: document.getElementById('npc-carta').value,
+      npcHab: document.getElementById('npc-hab').value
+    };
+
+    db.ref('combat_tracker').set(dadosGerais);
+  }
+
+  // Escutar atualizações em tempo real (para Jogador e Mestre)
+  db.ref('combat_tracker').on('value', (snapshot) => {
+    const dados = snapshot.val();
+    if (!dados) {
+      // Se estiver vazio e for Mestre, cria dados iniciais predefinidos
+      if (modoAtual === 'mestre' && document.getElementById('tabela-iniciativa').children.length === 0) {
+        adicionarLinha({ini: 20, nome: "Jogador 1", lv: 1, hp: "45 / 45", disp: "-", fraq: "-", acoes: "Atacando"});
+        adicionarLinha({ini: 15, nome: "Pyro Jack", lv: 1, hp: "56 / 56", disp: "Friendly", fraq: "Weak: Ice / Null: Fire", acoes: "Agi, Sukunda"});
+      }
+      return;
+    }
+
+    // Se for Jogador, atualiza a interface com os dados recebidos
+    if (modoAtual === 'jogador') {
+      if (dados.unidades) {
+        const tabela = document.getElementById('tabela-iniciativa');
+        tabela.innerHTML = '';
+        dados.unidades.forEach(u => adicionarLinha(u));
+      }
+      if (dados.disposicao) document.getElementById('disposicao').value = dados.disposicao;
+      if (dados.tier) document.getElementById('tier').value = dados.tier;
+      if (dados.resultadoDado !== undefined) document.getElementById('resultado-dado').value = dados.resultadoDado;
+      if (dados.interrupcao !== undefined) document.getElementById('interrupcao').checked = dados.interrupcao;
+      if (dados.c1 !== undefined) document.getElementById('c1').checked = dados.c1;
+      if (dados.c2 !== undefined) document.getElementById('c2').checked = dados.c2;
+      if (dados.c3 !== undefined) document.getElementById('c3').checked = dados.c3;
+      if (dados.reacoes !== undefined) document.getElementById('reacoes').value = dados.reacoes;
+      if (dados.npcNome !== undefined) document.getElementById('npc-nome').value = dados.npcNome;
+      if (dados.npcCarta !== undefined) document.getElementById('npc-carta').value = dados.npcCarta;
+      if (dados.npcHab !== undefined) document.getElementById('npc-hab').value = dados.npcHab;
+    }
+  });
+
+  // Carga inicial padrão caso o banco esteja vazio na primeira execução do Mestre
+  window.addEventListener('DOMContentLoaded', () => {
+    db.ref('combat_tracker').once('value', (snapshot) => {
+      if (!snapshot.exists() && modoAtual === 'mestre') {
+        adicionarLinha({ini: 20, nome: "Jogador 1", lv: 1, hp: "45 / 45", disp: "-", fraq: "-", acoes: "Atacando"});
+        adicionarLinha({ini: 15, nome: "Pyro Jack", lv: 1, hp: "56 / 56", disp: "Friendly", fraq: "Weak: Ice / Null: Fire", acoes: "Agi, Sukunda"});
+        guardarDadosCombate();
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
