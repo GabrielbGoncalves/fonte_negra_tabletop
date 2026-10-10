@@ -291,6 +291,7 @@
       text-transform: none;
     }
 
+    /* Formulário Mestre */
     .form-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -354,7 +355,7 @@
     "Vai comprar alguma coisa ou só veio fazer sombra? Escolha logo."
   </div>
 
-  <!-- PAINEL EXCLUSIVO DO MESTRE -->
+  <!-- PAINEL EXCLUSIVO DO MESTRE (Criação, Remoção e Logs) -->
   <div class="panel panel-mestre" id="painel-mestre" style="display: none;">
     <div class="panel-title" style="background: var(--p5-yellow); color: #000;">Painel de Controle do Mestre</div>
     
@@ -405,4 +406,381 @@
   <div class="container">
     <!-- PAINEL DA LOJA -->
     <div class="panel">
-      <div class="panel-title">Est
+      <div class="panel-title">Estoque da Loja</div>
+
+      <!-- Filtro por Tipos de Itens -->
+      <div class="category-filters">
+        <button class="btn-cat active" onclick="filtrarCategoria('Todos', this)">Todos</button>
+        <button class="btn-cat" onclick="filtrarCategoria('Armas', this)">Armas</button>
+        <button class="btn-cat" onclick="filtrarCategoria('Armadura', this)">Armaduras</button>
+        <button class="btn-cat" onclick="filtrarCategoria('Acessório', this)">Acessórios</button>
+        <button class="btn-cat" onclick="filtrarCategoria('Consumível', this)">Itens</button>
+      </div>
+
+      <div class="actions">
+        <button class="btn" id="btn-pechinchar" onclick="pechinchar()">Pechinchar (Teste Charme)</button>
+        <button class="btn" id="btn-imperatriz" onclick="ativarImperatriz()">Arcana III: A Imperatriz (-2 PR)</button>
+      </div>
+
+      <div class="item-list" id="shop-items"></div>
+    </div>
+
+    <!-- PAINEL DO INVENTÁRIO DO JOGADOR -->
+    <div class="panel">
+      <div class="panel-title">Seu Inventário</div>
+      <div class="inventory-list" id="inventory-items"></div>
+    </div>
+  </div>
+
+  <script>
+    // Inicialização do Firebase
+    const configArmazenada = localStorage.getItem('rpg_firebase_config');
+    if (configArmazenada) {
+      firebase.initializeApp(JSON.parse(configArmazenada));
+    }
+    const db = firebase.database();
+
+    // Gestão de Modo (Mestre vs Jogador)
+    const modoAtual = localStorage.getItem('rpg_modo_sessao') || 'jogador';
+    const indicadorModo = document.getElementById('indicador-modo');
+    const painelMestre = document.getElementById('painel-mestre');
+
+    if (modoAtual === 'mestre') {
+      indicadorModo.textContent = "Modo: Mestre (Gestão Ativa)";
+      indicadorModo.className = "inline-block mt-2 bg-emerald-600 text-white px-2 py-1 text-xs font-bold uppercase tracking-wider rounded";
+      painelMestre.style.display = 'block';
+    } else {
+      indicadorModo.textContent = "Modo: Jogador (Somente Leitura)";
+      indicadorModo.className = "inline-block mt-2 bg-blue-600 text-white px-2 py-1 text-xs font-bold uppercase tracking-wider rounded";
+      painelMestre.style.display = 'none';
+      
+      document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById('btn-pechinchar').disabled = true;
+        document.getElementById('btn-imperatriz').disabled = true;
+      });
+    }
+
+    let playerPR = 10.0;
+    let multiplierDesconto = 1.0;
+    let descontoImperatrizAtivo = false;
+    let categoriaFiltro = 'Todos';
+
+    let storeCatalog = [
+      {
+        id: '1',
+        nome: 'Energético Soul-UP',
+        tipo: 'Consumível',
+        precoBase: 0.5,
+        estoque: 5,
+        efeito: 'Recupera +2 de Energia.',
+        desc: 'Sabor guaraná sintético e taurina extrema. Sinta seu coração palpitar no ritmo do Metaverso.'
+      },
+      {
+        id: '2',
+        nome: 'Bálsamo de Aglaia',
+        tipo: 'Consumível',
+        precoBase: 1.0,
+        estoque: 2,
+        efeito: 'Remove todos os Status Mentais de um aliado.',
+        desc: 'Cheiro forte de eucalipto e menta pura. Queima as narinas, mas limpa a mente instantaneamente.'
+      },
+      {
+        id: '3',
+        nome: 'Jaqueta de Espinhos',
+        tipo: 'Armadura',
+        precoBase: 3.0,
+        estoque: 1,
+        efeito: 'RD +3; +1 FOR.',
+        desc: 'Uma jaqueta pesada com detalhes em metal pontiagudo. Faz você parecer perigoso.'
+      },
+      {
+        id: '4',
+        nome: 'Anel da Fortuna',
+        tipo: 'Acessório',
+        precoBase: 4.0,
+        estoque: 1,
+        efeito: 'Concede +1 Carga de Sorte temporária no início do combate.',
+        desc: 'Um anel prateado com gravuras de cartas de Tarô. Dá a sensação de que a sorte está com você.'
+      }
+    ];
+
+    let inventory = [
+      { id: 'loot1', nome: 'Relógio Cognitivo Quebrado', tipo: 'Loot', valorVenda: 1.5, desc: 'Saque obtido no Palácio. Vale PR no mundo real.' },
+      { id: 'loot2', nome: 'Gema do Desejo Opaca', tipo: 'Loot', valorVenda: 3.0, desc: 'Cristal raro purificado do Metaverso.' }
+    ];
+
+    let logsAlteracao = [];
+
+    function registrarLog(mensagem) {
+      const dataHora = new Date().toLocaleTimeString();
+      const logTexto = `[${dataHora}] ${mensagem}`;
+      logsAlteracao.unshift(logTexto);
+      if (logsAlteracao.length > 20) logsAlteracao.pop();
+      renderLogs();
+    }
+
+    function renderLogs() {
+      const container = document.getElementById('log-container');
+      container.innerHTML = logsAlteracao.map(l => `<div class="log-entry">${l}</div>`).join('');
+    }
+
+    function setDialogue(text) {
+      document.getElementById('dialogue').innerText = `"${text}"`;
+    }
+
+    function updatePRDisplay() {
+      document.getElementById('pr-display').innerText = playerPR.toFixed(1);
+    }
+
+    function filtrarCategoria(cat, btn) {
+      categoriaFiltro = cat;
+      document.querySelectorAll('.btn-cat').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderShop();
+    }
+
+    function renderShop() {
+      const shopContainer = document.getElementById('shop-items');
+      shopContainer.innerHTML = '';
+
+      const itensFiltrados = categoriaFiltro === 'Todos' 
+        ? storeCatalog 
+        : storeCatalog.filter(i => i.tipo.toLowerCase() === categoriaFiltro.toLowerCase());
+
+      if (itensFiltrados.length === 0) {
+        shopContainer.innerHTML = '<div style="font-family: Arial; text-transform: none; color: #777;">Nenhum item disponível nesta categoria.</div>';
+        return;
+      }
+
+      itensFiltrados.forEach(item => {
+        let precoFinal = item.precoBase * multiplierDesconto;
+        if (descontoImperatrizAtivo) {
+          precoFinal = Math.max(0.25, precoFinal - 2.0);
+        }
+
+        const temDesconto = precoFinal < item.precoBase;
+
+        const card = document.createElement('div');
+        card.className = 'item-card';
+        card.innerHTML = `
+          <div class="item-info">
+            <div class="item-name">
+              ${item.nome}
+              <span class="item-tag">${item.tipo}</span>
+              <span style="font-size: 0.8rem; color: #888;">[Qtd: ${item.estoque}]</span>
+            </div>
+            <div class="item-desc">${item.desc}</div>
+            <div class="item-effect">Efeito: ${item.efeito}</div>
+          </div>
+          <div class="item-price">
+            ${temDesconto ? `<span class="price-discount">\${item.precoBase.toFixed(1)} PR</span>` : ''}
+            ${precoFinal.toFixed(2)} PR
+          </div>
+          <div style="display: flex; gap: 5px;">
+            <button class="btn" ${modoAtual === 'jogador' || item.estoque <= 0 ? 'disabled' : ''} onclick="comprarItem('${item.id}', ${precoFinal})">
+              ${item.estoque > 0 ? 'Comprar' : 'Esgotado'}
+            </button>
+            ${modoAtual === 'mestre' ? `<button class="btn btn-danger" onclick="removerItemLoja('\${item.id}')">X</button>` : ''}
+          </div>
+        `;
+        shopContainer.appendChild(card);
+      });
+    }
+
+    function renderInventory() {
+      const invContainer = document.getElementById('inventory-items');
+      invContainer.innerHTML = '';
+
+      if (inventory.length === 0) {
+        invContainer.innerHTML = '<div style="font-family: Arial; text-transform: none; color: #777;">Inventário vazio.</div>';
+        return;
+      }
+
+      inventory.forEach((item, index) => {
+        const li = document.createElement('li');
+        li.className = 'inventory-item';
+        
+        let valorVenda = item.valorVenda || (item.precoBase ? item.precoBase * 0.5 : 0.5);
+
+        li.innerHTML = `
+          <div>
+            <strong>${item.nome}</strong> <span style="font-size: 0.8rem; color:#aaa;">(${item.tipo})</span>
+            <div style="font-size: 0.8rem; color: #ccc;">${item.desc || item.efeito}</div>
+          </div>
+          ${modoAtual === 'mestre' ? `<button class="btn" style="padding: 5px 10px; font-size: 0.8rem;" onclick="venderItem(\${index}, ${valorVenda})">Vender (+${valorVenda.toFixed(1)} PR)</button>` : ''}
+        `;
+        invContainer.appendChild(li);
+      });
+    }
+
+    function adicionarNovoItem() {
+      if (modoAtual !== 'mestre') return;
+
+      const nome = document.getElementById('novo-nome').value.trim();
+      const tipo = document.getElementById('novo-tipo').value;
+      const precoBase = parseFloat(document.getElementById('novo-preco').value) || 1.0;
+      const estoque = parseInt(document.getElementById('novo-estoque').value) || 1;
+      const efeito = document.getElementById('novo-efeito').value.trim() || 'Sem efeito especial.';
+      const desc = document.getElementById('nova-desc').value.trim() || 'Sem descrição.';
+
+      if (!nome) {
+        alert('Insira o nome do item!');
+        return;
+      }
+
+      const novoItem = {
+        id: Date.now().toString(),
+        nome,
+        tipo,
+        precoBase,
+        estoque,
+        efeito,
+        desc
+      };
+
+      storeCatalog.push(novoItem);
+      registrarLog(`MESTRE: Criou o item "${nome}" (${tipo}) por ${precoBase} PR.`);
+      
+      // Limpar campos
+      document.getElementById('novo-nome').value = '';
+      document.getElementById('novo-efeito').value = '';
+      document.getElementById('nova-desc').value = '';
+
+      renderShop();
+      guardarNoFirebase();
+    }
+
+    function removerItemLoja(itemId) {
+      if (modoAtual !== 'mestre') return;
+      
+      const index = storeCatalog.findIndex(i => i.id === itemId);
+      if (index !== -1) {
+        const itemRemovido = storeCatalog.splice(index, 1)[0];
+        registrarLog(`MESTRE: Removeu o item "${itemRemovido.nome}" da loja.`);
+        renderShop();
+        guardarNoFirebase();
+      }
+    }
+
+    function guardarNoFirebase() {
+      if (modoAtual !== 'mestre') return;
+      db.ref('loja').set({
+        playerPR: playerPR,
+        multiplierDesconto: multiplierDesconto,
+        descontoImperatrizAtivo: descontoImperatrizAtivo,
+        storeCatalog: storeCatalog,
+        inventory: inventory,
+        logsAlteracao: logsAlteracao,
+        dialogueText: document.getElementById('dialogue').innerText
+      });
+    }
+
+    function comprarItem(itemId, precoFinal) {
+      if (modoAtual !== 'mestre') return;
+      const item = storeCatalog.find(i => i.id === itemId);
+
+      if (!item || item.estoque <= 0) return;
+
+      if (playerPR < precoFinal) {
+        setDialogue("Acha que isso é caridade, garoto? Volte quando tiver Pontos de Recurso suficientes.");
+        guardarNoFirebase();
+        return;
+      }
+
+      playerPR -= precoFinal;
+      item.estoque -= 1;
+      inventory.push({ ...item });
+
+      if (descontoImperatrizAtivo) {
+        descontoImperatrizAtivo = false;
+        document.getElementById('btn-imperatriz').disabled = true;
+      }
+
+      registrarLog(`COMPRA: Adquirido "${item.nome}" por ${precoFinal.toFixed(2)} PR.`);
+      setDialogue(`Volte sempre. O ${item.nome} agora é seu.`);
+      updatePRDisplay();
+      renderShop();
+      renderInventory();
+      guardarNoFirebase();
+    }
+
+    function venderItem(index, valorVenda) {
+      if (modoAtual !== 'mestre') return;
+      const itemVendido = inventory.splice(index, 1)[0];
+      playerPR += valorVenda;
+
+      registrarLog(`VENDA: Vendido "${itemVendido.nome}" por +${valorVenda.toFixed(1)} PR.`);
+      setDialogue(`Aceito este ${itemVendido.nome}. Aqui estão seus PRs.`);
+      updatePRDisplay();
+      renderShop();
+      renderInventory();
+      guardarNoFirebase();
+    }
+
+    function pechinchar() {
+      if (modoAtual !== 'mestre') return;
+      const d20 = Math.floor(Math.random() * 20) + 1;
+      
+      if (d20 >= 10) {
+        multiplierDesconto = 0.85;
+        setDialogue(`Tche... você realmente sabe negociar. Vou fazer um preço especial hoje.`);
+        registrarLog(`PECHINCHA: Sucesso! Desconto de 15% aplicado.`);
+      } else {
+        multiplierDesconto = 1.10;
+        setDialogue(`Sua tentativa infeliz de me enrolar só fez meus preços subirem. Pague mais ou caia fora.`);
+        registrarLog(`PECHINCHA: Falha! Preços aumentados em 10%.`);
+      }
+
+      renderShop();
+      guardarNoFirebase();
+    }
+
+    function ativarImperatriz() {
+      if (modoAtual !== 'mestre') return;
+      descontoImperatrizAtivo = true;
+      setDialogue("Uma aura majestosa envolve a negociação. O valor da sua próxima compra caiu drasticamente!");
+      registrarLog(`HABILIDADE: Arcana III ativada.`);
+      renderShop();
+      guardarNoFirebase();
+    }
+
+    // Sincronização em tempo real com Firebase
+    db.ref('loja').on('value', (snapshot) => {
+      const dados = snapshot.val();
+      if (!dados) {
+        if (modoAtual === 'mestre') {
+          guardarNoFirebase();
+        }
+        return;
+      }
+
+      if (modoAtual === 'jogador') {
+        playerPR = dados.playerPR !== undefined ? dados.playerPR : playerPR;
+        multiplierDesconto = dados.multiplierDesconto !== undefined ? dados.multiplierDesconto : multiplierDesconto;
+        descontoImperatrizAtivo = dados.descontoImperatrizAtivo !== undefined ? dados.descontoImperatrizAtivo : descontoImperatrizAtivo;
+        if (dados.storeCatalog) storeCatalog = dados.storeCatalog;
+        if (dados.inventory) inventory = dados.inventory;
+        if (dados.logsAlteracao) logsAlteracao = dados.logsAlteracao;
+        if (dados.dialogueText) document.getElementById('dialogue').innerText = dados.dialogueText;
+
+        updatePRDisplay();
+        renderShop();
+        renderInventory();
+        renderLogs();
+      }
+    });
+
+    window.onload = () => {
+      db.ref('loja').once('value', (snapshot) => {
+        if (!snapshot.exists() && modoAtual === 'mestre') {
+          guardarNoFirebase();
+        }
+      });
+      updatePRDisplay();
+      renderShop();
+      renderInventory();
+      renderLogs();
+    };
+  </script>
+</body>
+</html>
