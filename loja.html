@@ -291,7 +291,6 @@
       text-transform: none;
     }
 
-    /* Formulário Mestre */
     .form-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -355,7 +354,7 @@
     "Vai comprar alguma coisa ou só veio fazer sombra? Escolha logo."
   </div>
 
-  <!-- PAINEL EXCLUSIVO DO MESTRE (Criação, Remoção e Logs) -->
+  <!-- PAINEL EXCLUSIVO DO MESTRE -->
   <div class="panel panel-mestre" id="painel-mestre" style="display: none;">
     <div class="panel-title" style="background: var(--p5-yellow); color: #000;">Painel de Controle do Mestre</div>
     
@@ -434,9 +433,19 @@
 
   <script>
     // Inicialização do Firebase
-    const configArmazenada = localStorage.getItem('rpg_firebase_config');
-    if (configArmazenada) {
-      firebase.initializeApp(JSON.parse(configArmazenada));
+    const firebaseConfig = {
+      apiKey: "AIzaSyAygeIUCDk9yZLczUYGKls0NSzD46wgpGI",
+      authDomain: "fonte-d9637.firebaseapp.com",
+      databaseURL: "https://fonte-d9637-default-rtdb.firebaseio.com",
+      projectId: "fonte-d9637",
+      storageBucket: "fonte-d9637.firebasestorage.app",
+      messagingSenderId: "925243258445",
+      appId: "1:925243258445:web:d7cf4c3d6b66d50337ce04",
+      measurementId: "G-8762GDVEXY"
+    };
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
     }
     const db = firebase.database();
 
@@ -450,7 +459,7 @@
       indicadorModo.className = "inline-block mt-2 bg-emerald-600 text-white px-2 py-1 text-xs font-bold uppercase tracking-wider rounded";
       painelMestre.style.display = 'block';
     } else {
-      indicadorModo.textContent = "Modo: Jogador (Somente Leitura)";
+      indicadorModo.textContent = "Modo: Jogador (Somente Leitura/Compra)";
       indicadorModo.className = "inline-block mt-2 bg-blue-600 text-white px-2 py-1 text-xs font-bold uppercase tracking-wider rounded";
       painelMestre.style.display = 'none';
       
@@ -515,12 +524,17 @@
       const dataHora = new Date().toLocaleTimeString();
       const logTexto = `[${dataHora}] ${mensagem}`;
       logsAlteracao.unshift(logTexto);
-      if (logsAlteracao.length > 20) logsAlteracao.pop();
+      if (logsAlteracao.length > 25) logsAlteracao.pop();
       renderLogs();
     }
 
     function renderLogs() {
       const container = document.getElementById('log-container');
+      if (!container) return;
+      if (logsAlteracao.length === 0) {
+        container.innerHTML = '<div class="log-entry">[SISTEMA] Aguardando registos...</div>';
+        return;
+      }
       container.innerHTML = logsAlteracao.map(l => `<div class="log-entry">${l}</div>`).join('');
     }
 
@@ -545,7 +559,7 @@
 
       const itensFiltrados = categoriaFiltro === 'Todos' 
         ? storeCatalog 
-        : storeCatalog.filter(i => i.tipo.toLowerCase() === categoriaFiltro.toLowerCase());
+        : storeCatalog.filter(i => String(i.tipo).toLowerCase() === categoriaFiltro.toLowerCase());
 
       if (itensFiltrados.length === 0) {
         shopContainer.innerHTML = '<div style="font-family: Arial; text-transform: none; color: #777;">Nenhum item disponível nesta categoria.</div>';
@@ -577,7 +591,7 @@
             ${precoFinal.toFixed(2)} PR
           </div>
           <div style="display: flex; gap: 5px;">
-            <button class="btn" ${modoAtual === 'jogador' || item.estoque <= 0 ? 'disabled' : ''} onclick="comprarItem('${item.id}', ${precoFinal})">
+            <button class="btn" ${item.estoque <= 0 ? 'disabled' : ''} onclick="comprarItem('${item.id}', ${precoFinal})">
               ${item.estoque > 0 ? 'Comprar' : 'Esgotado'}
             </button>
             ${modoAtual === 'mestre' ? `<button class="btn btn-danger" onclick="removerItemLoja('\${item.id}')">X</button>` : ''}
@@ -607,7 +621,9 @@
             <strong>${item.nome}</strong> <span style="font-size: 0.8rem; color:#aaa;">(${item.tipo})</span>
             <div style="font-size: 0.8rem; color: #ccc;">${item.desc || item.efeito}</div>
           </div>
-          ${modoAtual === 'mestre' ? `<button class="btn" style="padding: 5px 10px; font-size: 0.8rem;" onclick="venderItem(\${index}, ${valorVenda})">Vender (+${valorVenda.toFixed(1)} PR)</button>` : ''}
+          <button class="btn" style="padding: 5px 10px; font-size: 0.8rem;" onclick="venderItem(${index}, ${valorVenda})">
+            Vender (+${valorVenda.toFixed(1)} PR)
+          </button>
         `;
         invContainer.appendChild(li);
       });
@@ -629,7 +645,7 @@
       }
 
       const novoItem = {
-        id: Date.now().toString(),
+        id: 'item_' + Date.now(),
         nome,
         tipo,
         precoBase,
@@ -641,7 +657,6 @@
       storeCatalog.push(novoItem);
       registrarLog(`MESTRE: Criou o item "${nome}" (${tipo}) por ${precoBase} PR.`);
       
-      // Limpar campos
       document.getElementById('novo-nome').value = '';
       document.getElementById('novo-efeito').value = '';
       document.getElementById('nova-desc').value = '';
@@ -653,7 +668,7 @@
     function removerItemLoja(itemId) {
       if (modoAtual !== 'mestre') return;
       
-      const index = storeCatalog.findIndex(i => i.id === itemId);
+      const index = storeCatalog.findIndex(i => String(i.id) === String(itemId));
       if (index !== -1) {
         const itemRemovido = storeCatalog.splice(index, 1)[0];
         registrarLog(`MESTRE: Removeu o item "${itemRemovido.nome}" da loja.`);
@@ -663,7 +678,6 @@
     }
 
     function guardarNoFirebase() {
-      if (modoAtual !== 'mestre') return;
       db.ref('loja').set({
         playerPR: playerPR,
         multiplierDesconto: multiplierDesconto,
@@ -676,8 +690,7 @@
     }
 
     function comprarItem(itemId, precoFinal) {
-      if (modoAtual !== 'mestre') return;
-      const item = storeCatalog.find(i => i.id === itemId);
+      const item = storeCatalog.find(i => String(i.id) === String(itemId));
 
       if (!item || item.estoque <= 0) return;
 
@@ -696,7 +709,8 @@
         document.getElementById('btn-imperatriz').disabled = true;
       }
 
-      registrarLog(`COMPRA: Adquirido "${item.nome}" por ${precoFinal.toFixed(2)} PR.`);
+      const ator = modoAtual === 'mestre' ? 'MESTRE' : 'JOGADOR';
+      registrarLog(`COMPRA (${ator}): Adquirido "${item.nome}" por ${precoFinal.toFixed(2)} PR.`);
       setDialogue(`Volte sempre. O ${item.nome} agora é seu.`);
       updatePRDisplay();
       renderShop();
@@ -705,11 +719,13 @@
     }
 
     function venderItem(index, valorVenda) {
-      if (modoAtual !== 'mestre') return;
+      if (index < 0 || index >= inventory.length) return;
+
       const itemVendido = inventory.splice(index, 1)[0];
       playerPR += valorVenda;
 
-      registrarLog(`VENDA: Vendido "${itemVendido.nome}" por +${valorVenda.toFixed(1)} PR.`);
+      const ator = modoAtual === 'mestre' ? 'MESTRE' : 'JOGADOR';
+      registrarLog(`VENDA (${ator}): Vendido "${itemVendido.nome}" por +${valorVenda.toFixed(1)} PR.`);
       setDialogue(`Aceito este ${itemVendido.nome}. Aqui estão seus PRs.`);
       updatePRDisplay();
       renderShop();
@@ -744,7 +760,7 @@
       guardarNoFirebase();
     }
 
-    // Sincronização em tempo real com Firebase
+    // Sincronização em tempo real com Firebase Realtime Database
     db.ref('loja').on('value', (snapshot) => {
       const dados = snapshot.val();
       if (!dados) {
@@ -754,20 +770,18 @@
         return;
       }
 
-      if (modoAtual === 'jogador') {
-        playerPR = dados.playerPR !== undefined ? dados.playerPR : playerPR;
-        multiplierDesconto = dados.multiplierDesconto !== undefined ? dados.multiplierDesconto : multiplierDesconto;
-        descontoImperatrizAtivo = dados.descontoImperatrizAtivo !== undefined ? dados.descontoImperatrizAtivo : descontoImperatrizAtivo;
-        if (dados.storeCatalog) storeCatalog = dados.storeCatalog;
-        if (dados.inventory) inventory = dados.inventory;
-        if (dados.logsAlteracao) logsAlteracao = dados.logsAlteracao;
-        if (dados.dialogueText) document.getElementById('dialogue').innerText = dados.dialogueText;
+      playerPR = dados.playerPR !== undefined ? dados.playerPR : playerPR;
+      multiplierDesconto = dados.multiplierDesconto !== undefined ? dados.multiplierDesconto : multiplierDesconto;
+      descontoImperatrizAtivo = dados.descontoImperatrizAtivo !== undefined ? dados.descontoImperatrizAtivo : descontoImperatrizAtivo;
+      if (dados.storeCatalog) storeCatalog = dados.storeCatalog;
+      if (dados.inventory) inventory = dados.inventory;
+      if (dados.logsAlteracao) logsAlteracao = dados.logsAlteracao;
+      if (dados.dialogueText) document.getElementById('dialogue').innerText = dados.dialogueText;
 
-        updatePRDisplay();
-        renderShop();
-        renderInventory();
-        renderLogs();
-      }
+      updatePRDisplay();
+      renderShop();
+      renderInventory();
+      renderLogs();
     });
 
     window.onload = () => {
