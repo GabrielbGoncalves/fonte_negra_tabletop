@@ -17,6 +17,7 @@
       --p5-white: #ffffff;
       --p5-gray: #2a2a2a;
       --p5-yellow: #ffea00;
+      --p5-red: #ff3333;
     }
 
     * {
@@ -53,10 +54,36 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .btn-hub {
+      background: var(--p5-black);
+      color: var(--p5-white);
+      text-decoration: none;
+      padding: 10px 18px;
+      border: 2px solid var(--p5-white);
+      transform: skew(-10deg);
+      font-size: 1.1rem;
+      transition: all 0.2s;
+      display: inline-block;
+    }
+
+    .btn-hub:hover {
+      background: var(--p5-white);
+      color: var(--p5-black);
+      transform: skew(-10deg) scale(1.05);
     }
 
     header h1 {
-      font-size: 2.5rem;
+      font-size: 2.2rem;
       letter-spacing: 2px;
       text-shadow: 3px 3px 0px var(--p5-black);
     }
@@ -83,7 +110,7 @@
       color: var(--p5-black);
       padding: 15px 20px;
       border-left: 10px solid var(--p5-royal-blue);
-      transform: skew(-3deg);
+      transform: skew(-2deg);
       margin-bottom: 15px;
       box-shadow: 5px 5px 0px var(--p5-royal-blue);
       font-size: 1.1rem;
@@ -96,6 +123,13 @@
       border: 3px solid var(--p5-royal-blue);
       padding: 20px;
       box-shadow: 6px 6px 0px var(--p5-white);
+      margin-bottom: 20px;
+    }
+
+    .panel-mestre {
+      grid-column: 1 / -1;
+      border-color: var(--p5-yellow);
+      background: rgba(10, 10, 20, 0.98);
     }
 
     .panel-title {
@@ -105,7 +139,31 @@
       padding: 5px 15px;
       transform: rotate(-1deg);
       margin-bottom: 15px;
-      font-size: 1.5rem;
+      font-size: 1.4rem;
+    }
+
+    .category-filters {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
+    .btn-cat {
+      background: var(--p5-gray);
+      color: var(--p5-white);
+      border: 2px solid var(--p5-white);
+      padding: 6px 14px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transform: skew(-5deg);
+    }
+
+    .btn-cat.active {
+      background: var(--p5-royal-blue);
+      color: var(--p5-white);
+      border-color: var(--p5-yellow);
+      box-shadow: 3px 3px 0px var(--p5-white);
     }
 
     .actions {
@@ -132,6 +190,10 @@
       color: var(--p5-black);
       transform: skew(-8deg) scale(1.05);
       box-shadow: 3px 3px 0px var(--p5-royal-blue);
+    }
+
+    .btn-danger {
+      background: var(--p5-red);
     }
 
     .btn:disabled {
@@ -228,30 +290,136 @@
       font-family: Arial, sans-serif;
       text-transform: none;
     }
+
+    /* Formulário Mestre */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .form-group label {
+      font-size: 0.8rem;
+      color: var(--p5-yellow);
+    }
+
+    .form-group input, .form-group select {
+      background: var(--p5-black);
+      border: 1px solid var(--p5-royal-blue);
+      color: var(--p5-white);
+      padding: 8px;
+      font-family: Arial, sans-serif;
+      text-transform: none;
+    }
+
+    .log-box {
+      background: #000;
+      border: 1px solid var(--p5-royal-blue);
+      padding: 10px;
+      height: 120px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: #00ff66;
+      text-transform: none;
+    }
+
+    .log-entry {
+      margin-bottom: 4px;
+      border-bottom: 1px dotted #333;
+      padding-bottom: 2px;
+    }
   </style>
 </head>
 <body>
 
   <header>
-    <div>
-      <h1>Remédios da Escuridão[cite: 6]</h1>
-      <span id="indicador-modo" class="inline-block mt-2 px-2 py-1 text-xs font-bold uppercase tracking-wider">Modo: a carregar...</span>
+    <div class="header-left">
+      <a href="index.html" class="btn-hub">← Voltar ao Hub</a>
+      <div>
+        <h1>Remédios da Escuridão</h1>
+        <span id="indicador-modo" class="inline-block mt-2 px-2 py-1 text-xs font-bold uppercase tracking-wider">Modo: a carregar...</span>
+      </div>
     </div>
     <div class="wallet">PR: <span id="pr-display">10.0</span></div>
   </header>
 
   <div class="dialogue-box" id="dialogue">
-    "Vai comprar alguma coisa ou só veio fazer sombra? Escolha logo."[cite: 6]
+    "Vai comprar alguma coisa ou só veio fazer sombra? Escolha logo."
+  </div>
+
+  <!-- PAINEL EXCLUSIVO DO MESTRE (Criação, Remoção e Logs) -->
+  <div class="panel panel-mestre" id="painel-mestre" style="display: none;">
+    <div class="panel-title" style="background: var(--p5-yellow); color: #000;">Painel de Controle do Mestre</div>
+    
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Nome do Item:</label>
+        <input type="text" id="novo-nome" placeholder="Ex: Katana Amaldiçoada">
+      </div>
+      <div class="form-group">
+        <label>Categoria:</label>
+        <select id="novo-tipo">
+          <option value="Armas">Armas</option>
+          <option value="Armadura">Armaduras</option>
+          <option value="Acessório">Acessórios</option>
+          <option value="Consumível">Itens / Consumíveis</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Preço Base (PR):</label>
+        <input type="number" id="novo-preco" step="0.1" value="1.0">
+      </div>
+      <div class="form-group">
+        <label>Estoque Inicial:</label>
+        <input type="number" id="novo-estoque" value="3">
+      </div>
+      <div class="form-group" style="grid-column: span 2;">
+        <label>Efeito:</label>
+        <input type="text" id="novo-efeito" placeholder="Ex: FOR +2, Dano Crítico +10%">
+      </div>
+      <div class="form-group" style="grid-column: span 2;">
+        <label>Descrição:</label>
+        <input type="text" id="nova-desc" placeholder="Ex: Lâmina escura forjada nas sombras.">
+      </div>
+    </div>
+    
+    <div class="actions">
+      <button class="btn" onclick="adicionarNovoItem()">+ Criar Novo Item</button>
+    </div>
+
+    <div style="margin-top: 15px;">
+      <label style="font-size: 0.8rem; color: var(--p5-yellow);">Log de Alterações da Loja:</label>
+      <div class="log-box" id="log-container">
+        <div class="log-entry">[SISTEMA] Aguardando registos de alterações...</div>
+      </div>
+    </div>
   </div>
 
   <div class="container">
     <!-- PAINEL DA LOJA -->
     <div class="panel">
-      <div class="panel-title">Estoque da Loja[cite: 6]</div>
+      <div class="panel-title">Estoque da Loja</div>
+
+      <!-- Filtro por Tipos de Itens -->
+      <div class="category-filters">
+        <button class="btn-cat active" onclick="filtrarCategoria('Todos', this)">Todos</button>
+        <button class="btn-cat" onclick="filtrarCategoria('Armas', this)">Armas</button>
+        <button class="btn-cat" onclick="filtrarCategoria('Armadura', this)">Armaduras</button>
+        <button class="btn-cat" onclick="filtrarCategoria('Acessório', this)">Acessórios</button>
+        <button class="btn-cat" onclick="filtrarCategoria('Consumível', this)">Itens</button>
+      </div>
 
       <div class="actions">
-        <button class="btn" id="btn-pechinchar" onclick="pechinchar()">Pechinchar (Teste Charme)[cite: 6]</button>
-        <button class="btn" id="btn-imperatriz" onclick="ativarImperatriz()">Arcana III: A Imperatriz (-2 PR)[cite: 6]</button>
+        <button class="btn" id="btn-pechinchar" onclick="pechinchar()">Pechinchar (Teste Charme)</button>
+        <button class="btn" id="btn-imperatriz" onclick="ativarImperatriz()">Arcana III: A Imperatriz (-2 PR)</button>
       </div>
 
       <div class="item-list" id="shop-items"></div>
@@ -259,7 +427,7 @@
 
     <!-- PAINEL DO INVENTÁRIO DO JOGADOR -->
     <div class="panel">
-      <div class="panel-title">Seu Inventário[cite: 6]</div>
+      <div class="panel-title">Seu Inventário</div>
       <div class="inventory-list" id="inventory-items"></div>
     </div>
   </div>
@@ -275,13 +443,16 @@
     // Gestão de Modo (Mestre vs Jogador)
     const modoAtual = localStorage.getItem('rpg_modo_sessao') || 'jogador';
     const indicadorModo = document.getElementById('indicador-modo');
+    const painelMestre = document.getElementById('painel-mestre');
 
     if (modoAtual === 'mestre') {
-      indicadorModo.textContent = "Modo: Mestre (Escrita Ativa)";
+      indicadorModo.textContent = "Modo: Mestre (Gestão Ativa)";
       indicadorModo.className = "inline-block mt-2 bg-emerald-600 text-white px-2 py-1 text-xs font-bold uppercase tracking-wider rounded";
+      painelMestre.style.display = 'block';
     } else {
       indicadorModo.textContent = "Modo: Jogador (Somente Leitura)";
       indicadorModo.className = "inline-block mt-2 bg-blue-600 text-white px-2 py-1 text-xs font-bold uppercase tracking-wider rounded";
+      painelMestre.style.display = 'none';
       
       document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('btn-pechinchar').disabled = true;
@@ -292,6 +463,7 @@
     let playerPR = 10.0;
     let multiplierDesconto = 1.0;
     let descontoImperatrizAtivo = false;
+    let categoriaFiltro = 'Todos';
 
     let storeCatalog = [
       {
@@ -337,6 +509,21 @@
       { id: 'loot2', nome: 'Gema do Desejo Opaca', tipo: 'Loot', valorVenda: 3.0, desc: 'Cristal raro purificado do Metaverso.' }
     ];
 
+    let logsAlteracao = [];
+
+    function registrarLog(mensagem) {
+      const dataHora = new Date().toLocaleTimeString();
+      const logTexto = `[${dataHora}] ${mensagem}`;
+      logsAlteracao.unshift(logTexto);
+      if (logsAlteracao.length > 20) logsAlteracao.pop();
+      renderLogs();
+    }
+
+    function renderLogs() {
+      const container = document.getElementById('log-container');
+      container.innerHTML = logsAlteracao.map(l => `<div class="log-entry">${l}</div>`).join('');
+    }
+
     function setDialogue(text) {
       document.getElementById('dialogue').innerText = `"${text}"`;
     }
@@ -345,11 +532,27 @@
       document.getElementById('pr-display').innerText = playerPR.toFixed(1);
     }
 
+    function filtrarCategoria(cat, btn) {
+      categoriaFiltro = cat;
+      document.querySelectorAll('.btn-cat').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderShop();
+    }
+
     function renderShop() {
       const shopContainer = document.getElementById('shop-items');
       shopContainer.innerHTML = '';
 
-      storeCatalog.forEach(item => {
+      const itensFiltrados = categoriaFiltro === 'Todos' 
+        ? storeCatalog 
+        : storeCatalog.filter(i => i.tipo.toLowerCase() === categoriaFiltro.toLowerCase());
+
+      if (itensFiltrados.length === 0) {
+        shopContainer.innerHTML = '<div style="font-family: Arial; text-transform: none; color: #777;">Nenhum item disponível nesta categoria.</div>';
+        return;
+      }
+
+      itensFiltrados.forEach(item => {
         let precoFinal = item.precoBase * multiplierDesconto;
         if (descontoImperatrizAtivo) {
           precoFinal = Math.max(0.25, precoFinal - 2.0);
@@ -373,9 +576,12 @@
             ${temDesconto ? `<span class="price-discount">\${item.precoBase.toFixed(1)} PR</span>` : ''}
             ${precoFinal.toFixed(2)} PR
           </div>
-          <button class="btn" ${modoAtual === 'jogador' || item.estoque <= 0 ? 'disabled' : ''} onclick="comprarItem('${item.id}', ${precoFinal})">
-            ${item.estoque > 0 ? 'Comprar' : 'Esgotado'}
-          </button>
+          <div style="display: flex; gap: 5px;">
+            <button class="btn" ${modoAtual === 'jogador' || item.estoque <= 0 ? 'disabled' : ''} onclick="comprarItem('${item.id}', ${precoFinal})">
+              ${item.estoque > 0 ? 'Comprar' : 'Esgotado'}
+            </button>
+            ${modoAtual === 'mestre' ? `<button class="btn btn-danger" onclick="removerItemLoja('\${item.id}')">X</button>` : ''}
+          </div>
         `;
         shopContainer.appendChild(card);
       });
@@ -407,6 +613,55 @@
       });
     }
 
+    function adicionarNovoItem() {
+      if (modoAtual !== 'mestre') return;
+
+      const nome = document.getElementById('novo-nome').value.trim();
+      const tipo = document.getElementById('novo-tipo').value;
+      const precoBase = parseFloat(document.getElementById('novo-preco').value) || 1.0;
+      const estoque = parseInt(document.getElementById('novo-estoque').value) || 1;
+      const efeito = document.getElementById('novo-efeito').value.trim() || 'Sem efeito especial.';
+      const desc = document.getElementById('nova-desc').value.trim() || 'Sem descrição.';
+
+      if (!nome) {
+        alert('Insira o nome do item!');
+        return;
+      }
+
+      const novoItem = {
+        id: Date.now().toString(),
+        nome,
+        tipo,
+        precoBase,
+        estoque,
+        efeito,
+        desc
+      };
+
+      storeCatalog.push(novoItem);
+      registrarLog(`MESTRE: Criou o item "${nome}" (${tipo}) por ${precoBase} PR.`);
+      
+      // Limpar campos
+      document.getElementById('novo-nome').value = '';
+      document.getElementById('novo-efeito').value = '';
+      document.getElementById('nova-desc').value = '';
+
+      renderShop();
+      guardarNoFirebase();
+    }
+
+    function removerItemLoja(itemId) {
+      if (modoAtual !== 'mestre') return;
+      
+      const index = storeCatalog.findIndex(i => i.id === itemId);
+      if (index !== -1) {
+        const itemRemovido = storeCatalog.splice(index, 1)[0];
+        registrarLog(`MESTRE: Removeu o item "${itemRemovido.nome}" da loja.`);
+        renderShop();
+        guardarNoFirebase();
+      }
+    }
+
     function guardarNoFirebase() {
       if (modoAtual !== 'mestre') return;
       db.ref('loja').set({
@@ -415,6 +670,7 @@
         descontoImperatrizAtivo: descontoImperatrizAtivo,
         storeCatalog: storeCatalog,
         inventory: inventory,
+        logsAlteracao: logsAlteracao,
         dialogueText: document.getElementById('dialogue').innerText
       });
     }
@@ -440,6 +696,7 @@
         document.getElementById('btn-imperatriz').disabled = true;
       }
 
+      registrarLog(`COMPRA: Adquirido "${item.nome}" por ${precoFinal.toFixed(2)} PR.`);
       setDialogue(`Volte sempre. O ${item.nome} agora é seu.`);
       updatePRDisplay();
       renderShop();
@@ -452,6 +709,7 @@
       const itemVendido = inventory.splice(index, 1)[0];
       playerPR += valorVenda;
 
+      registrarLog(`VENDA: Vendido "${itemVendido.nome}" por +${valorVenda.toFixed(1)} PR.`);
       setDialogue(`Aceito este ${itemVendido.nome}. Aqui estão seus PRs.`);
       updatePRDisplay();
       renderShop();
@@ -466,9 +724,11 @@
       if (d20 >= 10) {
         multiplierDesconto = 0.85;
         setDialogue(`Tche... você realmente sabe negociar. Vou fazer um preço especial hoje.`);
+        registrarLog(`PECHINCHA: Sucesso! Desconto de 15% aplicado.`);
       } else {
         multiplierDesconto = 1.10;
         setDialogue(`Sua tentativa infeliz de me enrolar só fez meus preços subirem. Pague mais ou caia fora.`);
+        registrarLog(`PECHINCHA: Falha! Preços aumentados em 10%.`);
       }
 
       renderShop();
@@ -479,6 +739,7 @@
       if (modoAtual !== 'mestre') return;
       descontoImperatrizAtivo = true;
       setDialogue("Uma aura majestosa envolve a negociação. O valor da sua próxima compra caiu drasticamente!");
+      registrarLog(`HABILIDADE: Arcana III ativada.`);
       renderShop();
       guardarNoFirebase();
     }
@@ -499,11 +760,13 @@
         descontoImperatrizAtivo = dados.descontoImperatrizAtivo !== undefined ? dados.descontoImperatrizAtivo : descontoImperatrizAtivo;
         if (dados.storeCatalog) storeCatalog = dados.storeCatalog;
         if (dados.inventory) inventory = dados.inventory;
+        if (dados.logsAlteracao) logsAlteracao = dados.logsAlteracao;
         if (dados.dialogueText) document.getElementById('dialogue').innerText = dados.dialogueText;
 
         updatePRDisplay();
         renderShop();
         renderInventory();
+        renderLogs();
       }
     });
 
@@ -516,6 +779,7 @@
       updatePRDisplay();
       renderShop();
       renderInventory();
+      renderLogs();
     };
   </script>
 </body>
