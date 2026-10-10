@@ -665,17 +665,71 @@
       guardarNoFirebase();
     }
 
-    function removerItemLoja(itemId) {
-      if (modoAtual !== 'mestre') return;
-      
-      const index = storeCatalog.findIndex(i => String(i.id) === String(itemId));
-      if (index !== -1) {
-        const itemRemovido = storeCatalog.splice(index, 1)[0];
-        registrarLog(`MESTRE: Removeu o item "${itemRemovido.nome}" da loja.`);
-        renderShop();
-        guardarNoFirebase();
-      }
+    function renderShop() {
+  const shopContainer = document.getElementById('shop-items');
+  shopContainer.innerHTML = '';
+
+  const itensFiltrados = categoriaFiltro === 'Todos' 
+    ? storeCatalog 
+    : storeCatalog.filter(i => String(i.tipo).toLowerCase() === categoriaFiltro.toLowerCase());
+
+  if (itensFiltrados.length === 0) {
+    shopContainer.innerHTML = '<div style="font-family: Arial; text-transform: none; color: #777;">Nenhum item disponível nesta categoria.</div>';
+    return;
+  }
+
+  itensFiltrados.forEach(item => {
+    let precoFinal = item.precoBase * multiplierDesconto;
+    if (descontoImperatrizAtivo) {
+      precoFinal = Math.max(0.25, precoFinal - 2.0);
     }
+
+    const temDesconto = precoFinal < item.precoBase;
+
+    const card = document.createElement('div');
+    card.className = 'item-card';
+    card.innerHTML = `
+      <div class="item-info">
+        <div class="item-name">
+          ${item.nome}
+          <span class="item-tag">${item.tipo}</span>
+          <span style="font-size: 0.8rem; color: #888;">[Qtd: ${item.estoque}]</span>
+        </div>
+        <div class="item-desc">${item.desc}</div>
+        <div class="item-effect">Efeito: ${item.efeito}</div>
+      </div>
+      <div class="item-price">
+        ${temDesconto ? `<span class="price-discount">\${item.precoBase.toFixed(1)} PR</span>` : ''}
+        ${precoFinal.toFixed(2)} PR
+      </div>
+      <div style="display: flex; gap: 5px;">
+        <button class="btn" ${item.estoque <= 0 ? 'disabled' : ''} onclick="comprarItem('${item.id}', ${precoFinal})">
+          ${item.estoque > 0 ? 'Comprar' : 'Esgotado'}
+        </button>
+        ${modoAtual === 'mestre' ? `<button class="btn btn-danger" data-id="\${item.id}" onclick="removerItemLoja(this)">X</button>` : ''}
+      </div>
+    `;
+    shopContainer.appendChild(card);
+  });
+}
+
+function removerItemLoja(element) {
+  if (modoAtual !== 'mestre') return;
+  
+  // Obtém o ID diretamente do atributo data-id do botão
+  const itemId = element.getAttribute('data-id');
+  if (!itemId) return;
+
+  const index = storeCatalog.findIndex(i => String(i.id) === String(itemId));
+  if (index !== -1) {
+    const itemRemovido = storeCatalog.splice(index, 1)[0];
+    registrarLog(`MESTRE: Removeu o item "${itemRemovido.nome}" da loja.`);
+    
+    // Atualiza a tela e força a gravação no Firebase
+    renderShop();
+    guardarNoFirebase();
+  }
+}
 
     function guardarNoFirebase() {
       db.ref('loja').set({
