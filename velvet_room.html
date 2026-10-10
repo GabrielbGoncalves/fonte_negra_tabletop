@@ -2,12 +2,17 @@
 <html lang="pt-PT">
 <head>
 <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://www.gstatic.com https://*.firebaseio.com https://*.firebasedatabase.app http://127.0.0.1:9000; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://*.firebaseio.com wss://*.firebaseio.com https://*.firebasedatabase.app wss://*.firebasedatabase.app https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com http://127.0.0.1:9099 http://127.0.0.1:9000 ws://127.0.0.1:9000; frame-src https://*.firebaseapp.com https://*.firebaseio.com http://127.0.0.1:9000; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Calculadora de Fusão - Grimório do Coração[cite: 10]</title>
 
 <!-- Firebase SDK Compat -->
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" integrity="sha384-4gq9w/AGf72FXdNQ3Kn3EqWP7633NbCMjpYHt8YCZyXf23o2opcuAr4cif41tLrC" crossorigin="anonymous"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js" integrity="sha384-5PDE6CZvnNIJI5xu68GIFoOO3U73lAnRLBwPBmmKjWnYnYwKEHWr/ghtGooEOXGb" crossorigin="anonymous"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" integrity="sha384-xtdq4MQqPj1dB5DQsuw9O7dh4kHhMP/Wp5u8O1jiaWiou13ZfJIgiccjtVK2pBhL" crossorigin="anonymous"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/sessao.js" data-exigir-login></script>
 
 <style>
     body {
@@ -150,11 +155,8 @@
 </div>
 
 <script>
-    const configArmazenada = localStorage.getItem('rpg_firebase_config');
-    if (configArmazenada) {
-        firebase.initializeApp(JSON.parse(configArmazenada));
-    }
-    const db = firebase.database();
+    // Firebase e sessão vêm de js/sessao.js (o acesso ao banco aguarda o login)
+    const db = RPG.db;
 
     const modoAtual = localStorage.getItem('rpg_modo_sessao') || 'jogador';
     const indicadorModo = document.getElementById('indicador-modo');
@@ -325,10 +327,11 @@
         const nivelResultante = Math.floor((level1 + level2) / 2) + 1;
         const arcanaResultante = obterArcanaResultante(arcana1, arcana2);
 
+        const esc = RPG.escaparHtml;
         if (arcanaResultante === "Combinação a ser mapeada") {
-            resultBox.innerHTML = `<span>Resultado pendente</span><br>Adicione o cruzamento de ${arcana1} e ${arcana2} na matriz do código conforme as imagens.`;
+            resultBox.innerHTML = `<span>Resultado pendente</span><br>Adicione o cruzamento de ${esc(arcana1)} e ${esc(arcana2)} na matriz do código conforme as imagens.`;
         } else {
-            resultBox.innerHTML = `A Persona resultante será da Arcana: <br><span>${arcanaResultante}</span> Nível Base Aproximado: <span>${nivelResultante}</span>`;
+            resultBox.innerHTML = `A Persona resultante será da Arcana: <br><span>${esc(arcanaResultante)}</span> Nível Base Aproximado: <span>${esc(nivelResultante)}</span>`;
         }
     }
 
@@ -363,4 +366,4 @@
 </script>
 
 </body>
-</html>
+</html>
