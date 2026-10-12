@@ -126,7 +126,7 @@
         </div>
     </header>
 
-    <!-- GRID DE APLICATIVOS (10 MÓDULOS) -->
+    <!-- GRID DE APLICATIVOS -->
     <main class="w-full max-w-7xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-12">
 
         <!-- 1. Combat Tracker -->
@@ -221,6 +221,18 @@
             <span class="inline-block bg-black text-blue-400 text-xs px-2 py-1 font-bold border border-blue-900">velvet_room.html</span>
         </a>
 
+        <!-- 10. Cadastro de Usuários - Restrito para Mestre -->
+        <div id="card-cadastro" class="relative">
+            <a href="cadastro_usuarios.html" class="hub-card block bg-slate-900 border-2 border-blue-500 p-6 clip-card relative group">
+                <div class="absolute top-0 right-0 bg-red-600 text-white font-black text-xs px-2 py-1 skew-tag -mt-3 mr-4">
+                    <span class="inline-block unskew">CONTAS (MESTRE)</span>
+                </div>
+                <h2 class="text-2xl font-black text-white uppercase italic mb-2 group-hover:text-blue-400 transition-colors">Cadastro de Usuários</h2>
+                <p class="text-slate-400 text-sm leading-relaxed mb-4">Criação de contas para novos membros da mesa, com permissão de Mestre ou Jogador.</p>
+                <span class="inline-block bg-black text-blue-400 text-xs px-2 py-1 font-bold border border-blue-900">cadastro_usuarios.html</span>
+            </a>
+        </div>
+
     </main>
 
     <script>
@@ -277,23 +289,23 @@
 
         function aplicarModo(modo) {
             const displayEl = document.getElementById('display-modo-ativo');
-            const cardEditor = document.getElementById('card-editor');
+            const cardsRestritos = [document.getElementById('card-editor'), document.getElementById('card-cadastro')];
 
             if (modo === 'mestre') {
                 displayEl.textContent = "Mestre (Total)";
                 displayEl.className = "px-3 py-1 font-black text-xs uppercase tracking-wider bg-red-600 text-white border border-white";
-                if (cardEditor) {
-                    cardEditor.style.opacity = "1";
-                    cardEditor.title = "";
-                }
+                cardsRestritos.forEach((card) => {
+                    card.style.opacity = "1";
+                    card.title = "";
+                });
             } else {
                 displayEl.textContent = "Jogador (Leitura)";
                 displayEl.className = "px-3 py-1 font-black text-xs uppercase tracking-wider bg-blue-600 text-black border border-white";
                 // Restrição visual; a proteção real está nas Regras do Firebase
-                if (cardEditor) {
-                    cardEditor.style.opacity = "0.5";
-                    cardEditor.title = "Acesso restrito ao Mestre";
-                }
+                cardsRestritos.forEach((card) => {
+                    card.style.opacity = "0.5";
+                    card.title = "Acesso restrito ao Mestre";
+                });
             }
         }
     </script>

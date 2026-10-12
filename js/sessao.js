@@ -166,6 +166,38 @@
         await auth.signOut();
     }
 
+    // Cria uma conta (Auth) e grava o papel no banco. Só funciona para Mestres: as Regras
+    // recusam a gravação em /usuarios, /mestres e /jogadores vinda de outra conta.
+    // A conta nova é criada numa instância separada do Firebase, para o Mestre não perder a sessão.
+    async function cadastrarUsuario({ nome, email, senha, papel }) {
+        if (papel !== 'mestre' && papel !== 'jogador') throw new Error('papel-invalido');
+        const s = await pronto;
+        if (!s || s.modo !== 'mestre') throw new Error('sem-permissao');
+
+        const app = firebase.initializeApp(FIREBASE_CONFIG, 'cadastro-' + Date.now());
+        try {
+            const authCadastro = app.auth();
+            if (usarEmulador) authCadastro.useEmulator('http://127.0.0.1:9099');
+            await authCadastro.setPersistence(firebase.auth.Auth.Persistence.NONE);
+
+            const cred = await comPrazo(authCadastro.createUserWithEmailAndPassword(email, senha), 15000, 'auth-indisponivel');
+            const uid = cred.user.uid;
+            try {
+                await comPrazo(database.ref().update({
+                    ['usuarios/' + uid]: { nome, email, papel },
+                    [(papel === 'mestre' ? 'mestres/' : 'jogadores/') + uid]: true
+                }), 10000, 'banco-indisponivel');
+            } catch (err) {
+                // Sem papel no banco a conta não serve para nada: desfaz a criação
+                await cred.user.delete().catch(registrarErro);
+                throw err;
+            }
+            return uid;
+        } finally {
+            await app.delete().catch(registrarErro);
+        }
+    }
+
     // Escapa texto para inserir com segurança em innerHTML (conteúdo ou atributo entre aspas).
     function escaparHtml(valor) {
         return String(valor ?? '').replace(/[&<>"']/g, (c) => ({
@@ -178,6 +210,7 @@
         sessao: pronto,
         entrar,
         sair,
+        cadastrarUsuario,
         escaparHtml
     });
 })();

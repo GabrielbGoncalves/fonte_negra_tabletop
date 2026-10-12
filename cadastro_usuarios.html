@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://www.gstatic.com https://*.firebaseio.com https://*.firebasedatabase.app http://127.0.0.1:9000; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://*.firebaseio.com wss://*.firebaseio.com https://*.firebasedatabase.app wss://*.firebasedatabase.app https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com http://127.0.0.1:9099 http://127.0.0.1:9000 ws://127.0.0.1:9000; frame-src https://*.firebaseapp.com https://*.firebaseio.com http://127.0.0.1:9000; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Usuários - Persona RPG</title>
+
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" integrity="sha384-4gq9w/AGf72FXdNQ3Kn3EqWP7633NbCMjpYHt8YCZyXf23o2opcuAr4cif41tLrC" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js" integrity="sha384-5PDE6CZvnNIJI5xu68GIFoOO3U73lAnRLBwPBmmKjWnYnYwKEHWr/ghtGooEOXGb" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" integrity="sha384-xtdq4MQqPj1dB5DQsuw9O7dh4kHhMP/Wp5u8O1jiaWiou13ZfJIgiccjtVK2pBhL" crossorigin="anonymous"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/sessao.js" data-exigir-login></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Oswald', sans-serif;
+            background-color: #020617;
+            background-image: radial-gradient(#1e3a8a 15%, transparent 16%), radial-gradient(#1e3a8a 15%, transparent 16%);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            color: #f8fafc;
+            min-height: 100vh;
+        }
+
+        .clip-card {
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%);
+        }
+
+        .clip-header {
+            clip-path: polygon(0 0, 100% 0, 98% 100%, 2% 100%);
+        }
+
+        .skew-tag {
+            transform: skewX(-12deg);
+        }
+
+        .unskew {
+            transform: skewX(12deg);
+        }
+
+        .campo.invalido {
+            border-color: #ef4444;
+        }
+
+        /* Seletor de permissão: rádios escondidos, rótulos inclinados */
+        .opcao-papel input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .opcao-papel span {
+            transition: all 0.15s ease;
+        }
+
+        .opcao-papel input:focus-visible + span {
+            outline: 2px solid #60a5fa;
+            outline-offset: 2px;
+        }
+
+        .opcao-papel input:checked + span.papel-jogador {
+            background-color: #2563eb;
+            color: #000;
+            border-color: #fff;
+            box-shadow: 3px 3px 0px #fff;
+        }
+
+        .opcao-papel input:checked + span.papel-mestre {
+            background-color: #dc2626;
+            color: #fff;
+            border-color: #fff;
+            box-shadow: 3px 3px 0px #fff;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex flex-col items-center">
+
+    <header class="w-full max-w-3xl bg-blue-600 text-black p-6 mb-8 clip-header border-4 border-white shadow-[8px_8px_0px_#000] flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="flex items-center gap-4">
+            <div class="bg-black text-white px-4 py-2 text-3xl font-black skew-tag border-2 border-blue-500">
+                <span class="inline-block unskew">ID</span>
+            </div>
+            <div>
+                <h1 class="text-3xl md:text-4xl font-black uppercase italic tracking-widest drop-shadow-[2px_2px_0px_#fff] text-white">
+                    Cadastro de Usuários
+                </h1>
+                <p class="text-black font-bold uppercase tracking-widest text-sm">Novos membros da mesa</p>
+            </div>
+        </div>
+        <a href="index.html" class="bg-black text-white px-4 py-2 font-bold text-xs uppercase tracking-wider border-2 border-white skew-tag hover:bg-slate-800 transition-colors">
+            <span class="inline-block unskew">← Voltar ao Hub</span>
+        </a>
+    </header>
+
+    <!-- Aviso para quem não é Mestre (restrição visual; quem bloqueia de fato são as Regras do Firebase) -->
+    <div id="aviso-restrito" class="hidden w-full max-w-md bg-slate-900 border-4 border-red-600 p-6 clip-card shadow-[10px_10px_0px_#7f1d1d] text-center">
+        <p class="text-xl font-black uppercase tracking-widest text-red-500 mb-2">Acesso restrito</p>
+        <p class="text-sm text-slate-400 uppercase tracking-wider">Só o Mestre pode cadastrar usuários.</p>
+    </div>
+
+    <main id="painel-cadastro" class="hidden w-full max-w-md bg-slate-900 border-4 border-blue-500 p-6 clip-card shadow-[10px_10px_0px_#1d4ed8]">
+        <div class="bg-blue-600 text-black px-4 py-2 text-2xl font-black skew-tag mb-6 text-center border-2 border-white">
+            <span class="inline-block unskew uppercase tracking-widest">Novo Usuário</span>
+        </div>
+
+        <form id="form-cadastro" class="space-y-4" novalidate>
+            <div>
+                <label for="cad-nome" class="block text-xs font-bold uppercase tracking-wider text-blue-400 mb-1">Nome</label>
+                <input type="text" id="cad-nome" name="nome" maxlength="60" autocomplete="off" placeholder="Nome do personagem ou jogador" class="campo w-full bg-black border-2 border-slate-700 p-3 text-sm text-white focus:border-blue-500 outline-none font-sans">
+                <p data-erro="nome" class="hidden mt-1 text-xs text-red-500 font-bold uppercase tracking-wider"></p>
+            </div>
+
+            <div>
+                <label for="cad-email" class="block text-xs font-bold uppercase tracking-wider text-blue-400 mb-1">E-mail</label>
+                <input type="email" id="cad-email" name="email" maxlength="254" autocomplete="off" placeholder="jogador@email.com" class="campo w-full bg-black border-2 border-slate-700 p-3 text-sm text-white focus:border-blue-500 outline-none font-sans">
+                <p data-erro="email" class="hidden mt-1 text-xs text-red-500 font-bold uppercase tracking-wider"></p>
+            </div>
+
+            <div>
+                <label for="cad-senha" class="block text-xs font-bold uppercase tracking-wider text-blue-400 mb-1">Senha</label>
+                <input type="password" id="cad-senha" name="senha" autocomplete="new-password" placeholder="Mínimo de 6 caracteres" class="campo w-full bg-black border-2 border-slate-700 p-3 text-sm text-white focus:border-blue-500 outline-none font-sans">
+                <p data-erro="senha" class="hidden mt-1 text-xs text-red-500 font-bold uppercase tracking-wider"></p>
+            </div>
+
+            <div>
+                <label for="cad-senha2" class="block text-xs font-bold uppercase tracking-wider text-blue-400 mb-1">Repetir senha</label>
+                <input type="password" id="cad-senha2" name="senha2" autocomplete="new-password" placeholder="••••••••" class="campo w-full bg-black border-2 border-slate-700 p-3 text-sm text-white focus:border-blue-500 outline-none font-sans">
+                <p data-erro="senha2" class="hidden mt-1 text-xs text-red-500 font-bold uppercase tracking-wider"></p>
+            </div>
+
+            <fieldset>
+                <legend class="block text-xs font-bold uppercase tracking-wider text-blue-400 mb-2">Permissão</legend>
+                <div class="grid grid-cols-2 gap-4 px-1">
+                    <label class="opcao-papel relative cursor-pointer">
+                        <input type="radio" name="papel" value="jogador" checked>
+                        <span class="papel-jogador block text-center skew-tag border-2 border-slate-700 bg-black text-slate-400 py-2 font-black text-sm uppercase tracking-wider hover:border-blue-500">
+                            <span class="inline-block unskew">Jogador</span>
+                        </span>
+                    </label>
+                    <label class="opcao-papel relative cursor-pointer">
+                        <input type="radio" name="papel" value="mestre">
+                        <span class="papel-mestre block text-center skew-tag border-2 border-slate-700 bg-black text-slate-400 py-2 font-black text-sm uppercase tracking-wider hover:border-red-500">
+                            <span class="inline-block unskew">Mestre</span>
+                        </span>
+                    </label>
+                </div>
+            </fieldset>
+
+            <div id="cad-resultado" class="hidden text-xs font-bold uppercase tracking-wider text-center" role="status"></div>
+
+            <div class="pt-2">
+                <button type="submit" id="cad-enviar" class="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-wait text-black font-black py-3 px-4 text-xs uppercase tracking-wider transition-colors border-2 border-white shadow-[2px_2px_0px_#fff]">
+                    Cadastrar
+                </button>
+            </div>
+        </form>
+
+        <p class="mt-6 text-center text-[10px] text-slate-500 uppercase tracking-widest">
+            A conta pode entrar no Hub logo após o cadastro.
+        </p>
+    </main>
+
+    <script>
+        const modoAtual = localStorage.getItem('rpg_modo_sessao') || 'jogador';
+
+        const form = document.getElementById('form-cadastro');
+        const botao = document.getElementById('cad-enviar');
+        const resultado = document.getElementById('cad-resultado');
+        const campos = {
+            nome: document.getElementById('cad-nome'),
+            email: document.getElementById('cad-email'),
+            senha: document.getElementById('cad-senha'),
+            senha2: document.getElementById('cad-senha2')
+        };
+        let tentouEnviar = false;
+
+        document.getElementById(modoAtual === 'mestre' ? 'painel-cadastro' : 'aviso-restrito').classList.remove('hidden');
+
+        function lerDados() {
+            return {
+                nome: campos.nome.value.trim(),
+                email: campos.email.value.trim(),
+                senha: campos.senha.value,
+                senha2: campos.senha2.value,
+                papel: form.querySelector('input[name="papel"]:checked')?.value || 'jogador'
+            };
+        }
+
+        // Retorna { campo: mensagem } só com os campos inválidos
+        function validar(d) {
+            const erros = {};
+            if (!d.nome) erros.nome = 'Informe o nome.';
+
+            if (!d.email) erros.email = 'Informe o e-mail.';
+            else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email)) erros.email = 'E-mail inválido.';
+
+            if (!d.senha) erros.senha = 'Informe a senha.';
+            else if (d.senha.length < 6) erros.senha = 'A senha precisa ter pelo menos 6 caracteres.';
+
+            if (!d.senha2) erros.senha2 = 'Repita a senha.';
+            else if (d.senha2 !== d.senha) erros.senha2 = 'As senhas não conferem.';
+
+            return erros;
+        }
+
+        function mostrarErros(erros) {
+            Object.keys(campos).forEach((nome) => {
+                const msg = form.querySelector(`[data-erro="${nome}"]`);
+                const erro = erros[nome];
+                campos[nome].classList.toggle('invalido', !!erro);
+                campos[nome].setAttribute('aria-invalid', erro ? 'true' : 'false');
+                msg.textContent = erro || '';
+                msg.classList.toggle('hidden', !erro);
+            });
+        }
+
+        function mostrarResultado(texto, sucesso) {
+            resultado.textContent = texto;
+            resultado.classList.toggle('text-emerald-400', sucesso);
+            resultado.classList.toggle('text-red-500', !sucesso);
+            resultado.classList.remove('hidden');
+        }
+
+        // Depois da primeira tentativa, os erros acompanham a digitação
+        form.addEventListener('input', () => {
+            if (tentouEnviar) mostrarErros(validar(lerDados()));
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            tentouEnviar = true;
+            resultado.classList.add('hidden');
+
+            const dados = lerDados();
+            const erros = validar(dados);
+            mostrarErros(erros);
+            const primeiroInvalido = Object.keys(campos).find((nome) => erros[nome]);
+            if (primeiroInvalido) {
+                campos[primeiroInvalido].focus();
+                return;
+            }
+
+            botao.disabled = true;
+            try {
+                await RPG.cadastrarUsuario({ nome: dados.nome, email: dados.email, senha: dados.senha, papel: dados.papel });
+                form.reset();
+                tentouEnviar = false;
+                mostrarErros({});
+                mostrarResultado(`${dados.nome} cadastrado como ${dados.papel === 'mestre' ? 'Mestre' : 'Jogador'}.`, true);
+                campos.nome.focus();
+            } catch (err) {
+                console.error('Falha no cadastro:', err);
+                const codigo = (err && (err.code || err.message)) || '';
+                if (codigo === 'auth/email-already-in-use') {
+                    mostrarErros({ email: 'Este e-mail já tem uma conta.' });
+                    campos.email.focus();
+                    return;
+                }
+                const mensagens = {
+                    'auth/invalid-email': 'O serviço de login recusou este e-mail.',
+                    'auth/weak-password': 'O serviço de login recusou esta senha: use uma mais forte.',
+                    'auth/operation-not-allowed': 'O login por e-mail e senha está desativado no Firebase.',
+                    'auth/network-request-failed': 'Sem ligação com o serviço de login. Tente novamente.',
+                    'auth/too-many-requests': 'Muitas tentativas. Aguarde um pouco e tente novamente.',
+                    'auth-indisponivel': 'O serviço de login não respondeu. Tente novamente.',
+                    'banco-indisponivel': 'O banco de dados não respondeu. A conta não foi criada.',
+                    'PERMISSION_DENIED': 'O banco recusou o cadastro. A conta não foi criada.',
+                    'sem-permissao': 'Só o Mestre pode cadastrar usuários.'
+                };
+                mostrarResultado(mensagens[codigo] || 'Não foi possível cadastrar. Tente novamente.', false);
+            } finally {
+                botao.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
