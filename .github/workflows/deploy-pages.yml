@@ -44,6 +44,7 @@ jobs:
           mkdir -p _site/js
           cp *.html _site/
           cp js/*.js _site/js/
+          cp -r assets _site/
 
       - uses: actions/configure-pages@v5
 
