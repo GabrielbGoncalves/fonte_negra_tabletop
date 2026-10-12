@@ -8,7 +8,7 @@ Este guia publica o site em `https://gabrielbgoncalves.github.io/fonte_negra_tab
 |---|---|---|
 | Configuração web do Firebase (`apiKey`, `appId`, URLs) | Secrets do GitHub, injetada no deploy em `js/firebase-config.js` | **Fora do código e do Git.** Mas quem abre o site consegue ver os valores no navegador, porque é assim que o SDK web do Firebase funciona. Não existe forma de esconder isso num site estático. |
 | Senhas dos usuários | Firebase Authentication | Não. Nunca passam pelo repositório. |
-| Quem é Mestre ou Jogador | `/mestres` e `/jogadores` no banco, editáveis só pelo console | Não. |
+| Quem é Mestre ou Jogador | `/mestres` e `/jogadores` no banco; Mestres só criam entradas (página de cadastro), alterar ou revogar é pelo console | Não. |
 | Dados da mesa | Realtime Database, protegido por `database.rules.json` | Só para contas cadastradas. |
 
 A segurança dos dados vem de **três camadas**, todas configuradas abaixo:
