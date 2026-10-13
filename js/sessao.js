@@ -8,6 +8,7 @@
  * Mesmo assim, a configuração web do Firebase chega ao navegador de quem abre o
  * site; quem protege os dados são as Regras do Realtime Database
  * (database.rules.json): só /mestres escreve, só /mestres e /jogadores leem.
+ * Exceção: no auto-cadastro, a própria conta pode se gravar como Jogador.
  *
  * O "modo" (mestre/jogador) guardado no localStorage é apenas um cache para a
  * interface; ele é sempre conferido contra o banco depois do login.
@@ -198,6 +199,29 @@
         }
     }
 
+    // Auto-cadastro aberto (cadastro_jogador.html): cria a conta já logada e grava o papel de Jogador.
+    // As Regras só aceitam que a própria conta se grave em /jogadores e /usuarios com papel 'jogador'.
+    async function cadastrarJogador({ nome, email, senha }) {
+        if (await pronto) throw new Error('ja-logado');
+
+        const cred = await comPrazo(auth.createUserWithEmailAndPassword(email, senha), 15000, 'auth-indisponivel');
+        const uid = cred.user.uid;
+        try {
+            await comPrazo(database.ref().update({
+                // O e-mail gravado é o do Auth, que as Regras conferem com auth.token.email
+                ['usuarios/' + uid]: { nome, email: cred.user.email, papel: 'jogador' },
+                ['jogadores/' + uid]: true
+            }), 10000, 'banco-indisponivel');
+        } catch (err) {
+            // Sem papel no banco a conta não serve para nada: desfaz a criação
+            await cred.user.delete().catch(registrarErro);
+            await auth.signOut().catch(registrarErro);
+            throw err;
+        }
+        gravarCache('jogador');
+        return uid;
+    }
+
     // Escapa texto para inserir com segurança em innerHTML (conteúdo ou atributo entre aspas).
     function escaparHtml(valor) {
         return String(valor ?? '').replace(/[&<>"']/g, (c) => ({
@@ -211,6 +235,7 @@
         entrar,
         sair,
         cadastrarUsuario,
+        cadastrarJogador,
         escaparHtml
     });
 })();

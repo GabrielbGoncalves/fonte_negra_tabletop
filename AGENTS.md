@@ -21,6 +21,7 @@ Idioma: código, comentários, textos de interface e mensagens de commit em **po
 | `sistema_de_confidentes.html` | Confidentes por jogador | `sistema_de_confidentes` |
 | `velvet_room.html` | Calculadora de fusão | `velvet_room` |
 | `cadastro_usuarios.html` | Cadastro de contas (só Mestre) | `usuarios`, `mestres`, `jogadores` |
+| `cadastro_jogador.html` | Auto-cadastro aberto, só cria Jogadores (link no login do hub) | `usuarios`, `jogadores` |
 | `loja.html` | **Quebrado**: é só um trecho de JS (ver "Problemas conhecidos") | `loja` |
 | `js/sessao.js` | Firebase, login, papel do usuário, cadastro de contas e helpers compartilhados | `mestres`, `jogadores`, `usuarios` |
 | `js/firebase-config.js` | **Placeholder** (`null`). No deploy, o workflow sobrescreve com a configuração real a partir dos secrets | — |
@@ -41,7 +42,7 @@ Cada página tem o CSS e o JS embutidos (`<style>` e `<script>` no próprio arqu
   - `RPG.entrar(email, senha)` e `RPG.sair()`.
   - `RPG.cadastrarUsuario({ nome, email, senha, papel })`: cria a conta no Auth numa instância secundária do Firebase (o Mestre continua logado) e grava `/usuarios/{uid}` e o papel numa única atualização. Se o banco recusar, a conta recém-criada é apagada.
   - `RPG.escaparHtml(valor)`.
-- O papel vem do banco: `/mestres/{uid} = true` ou `/jogadores/{uid} = true`. Um Mestre pode **criar** essas entradas (pela página de cadastro), mas não alterar nem apagar: trocar ou revogar papel continua sendo pelo Console do Firebase. `/usuarios/{uid}` guarda nome, e-mail e papel, e só Mestres leem.
+- O papel vem do banco: `/mestres/{uid} = true` ou `/jogadores/{uid} = true`. Um Mestre pode **criar** essas entradas (pela página de cadastro), mas não alterar nem apagar: trocar ou revogar papel continua sendo pelo Console do Firebase. Qualquer pessoa pode criar a própria conta de Jogador em `cadastro_jogador.html` (`RPG.cadastrarJogador`): as regras deixam a conta gravar só `/jogadores/{seu uid}` e `/usuarios/{seu uid}` com papel `jogador` e o e-mail do token, na mesma atualização. `/usuarios/{uid}` guarda nome, e-mail e papel, e só Mestres leem.
 - `localStorage['rpg_modo_sessao']` é **só um cache para a interface**. As páginas leem esse cache de forma síncrona em `const modoAtual = ...`. O `sessao.js` confere o cache contra o banco e recarrega a página se ele estiver errado.
 - Toda página inclui `<script src="js/firebase-config.js"></script>` antes de `js/sessao.js`. As páginas internas usam `<script src="js/sessao.js" data-exigir-login></script>` e, sem sessão válida, voltam para `index.html`.
 - Em `localhost`/`127.0.0.1`, o `sessao.js` ignora o `firebase-config.js` e usa uma configuração fixa do projeto demo, apontando para os emuladores.

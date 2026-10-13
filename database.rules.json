@@ -13,14 +13,14 @@
     "jogadores": {
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
-        ".write": "auth != null && root.child('mestres/' + auth.uid).val() === true && !data.exists() && newData.val() === true",
+        ".write": "auth != null && !data.exists() && newData.val() === true && (root.child('mestres/' + auth.uid).val() === true || (auth.uid === $uid && root.child('mestres/' + $uid).val() !== true && newData.parent().parent().child('usuarios/' + $uid + '/papel').val() === 'jogador'))",
         ".validate": "newData.isBoolean()"
       }
     },
     "usuarios": {
       ".read": "auth != null && root.child('mestres/' + auth.uid).val() === true",
       "$uid": {
-        ".write": "auth != null && root.child('mestres/' + auth.uid).val() === true && !data.exists()",
+        ".write": "auth != null && !data.exists() && (root.child('mestres/' + auth.uid).val() === true || (auth.uid === $uid && newData.child('papel').val() === 'jogador' && newData.child('email').val() === auth.token.email))",
         ".validate": "newData.hasChildren(['nome', 'email', 'papel'])",
         "nome": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 60" },
         "email": { ".validate": "newData.isString() && newData.val().length <= 254" },
