@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loja | Fonte Negra</title>
+
+    <!-- ============================================================
+         COPIE DE OUTRA PÁGINA (ex.: sistema_de_confidentes.html), nesta ordem:
+         1. <meta http-equiv="Content-Security-Policy" ...>
+         2. <meta name="referrer" ...> e o bloco de favicons (assets/favicon/)
+         3. Os três <script> do Firebase compat 10.8.0 com integrity (SRI)
+         A CSP já deve liberar Google Fonts (Oswald) e o Firebase.
+         ============================================================ -->
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/sessao.js" data-exigir-login></script>
+
+    <style>
+        :root {
+            --bg: #020617;
+            --painel: #0f172a;
+            --painel-2: #16213f;
+            --azul: #3b82f6;
+            --azul-claro: #60a5fa;
+            --azul-escuro: #1e3a8a;
+            --texto: #f8fafc;
+            --suave: #94a3b8;
+            --ok: #22c55e;
+            --aviso: #f59e0b;
+            --perigo: #ef4444;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Oswald', sans-serif;
+            background-color: var(--bg);
+            background-image: radial-gradient(#1e3a8a 15%, transparent 16%), radial-gradient(#1e3a8a 15%, transparent 16%);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            color: var(--texto);
+            min-height: 100vh;
+        }
+        .clip-card { clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%); }
+        .clip-header { clip-path: polygon(0 0, 100% 0, 98% 100%, 2% 100%); }
+        .skew-tag { transform: skewX(-12deg); }
+        .unskew { transform: skewX(12deg); display: inline-block; }
+        .txt { font-family: Arial, Helvetica, sans-serif; text-transform: none; }
+
+        /* ---------- Topo ---------- */
+        .topo {
+            background: var(--azul-escuro);
+            border-bottom: 4px solid var(--azul);
+            padding: 14px 20px 22px;
+            display: flex; flex-wrap: wrap; align-items: center; gap: 14px;
+        }
+        .topo h1 { margin: 0; font-size: 2rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; font-style: italic; }
+        .topo .voltar { color: var(--texto); text-decoration: none; border: 2px solid var(--azul-claro); padding: 4px 12px; text-transform: uppercase; font-size: .9rem; }
+        .topo .voltar:hover { background: var(--azul); }
+        .topo .espaco { flex: 1; }
+        .selo { background: var(--bg); border: 2px solid var(--azul-claro); padding: 6px 18px; font-weight: 700; font-size: 1.15rem; }
+        .selo small { color: var(--suave); font-weight: 400; margin-right: 8px; }
+
+        main { max-width: 1180px; margin: 0 auto; padding: 22px 16px 60px; }
+
+        .faixa-ajuste {
+            margin-bottom: 16px; padding: 10px 16px; border-left: 6px solid var(--ok);
+            background: var(--painel); font-size: 1.05rem;
+        }
+        .faixa-ajuste.aumento { border-left-color: var(--aviso); }
+
+        /* ---------- Abas ---------- */
+        .abas { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+        .aba {
+            font: inherit; text-transform: uppercase; letter-spacing: 1px; cursor: pointer;
+            background: var(--painel); color: var(--suave); border: 2px solid var(--azul-escuro);
+            padding: 8px 20px; transform: skewX(-12deg);
+        }
+        .aba > span { display: inline-block; transform: skewX(12deg); }
+        .aba:hover { color: var(--texto); border-color: var(--azul-claro); }
+        .aba.ativa { background: var(--azul); color: #fff; border-color: var(--azul-claro); }
+        .painel-aba[hidden] { display: none; }
+
+        /* ---------- Controles ---------- */
+        input, select, textarea {
+            font: inherit; font-family: Arial, Helvetica, sans-serif;
+            background: var(--bg); color: var(--texto);
+            border: 2px solid var(--azul-escuro); padding: 8px 10px; min-width: 0;
+        }
+        textarea { resize: vertical; width: 100%; }
+        input:focus, select:focus, textarea:focus, .btn:focus-visible, .aba:focus-visible {
+            outline: 2px solid var(--azul-claro); outline-offset: 2px; border-color: var(--azul-claro);
+        }
+        label { display: block; font-size: .85rem; color: var(--suave); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+        .btn {
+            font: inherit; text-transform: uppercase; letter-spacing: 1px; cursor: pointer;
+            background: var(--azul); color: #fff; border: 2px solid var(--azul-claro);
+            padding: 7px 16px; box-shadow: 3px 3px 0 var(--azul-escuro);
+            transition: transform .12s, box-shadow .12s;
+        }
+        .btn:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--azul-escuro); }
+        .btn:disabled { opacity: .4; cursor: not-allowed; }
+        .btn.sec { background: var(--painel); border-color: var(--azul-escuro); color: var(--texto); }
+        .btn.sec:hover:not(:disabled) { border-color: var(--azul-claro); }
+        .btn.perigo { background: #7f1d1d; border-color: var(--perigo); box-shadow: 3px 3px 0 #450a0a; }
+        .btn.mini { padding: 3px 10px; font-size: .85rem; box-shadow: 2px 2px 0 var(--azul-escuro); }
+
+        .filtros { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin-bottom: 22px; }
+        .filtros .campo-busca { flex: 1 1 260px; }
+        .filtros input[type=search] { width: 100%; }
+        .check { display: flex; align-items: center; gap: 8px; padding-bottom: 9px; color: var(--texto); text-transform: none; letter-spacing: 0; font-size: 1rem; cursor: pointer; }
+        .check input { width: 18px; height: 18px; padding: 0; accent-color: var(--azul); }
+        .contagem { color: var(--suave); padding-bottom: 10px; }
+
+        /* ---------- Cards ---------- */
+        .grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 24px; }
+        .sombra { filter: drop-shadow(4px 4px 0 var(--azul)); transition: transform .15s, filter .15s; }
+        .sombra:hover { transform: translate(-3px, -3px); filter: drop-shadow(8px 8px 0 var(--azul-claro)); }
+        .card {
+            background: var(--painel); border: 2px solid var(--azul-escuro);
+            padding: 16px 16px 30px; height: 100%; display: flex; flex-direction: column; gap: 10px;
+        }
+        .card.esgotado { opacity: .6; }
+        .card-topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+        .nome { margin: 0; font-size: 1.35rem; text-transform: uppercase; letter-spacing: 1px; line-height: 1.15; word-break: break-word; }
+        .tag { background: var(--azul-escuro); border: 1px solid var(--azul-claro); padding: 2px 10px; font-size: .75rem; text-transform: uppercase; white-space: nowrap; }
+        .desc, .efeito { margin: 0; color: #cbd5e1; font-size: .92rem; line-height: 1.4; }
+        .efeito b { color: var(--azul-claro); }
+        .card-rodape { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
+        .linha-preco { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+        .preco { font-size: 1.6rem; font-weight: 700; color: var(--azul-claro); }
+        .preco s { font-size: 1rem; font-weight: 400; color: var(--suave); margin-right: 8px; }
+        .estoque { color: var(--suave); font-size: .95rem; }
+        .selo-ajuste { display: inline-block; font-size: .8rem; padding: 1px 8px; margin-left: 6px; color: #052e16; background: var(--ok); vertical-align: middle; }
+        .selo-ajuste.aumento { background: var(--aviso); color: #451a03; }
+        .prazo { font-size: .8rem; color: var(--suave); width: 100%; }
+        .acoes { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+        .acoes input[type=number] { width: 64px; padding: 6px; }
+        .vazio { padding: 40px 16px; text-align: center; color: var(--suave); border: 2px dashed var(--azul-escuro); background: var(--painel); }
+
+        /* ---------- Blocos (mestre) ---------- */
+        .bloco { background: var(--painel); border: 2px solid var(--azul-escuro); padding: 16px; margin-bottom: 22px; }
+        .bloco h2 { margin: 0 0 12px; font-size: 1.3rem; text-transform: uppercase; letter-spacing: 1px; color: var(--azul-claro); }
+        .form-linha { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
+        .ajuda { color: var(--suave); font-size: .85rem; margin: 10px 0 0; }
+        .lista { display: flex; flex-direction: column; gap: 8px; }
+        .linha { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; background: var(--painel-2); border-left: 4px solid var(--azul); padding: 8px 12px; }
+        .linha .grow { flex: 1 1 200px; }
+        .linha.ok { border-left-color: var(--ok); }
+        .linha.aumento { border-left-color: var(--aviso); }
+        .jogador { background: var(--painel-2); border: 2px solid var(--azul-escuro); padding: 14px; margin-bottom: 16px; }
+        .jogador-topo { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        .jogador-topo h3 { margin: 0; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; }
+        .pr-atual { font-size: 1.4rem; font-weight: 700; color: var(--azul-claro); }
+        .qtd-controle { display: inline-flex; align-items: center; gap: 6px; }
+        table { width: 100%; border-collapse: collapse; font-family: Arial, Helvetica, sans-serif; }
+        th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--azul-escuro); vertical-align: top; }
+        th { color: var(--suave); font-weight: 400; font-size: .8rem; text-transform: uppercase; letter-spacing: 1px; }
+        .tabela-rolagem { overflow-x: auto; }
+        .log-linha { font-family: Arial, Helvetica, sans-serif; font-size: .92rem; padding: 6px 0; border-bottom: 1px solid var(--azul-escuro); }
+        .log-linha time { color: var(--suave); margin-right: 10px; }
+
+        /* ---------- Modal e aviso ---------- */
+        dialog { background: var(--painel); color: var(--texto); border: 3px solid var(--azul); padding: 22px; width: min(520px, 94vw); box-shadow: 8px 8px 0 var(--azul-escuro); }
+        dialog::backdrop { background: rgba(2, 6, 23, .8); }
+        dialog h2 { margin: 0 0 14px; text-transform: uppercase; letter-spacing: 1px; }
+        .campo { margin-bottom: 12px; }
+        .campo input, .campo select { width: 100%; }
+        .dupla { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .modal-acoes { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
+        #aviso {
+            position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
+            max-width: 92vw; padding: 10px 22px; background: var(--azul-escuro);
+            border: 2px solid var(--azul-claro); font-family: Arial, Helvetica, sans-serif; z-index: 50;
+        }
+        #aviso.erro { background: #7f1d1d; border-color: var(--perigo); }
+        #aviso[hidden] { display: none; }
+        @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+        @media (max-width: 560px) { .topo h1 { font-size: 1.5rem; } .dupla { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<header class="topo">
+    <a class="voltar" href="index.html">‹ Hub</a>
+    <h1>Loja</h1>
+    <div class="espaco"></div>
+    <div class="selo skew-tag"><span class="unskew" id="selo-topo"></span></div>
+</header>
+
+<main>
+    <div id="faixa-global" class="faixa-ajuste txt" hidden></div>
+
+    <nav class="abas" id="abas" aria-label="Seções da loja"></nav>
+
+    <!-- LOJA -->
+    <section class="painel-aba" id="aba-loja">
+        <div class="filtros">
+            <div class="campo-busca">
+                <label for="busca">Pesquisar</label>
+                <input type="search" id="busca" placeholder="Nome, descrição ou efeito" autocomplete="off">
+            </div>
+            <div>
+                <label for="filtro-tipo">Categoria</label>
+                <select id="filtro-tipo"></select>
+            </div>
+            <div>
+                <label for="ordem">Ordenar</label>
+                <select id="ordem">
+                    <option value="nome">Nome</option>
+                    <option value="preco-asc">Menor preço</option>
+                    <option value="preco-desc">Maior preço</option>
+                </select>
+            </div>
+            <label class="check"><input type="checkbox" id="so-disponiveis"> Só com estoque</label>
+            <label class="check" id="rotulo-so-ajuste"><input type="checkbox" id="so-ajuste"> Só com ajuste de preço</label>
+            <span class="contagem txt" id="contagem"></span>
+            <button class="btn" id="btn-novo-item" data-acao="novo-item" hidden>+ Novo item</button>
+        </div>
+        <div class="grade" id="grade"></div>
+    </section>
+
+    <!-- INVENTÁRIO (jogador) -->
+    <section class="painel-aba" id="aba-inventario" hidden>
+        <div class="bloco">
+            <h2>Meu inventário</h2>
+            <div class="lista" id="meu-inventario"></div>
+        </div>
+    </section>
+
+    <!-- JOGADORES (mestre) -->
+    <section class="painel-aba" id="aba-jogadores" hidden>
+        <div class="bloco">
+            <h2>Inventário geral</h2>
+            <div class="filtros" style="margin-bottom:12px">
+                <div class="campo-busca">
+                    <label for="busca-geral">Pesquisar item ou jogador</label>
+                    <input type="search" id="busca-geral" autocomplete="off">
+                </div>
+            </div>
+            <div class="tabela-rolagem" id="inventario-geral"></div>
+        </div>
+        <div id="lista-jogadores"></div>
+    </section>
+
+    <!-- PREÇOS (mestre) -->
+    <section class="painel-aba" id="aba-precos" hidden>
+        <div class="bloco">
+            <h2>Desconto ou aumento temporário</h2>
+            <div class="form-linha">
+                <div><label for="aj-escopo">Vale para</label>
+                    <select id="aj-escopo">
+                        <option value="loja">A loja toda</option>
+                        <option value="categoria">Uma categoria</option>
+                        <option value="item">Um item</option>
+                    </select></div>
+                <div id="aj-alvo-caixa" hidden><label for="aj-alvo">Alvo</label><select id="aj-alvo"></select></div>
+                <div><label for="aj-tipo">Tipo</label>
+                    <select id="aj-tipo"><option value="desconto">Desconto</option><option value="aumento">Aumento</option></select></div>
+                <div><label for="aj-pct">Percentual</label><input type="number" id="aj-pct" min="1" max="100" step="1" value="10" style="width:90px"></div>
+                <div><label for="aj-dur">Duração</label><input type="number" id="aj-dur" min="1" max="9999" step="1" value="1" style="width:90px"></div>
+                <div><label for="aj-unid">Unidade</label>
+                    <select id="aj-unid">
+                        <option value="min">Minutos</option>
+                        <option value="h" selected>Horas</option>
+                        <option value="d">Dias</option>
+                        <option value="sem">Sem prazo</option>
+                    </select></div>
+                <button class="btn" data-acao="aplicar-ajuste">Aplicar</button>
+            </div>
+            <p class="ajuda txt">O ajuste de um item soma-se ao da loja toda (os dois são multiplicados). Para uma categoria, vale para os itens que existem agora. Ao chegar o prazo, o preço volta ao normal sozinho.</p>
+        </div>
+        <div class="bloco">
+            <h2>Ajustes ativos</h2>
+            <div class="lista" id="ajustes-ativos"></div>
+        </div>
+    </section>
+
+    <!-- HISTÓRICO (mestre) -->
+    <section class="painel-aba" id="aba-historico" hidden>
+        <div class="bloco">
+            <div class="form-linha" style="justify-content:space-between;margin-bottom:10px">
+                <h2 style="margin:0">Histórico</h2>
+                <button class="btn perigo mini" data-acao="limpar-log">Limpar histórico</button>
+            </div>
+            <div id="log"></div>
+        </div>
+    </section>
+</main>
+
+<!-- Modal de item -->
+<dialog id="dlg-item">
+    <h2 id="dlg-item-titulo">Novo item</h2>
+    <form id="form-item" method="dialog">
+        <div class="campo"><label for="i-nome">Nome</label><input id="i-nome" maxlength="80" required></div>
+        <div class="campo"><label for="i-tipo">Categoria</label><input id="i-tipo" maxlength="40" list="lista-tipos" required><datalist id="lista-tipos"></datalist></div>
+        <div class="dupla">
+            <div class="campo"><label for="i-preco">Preço (PR)</label><input type="number" id="i-preco" min="0" max="1000000" step="0.01" required></div>
+            <div class="campo"><label for="i-estoque">Quantidade</label><input type="number" id="i-estoque" min="0" max="9999" step="1" required></div>
+        </div>
+        <div class="campo"><label for="i-desc">Descrição</label><textarea id="i-desc" rows="3" maxlength="500"></textarea></div>
+        <div class="campo"><label for="i-efeito">Efeito</label><textarea id="i-efeito" rows="2" maxlength="300"></textarea></div>
+        <div class="modal-acoes">
+            <button type="button" class="btn sec" data-acao="fechar-item">Cancelar</button>
+            <button type="submit" class="btn">Salvar item</button>
+        </div>
+    </form>
+</dialog>
+
+<div id="aviso" class="txt" role="status" hidden></div>
+
+<script>
+(function () {
+    'use strict';
+
+    const esc = RPG.escaparHtml;
+    let ehMestre = false;   // definido quando a sessão confirma o papel (resolve com { user, modo })
+    const SEM_PRAZO = 9999999999999;   // "ate" usado quando o ajuste não tem prazo
+    const $ = (s, r) => (r || document).querySelector(s);
+
+    const estado = {
+        uid: null, aba: 'loja',
+        itens: [], global: null,
+        pr: {}, inventario: {}, usuarios: {}, log: {},
+        carregou: { itens: false, global: false }, limpou: false
+    };
+
+    /* ---------- utilitários ---------- */
+    const r2 = n => Math.round(n * 100) / 100;
+    const num = (v, padrao, min, max) => {
+        v = Number(v);
+        return Number.isFinite(v) ? Math.min(max, Math.max(min, v)) : padrao;
+    };
+    const fmtPR = n => r2(n).toLocaleString('pt-BR', { maximumFractionDigits: 2 }) + ' PR';
+    const semAcento = s => String(s == null ? '' : s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const fmtData = t => new Date(t).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+    const texto = (v, max) => String(v == null ? '' : v).trim().slice(0, max);
+
+    function fmtRestante(ate, agora) {
+        if (ate >= SEM_PRAZO) return 'sem prazo';
+        const min = Math.max(1, Math.ceil((ate - agora) / 60000));
+        const d = Math.floor(min / 1440), h = Math.floor((min % 1440) / 60), m = min % 60;
+        if (d > 0) return 'faltam ' + d + 'd ' + h + 'h';
+        if (h > 0) return 'faltam ' + h + 'h ' + m + 'min';
+        return 'faltam ' + m + 'min';
+    }
+
+    let tempoAviso;
+    function avisar(msg, erro) {
+        const el = $('#aviso');
+        el.textContent = msg;
+        el.className = 'txt' + (erro ? ' erro' : '');
+        el.hidden = false;
+        clearTimeout(tempoAviso);
+        tempoAviso = setTimeout(() => { el.hidden = true; }, 4500);
+    }
+
+    /* ---------- normalização dos dados do banco ---------- */
+    function normAjuste(raw) {
+        if (!raw || typeof raw !== 'object') return null;
+        const pct = Number(raw.pct), ate = Number(raw.ate);
+        if (!Number.isFinite(pct) || !Number.isFinite(ate)) return null;
+        return { pct: Math.min(1000, Math.max(-100, pct)), ate };
+    }
+
+    function normItens(raw) {
+        if (!raw || typeof raw !== 'object') return [];
+        return Object.keys(raw).map(id => {
+            const r = raw[id] || {};
+            return {
+                id,
+                nome: texto(r.nome, 80) || '(sem nome)',
+                tipo: texto(r.tipo, 40) || 'Geral',
+                desc: texto(r.desc, 500),
+                efeito: texto(r.efeito, 300),
+                preco: r2(num(r.preco, 0, 0, 1000000)),
+                estoque: Math.floor(num(r.estoque, 0, 0, 9999)),
+                ajuste: normAjuste(r.ajuste)
+            };
+        }).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+    }
+
+    /* ---------- preço (mesma conta das regras do banco) ---------- */
+    const mult = (aj, agora) => (aj && aj.ate > agora) ? 1 + aj.pct / 100 : 1;
+    const precoUnit = (item, agora) => r2(item.preco * mult(item.ajuste, agora) * mult(estado.global, agora));
+    const ativo = (aj, agora) => !!(aj && aj.ate > agora);
+
+    /* ---------- gravação ---------- */
+    // Atualizações em vários caminhos de uma vez (compra, ajustes) precisam de update() na raiz,
+    // que o wrapper RPG.db não expõe. Só chamamos depois de a sessão estar confirmada.
+    async function gravar(mapa) {
+        await RPG.sessao;
+        return firebase.database().ref().update(mapa);
+    }
+    const novoId = () => firebase.database().ref().push().key;
+
+    function entradaLog(mapa, textoLog) {
+        mapa['loja/log/' + novoId()] = { t: Date.now(), uid: estado.uid, texto: texto(textoLog, 300) };
+    }
+
+    async function executar(mapa, okMsg, erroMsg) {
+        try {
+            await gravar(mapa);
+            if (okMsg) avisar(okMsg);
+            return true;
+        } catch (e) {
+            console.error(e);
+            avisar(erroMsg || 'Não foi possível salvar. Tente de novo.', true);
+            return false;
+        }
+    }
+
+    /* ---------- leitura em tempo real ---------- */
+    function ligar() {
+        const db = RPG.db;
+        const falha = e => { console.error(e); avisar('Sem permissão para ler a loja. Confira as regras do banco.', true); };
+
+        db.ref('loja/itens').on('value', s => { estado.itens = normItens(s.val()); estado.carregou.itens = true; aoCarregar(); }, falha);
+        db.ref('loja/ajusteGlobal').on('value', s => { estado.global = normAjuste(s.val()); estado.carregou.global = true; aoCarregar(); }, falha);
+
+        if (ehMestre) {
+            db.ref('loja/pr').on('value', s => { estado.pr = s.val() || {}; renderTudo(); }, falha);
+            db.ref('loja/inventario').on('value', s => { estado.inventario = s.val() || {}; renderTudo(); }, falha);
+            db.ref('loja/log').on('value', s => { estado.log = s.val() || {}; renderTudo(); }, falha);
+            db.ref('usuarios').on('value', s => { estado.usuarios = s.val() || {}; renderTudo(); }, falha);
+        } else {
+            db.ref('loja/pr/' + estado.uid).on('value', s => { estado.pr = {}; estado.pr[estado.uid] = num(s.val(), 0, 0, 1000000); renderTudo(); }, falha);
+            db.ref('loja/inventario/' + estado.uid).on('value', s => { estado.inventario = {}; estado.inventario[estado.uid] = s.val() || {}; renderTudo(); }, falha);
+        }
+    }
+
+    function aoCarregar() {
+        renderTudo();
+        if (ehMestre && !estado.limpou && estado.carregou.itens && estado.carregou.global) {
+            estado.limpou = true;
+            limparExpirados();
+        }
+    }
+
+    // Remove do banco ajustes que já venceram (o preço já voltou ao normal; isto só faz faxina).
+    function limparExpirados() {
+        const agora = Date.now(), mapa = {};
+        if (estado.global && estado.global.ate <= agora) mapa['loja/ajusteGlobal'] = null;
+        estado.itens.forEach(i => { if (i.ajuste && i.ajuste.ate <= agora) mapa['loja/itens/' + i.id + '/ajuste'] = null; });
+        if (Object.keys(mapa).length) gravar(mapa).catch(console.error);
+    }
+
+    /* ---------- render: estrutura ---------- */
+    function renderTudo() {
+        renderTopo();
+        renderAbas();
+        renderFiltroTipos();
+        renderLoja();
+        if (estado.aba === 'inventario') renderMeuInventario();
+        if (estado.aba === 'jogadores') renderJogadores();
+        if (estado.aba === 'precos') renderAjustes();
+        if (estado.aba === 'historico') renderLog();
+    }
+
+    function renderTopo() {
+        const agora = Date.now();
+        $('#selo-topo').innerHTML = ehMestre
+            ? 'Modo Mestre'
+            : '<small>Seu saldo</small>' + esc(fmtPR(num(estado.pr[estado.uid], 0, 0, 1000000)));
+
+        const faixa = $('#faixa-global');
+        if (ativo(estado.global, agora)) {
+            const p = estado.global.pct, aumento = p > 0;
+            faixa.className = 'faixa-ajuste txt' + (aumento ? ' aumento' : '');
+            faixa.textContent = (aumento ? 'Aumento de ' : 'Promoção de ') + Math.abs(p) + '% em toda a loja (' + fmtRestante(estado.global.ate, agora) + ').';
+            faixa.hidden = false;
+        } else {
+            faixa.hidden = true;
+        }
+    }
+
+    function renderAbas() {
+        const abas = ehMestre
+            ? [['loja', 'Loja'], ['jogadores', 'Jogadores e inventário'], ['precos', 'Preços'], ['historico', 'Histórico']]
+            : [['loja', 'Loja'], ['inventario', 'Meu inventário']];
+        const nav = $('#abas');
+        const html = abas.map(a =>
+            '<button class="aba' + (a[0] === estado.aba ? ' ativa' : '') + '" data-acao="aba" data-aba="' + esc(a[0]) + '"><span>' + esc(a[1]) + '</span></button>'
+        ).join('');
+        if (nav.dataset.sig !== html) { nav.innerHTML = html; nav.dataset.sig = html; }
+        ['loja', 'inventario', 'jogadores', 'precos', 'historico'].forEach(id => {
+            const el = $('#aba-' + id);
+            if (el) el.hidden = id !== estado.aba;
+        });
+        $('#btn-novo-item').hidden = !ehMestre;
+        $('#rotulo-so-ajuste').hidden = false;
+    }
+
+    function renderFiltroTipos() {
+        const sel = $('#filtro-tipo');
+        const tipos = Array.from(new Set(estado.itens.map(i => i.tipo))).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+        const atual = sel.value;
+        const html = '<option value="">Todas</option>' + tipos.map(t => '<option value="' + esc(t) + '">' + esc(t) + '</option>').join('');
+        if (sel.dataset.sig !== html) {
+            sel.innerHTML = html; sel.dataset.sig = html;
+            sel.value = tipos.indexOf(atual) >= 0 ? atual : '';
+        }
+        const dl = $('#lista-tipos');
+        if (dl) dl.innerHTML = tipos.map(t => '<option value="' + esc(t) + '"></option>').join('');
+    }
+
+    /* ---------- render: loja ---------- */
+    function filtrarItens() {
+        const q = semAcento($('#busca').value.trim());
+        const tipo = $('#filtro-tipo').value;
+        const soDisp = $('#so-disponiveis').checked;
+        const soAj = $('#so-ajuste').checked;
+        const ordem = $('#ordem').value;
+        const agora = Date.now();
+
+        const lista = estado.itens.filter(i => {
+            if (tipo && i.tipo !== tipo) return false;
+            if (soDisp && i.estoque <= 0) return false;
+            if (soAj && precoUnit(i, agora) === i.preco) return false;
+            if (q && semAcento(i.nome + ' ' + i.tipo + ' ' + i.desc + ' ' + i.efeito).indexOf(q) < 0) return false;
+            return true;
+        });
+        if (ordem === 'preco-asc') lista.sort((a, b) => precoUnit(a, agora) - precoUnit(b, agora));
+        if (ordem === 'preco-desc') lista.sort((a, b) => precoUnit(b, agora) - precoUnit(a, agora));
+        return lista;
+    }
+
+    function cardItem(item, agora) {
+        const unit = precoUnit(item, agora);
+        const mudou = Math.abs(unit - item.preco) >= 0.005;
+        const pctEf = item.preco > 0 ? Math.round((unit / item.preco - 1) * 100) : 0;
+        const aumento = unit > item.preco;
+        // prazo mostrado: o do ajuste do item, ou o da loja toda
+        const ajPrazo = ativo(item.ajuste, agora) ? item.ajuste : (ativo(estado.global, agora) ? estado.global : null);
+
+        let acoes;
+        if (ehMestre) {
+            acoes = '<button class="btn mini" data-acao="editar-item" data-id="' + esc(item.id) + '">Editar</button>' +
+                    '<button class="btn mini sec" data-acao="preco-item" data-id="' + esc(item.id) + '">Preço</button>' +
+                    '<button class="btn mini perigo" data-acao="excluir-item" data-id="' + esc(item.id) + '">Excluir</button>';
+        } else if (item.estoque <= 0) {
+            acoes = '<button class="btn" disabled>Esgotado</button>';
+        } else {
+            const pr = num(estado.pr[estado.uid], 0, 0, 1000000);
+            acoes = '<input type="number" min="1" max="' + item.estoque + '" step="1" value="1" aria-label="Quantidade" data-qtd="' + esc(item.id) + '">' +
+                    '<button class="btn" data-acao="comprar" data-id="' + esc(item.id) + '"' + (unit > pr ? ' disabled title="PR insuficiente"' : '') + '>Comprar</button>';
+        }
+
+        return '<div class="sombra"><article class="card clip-card' + (item.estoque <= 0 ? ' esgotado' : '') + '">' +
+            '<div class="card-topo"><h3 class="nome">' + esc(item.nome) + '</h3>' +
+            '<span class="tag skew-tag"><span class="unskew">' + esc(item.tipo) + '</span></span></div>' +
+            (item.desc ? '<p class="desc txt">' + esc(item.desc) + '</p>' : '') +
+            (item.efeito ? '<p class="efeito txt"><b>Efeito:</b> ' + esc(item.efeito) + '</p>' : '') +
+            '<div class="card-rodape">' +
+              '<div class="linha-preco"><div class="preco">' +
+                (mudou ? '<s>' + esc(fmtPR(item.preco)) + '</s>' : '') + esc(fmtPR(unit)) +
+                (mudou ? '<span class="selo-ajuste' + (aumento ? ' aumento' : '') + '">' + (pctEf > 0 ? '+' : '') + pctEf + '%</span>' : '') +
+              '</div><div class="estoque txt">Qtd: ' + item.estoque + '</div>' +
+              (mudou && ajPrazo ? '<div class="prazo txt">' + esc(fmtRestante(ajPrazo.ate, agora)) + '</div>' : '') +
+              '</div>' +
+              '<div class="acoes">' + acoes + '</div>' +
+            '</div></article></div>';
+    }
+
+    function renderLoja() {
+        const agora = Date.now();
+        const lista = filtrarItens();
+        const grade = $('#grade');
+        $('#contagem').textContent = lista.length + (lista.length === 1 ? ' item' : ' itens');
+
+        if (!estado.carregou.itens) { grade.innerHTML = '<div class="vazio txt">Carregando a loja…</div>'; return; }
+        if (!lista.length) {
+            grade.innerHTML = '<div class="vazio txt">' + (estado.itens.length
+                ? 'Nenhum item corresponde aos filtros.'
+                : (ehMestre ? 'A loja está vazia. Use “+ Novo item” para cadastrar o primeiro.' : 'A loja está vazia por enquanto.')) + '</div>';
+            return;
+        }
+        // preserva as quantidades digitadas nos cards enquanto a lista é redesenhada
+        const digitadas = {};
+        grade.querySelectorAll('[data-qtd]').forEach(el => { digitadas[el.dataset.qtd] = el.value; });
+        grade.innerHTML = lista.map(i => cardItem(i, agora)).join('');
+        grade.querySelectorAll('[data-qtd]').forEach(el => { if (digitadas[el.dataset.qtd]) el.value = digitadas[el.dataset.qtd]; });
+    }
+
+    /* ---------- render: inventário do jogador ---------- */
+    function renderMeuInventario() {
+        const inv = estado.inventario[estado.uid] || {};
+        const ids = Object.keys(inv).filter(id => num(inv[id] && inv[id].qtd, 0, 0, 9999) > 0)
+            .sort((a, b) => texto(inv[a].nome, 80).localeCompare(texto(inv[b].nome, 80), 'pt-BR'));
+        $('#meu-inventario').innerHTML = ids.length
+            ? ids.map(id => '<div class="linha txt"><span class="grow">' + esc(texto(inv[id].nome, 80)) + '</span><b>× ' + num(inv[id].qtd, 0, 0, 9999) + '</b></div>').join('')
+            : '<div class="vazio txt">Você ainda não tem itens. Compre algo na aba Loja.</div>';
+    }
+
+    /* ---------- render: jogadores e inventário geral (mestre) ---------- */
+    function listaJogadores() {
+        return Object.keys(estado.usuarios)
+            .filter(uid => estado.usuarios[uid] && estado.usuarios[uid].papel === 'jogador')
+            .map(uid => ({ uid, nome: texto(estado.usuarios[uid].nome, 80) || texto(estado.usuarios[uid].email, 80) || uid.slice(0, 6) }))
+            .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+    }
+
+    function renderJogadores() {
+        const raiz = $('#aba-jogadores');
+        // não redesenha enquanto o Mestre digita em um campo desta aba
+        if (document.activeElement && raiz.contains(document.activeElement) && /INPUT|SELECT/.test(document.activeElement.tagName)) {
+            if (document.activeElement.id !== 'busca-geral') { estado.pendente = true; return; }
+        }
+        estado.pendente = false;
+
+        const jogadores = listaJogadores();
+        const nomes = {}; jogadores.forEach(j => { nomes[j.uid] = j.nome; });
+
+        // inventário geral: item -> quem tem
+        const geral = {};
+        Object.keys(estado.inventario).forEach(uid => {
+            const inv = estado.inventario[uid] || {};
+            Object.keys(inv).forEach(id => {
+                const q = num(inv[id] && inv[id].qtd, 0, 0, 9999);
+                if (q <= 0) return;
+                const g = geral[id] || (geral[id] = { nome: texto(inv[id].nome, 80), total: 0, donos: [] });
+                g.total += q; g.donos.push({ nome: nomes[uid] || (estado.usuarios[uid] && estado.usuarios[uid].nome) || uid.slice(0, 6), qtd: q });
+            });
+        });
+        const q = semAcento($('#busca-geral').value.trim());
+        const linhas = Object.keys(geral).map(id => geral[id])
+            .filter(g => !q || semAcento(g.nome + ' ' + g.donos.map(d => d.nome).join(' ')).indexOf(q) >= 0)
+            .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+        $('#inventario-geral').innerHTML = linhas.length
+            ? '<table><thead><tr><th>Item</th><th>Total</th><th>Com quem está</th></tr></thead><tbody>' +
+              linhas.map(g => '<tr><td>' + esc(g.nome) + '</td><td>' + g.total + '</td><td>' +
+                  g.donos.map(d => esc(d.nome) + ' × ' + d.qtd).join(', ') + '</td></tr>').join('') + '</tbody></table>'
+            : '<div class="vazio txt">' + (q ? 'Nada encontrado.' : 'Nenhum jogador tem itens ainda.') + '</div>';
+
+        const opcoesItens = estado.itens.map(i => '<option value="' + esc(i.id) + '">' + esc(i.nome) + '</option>').join('');
+        $('#lista-jogadores').innerHTML = jogadores.length ? jogadores.map(j => {
+            const pr = num(estado.pr[j.uid], 0, 0, 1000000);
+            const inv = estado.inventario[j.uid] || {};
+            const ids = Object.keys(inv).filter(id => num(inv[id] && inv[id].qtd, 0, 0, 9999) > 0)
+                .sort((a, b) => texto(inv[a].nome, 80).localeCompare(texto(inv[b].nome, 80), 'pt-BR'));
+            return '<div class="jogador" data-uid="' + esc(j.uid) + '">' +
+                '<div class="jogador-topo"><h3>' + esc(j.nome) + '</h3><span class="pr-atual">' + esc(fmtPR(pr)) + '</span></div>' +
+                '<div class="form-linha" style="margin-bottom:12px">' +
+                  '<div><label>PR</label><input type="number" min="0" max="1000000" step="0.01" value="' + pr + '" data-campo="pr" style="width:120px"></div>' +
+                  '<button class="btn mini" data-acao="pr-definir" data-uid="' + esc(j.uid) + '">Definir</button>' +
+                  '<button class="btn mini sec" data-acao="pr-somar" data-uid="' + esc(j.uid) + '">+ Somar</button>' +
+                  '<button class="btn mini sec" data-acao="pr-subtrair" data-uid="' + esc(j.uid) + '">− Subtrair</button>' +
+                '</div>' +
+                '<div class="lista" style="margin-bottom:12px">' + (ids.length ? ids.map(id =>
+                    '<div class="linha txt"><span class="grow">' + esc(texto(inv[id].nome, 80)) + '</span>' +
+                    '<span class="qtd-controle"><button class="btn mini sec" data-acao="inv-menos" data-uid="' + esc(j.uid) + '" data-id="' + esc(id) + '">−</button>' +
+                    '<b>' + num(inv[id].qtd, 0, 0, 9999) + '</b>' +
+                    '<button class="btn mini sec" data-acao="inv-mais" data-uid="' + esc(j.uid) + '" data-id="' + esc(id) + '">+</button></span>' +
+                    '<button class="btn mini perigo" data-acao="inv-remover" data-uid="' + esc(j.uid) + '" data-id="' + esc(id) + '">Remover</button></div>'
+                ).join('') : '<div class="vazio txt" style="padding:14px">Inventário vazio.</div>') + '</div>' +
+                (estado.itens.length ? '<div class="form-linha"><div><label>Dar item</label><select data-campo="dar-item">' + opcoesItens + '</select></div>' +
+                  '<div><label>Qtd</label><input type="number" min="1" max="999" step="1" value="1" data-campo="dar-qtd" style="width:80px"></div>' +
+                  '<label class="check"><input type="checkbox" data-campo="dar-estoque"> Descontar do estoque</label>' +
+                  '<button class="btn mini" data-acao="dar-item" data-uid="' + esc(j.uid) + '">Dar</button></div>' : '') +
+                '</div>';
+        }).join('') : '<div class="vazio txt">Nenhum jogador cadastrado ainda.</div>';
+    }
+
+    /* ---------- render: ajustes ativos (mestre) ---------- */
+    function renderAjustes() {
+        const agora = Date.now();
+        const linhas = [];
+        if (ativo(estado.global, agora)) linhas.push({ rotulo: 'Loja toda', aj: estado.global, caminho: 'loja/ajusteGlobal' });
+        estado.itens.forEach(i => { if (ativo(i.ajuste, agora)) linhas.push({ rotulo: i.nome, aj: i.ajuste, caminho: 'loja/itens/' + i.id + '/ajuste' }); });
+
+        $('#ajustes-ativos').innerHTML = linhas.length
+            ? linhas.map(l => '<div class="linha txt ' + (l.aj.pct > 0 ? 'aumento' : 'ok') + '"><span class="grow"><b>' + esc(l.rotulo) + '</b> — ' +
+                (l.aj.pct > 0 ? 'aumento de ' : 'desconto de ') + Math.abs(l.aj.pct) + '% (' + esc(fmtRestante(l.aj.ate, agora)) + ')</span>' +
+                '<button class="btn mini sec" data-acao="encerrar-ajuste" data-caminho="' + esc(l.caminho) + '">Encerrar</button></div>').join('') +
+              '<div><button class="btn mini perigo" data-acao="encerrar-todos">Encerrar todos</button></div>'
+            : '<div class="vazio txt">Nenhum ajuste de preço ativo.</div>';
+
+        // alvos do formulário
+        const escopo = $('#aj-escopo').value;
+        const sel = $('#aj-alvo');
+        $('#aj-alvo-caixa').hidden = escopo === 'loja';
+        const valor = sel.value;
+        const opcoes = escopo === 'categoria'
+            ? Array.from(new Set(estado.itens.map(i => i.tipo))).sort((a, b) => a.localeCompare(b, 'pt-BR')).map(t => [t, t])
+            : estado.itens.map(i => [i.id, i.nome]);
+        const html = opcoes.map(o => '<option value="' + esc(o[0]) + '">' + esc(o[1]) + '</option>').join('');
+        if (sel.dataset.sig !== escopo + html) {
+            sel.innerHTML = html; sel.dataset.sig = escopo + html;
+            if (opcoes.some(o => o[0] === valor)) sel.value = valor;
+        }
+    }
+
+    function renderLog() {
+        const chaves = Object.keys(estado.log).sort((a, b) => num(estado.log[b] && estado.log[b].t, 0, 0, SEM_PRAZO) - num(estado.log[a] && estado.log[a].t, 0, 0, SEM_PRAZO)).slice(0, 80);
+        $('#log').innerHTML = chaves.length
+            ? chaves.map(k => { const l = estado.log[k] || {}; return '<div class="log-linha"><time>' + esc(fmtData(num(l.t, 0, 0, SEM_PRAZO))) + '</time>' + esc(texto(l.texto, 300)) + '</div>'; }).join('')
+            : '<div class="vazio txt">Nada registrado ainda.</div>';
+    }
+
+    /* ---------- ações do jogador ---------- */
+    async function comprar(id, qtdBruta) {
+        const item = estado.itens.find(i => i.id === id);
+        const qtd = Math.floor(num(qtdBruta, 1, 1, 9999));
+        if (!item) return;
+        if (item.estoque < qtd) return avisar('Não há estoque suficiente.', true);
+
+        const agora = Date.now();
+        const total = r2(precoUnit(item, agora) * qtd);
+        const pr = num(estado.pr[estado.uid], 0, 0, 1000000);
+        if (total > pr) return avisar('PR insuficiente. Faltam ' + fmtPR(total - pr) + '.', true);
+
+        const inv = (estado.inventario[estado.uid] || {})[id];
+        const atual = inv ? num(inv.qtd, 0, 0, 9999) : 0;
+        if (atual + qtd > 9999) return avisar('Quantidade acima do limite.', true);
+        if (!confirm('Comprar ' + qtd + '× ' + item.nome + ' por ' + fmtPR(total) + '?')) return;
+
+        const mapa = {};
+        mapa['loja/itens/' + id + '/estoque'] = item.estoque - qtd;
+        mapa['loja/pr/' + estado.uid] = r2(pr - total);
+        mapa['loja/inventario/' + estado.uid + '/' + id + '/qtd'] = atual + qtd;
+        mapa['loja/inventario/' + estado.uid + '/' + id + '/nome'] = item.nome;
+        entradaLog(mapa, 'Compra: ' + qtd + '× ' + item.nome + ' por ' + fmtPR(total) + '.');
+        await executar(mapa, 'Compra feita: ' + qtd + '× ' + item.nome + '.',
+            'A compra não passou. O preço, o estoque ou seu PR podem ter mudado: confira a loja e tente de novo.');
+    }
+
+    /* ---------- ações do mestre: itens ---------- */
+    let editandoId = null;
+
+    function abrirItem(id) {
+        editandoId = id || null;
+        const it = id ? estado.itens.find(i => i.id === id) : null;
+        $('#dlg-item-titulo').textContent = it ? 'Editar item' : 'Novo item';
+        $('#i-nome').value = it ? it.nome : '';
+        $('#i-tipo').value = it ? it.tipo : ($('#filtro-tipo').value || '');
+        $('#i-preco').value = it ? it.preco : '';
+        $('#i-estoque').value = it ? it.estoque : 1;
+        $('#i-desc').value = it ? it.desc : '';
+        $('#i-efeito').value = it ? it.efeito : '';
+        $('#dlg-item').showModal();
+        $('#i-nome').focus();
+    }
+
+    async function salvarItem() {
+        if (!ehMestre) return;
+        const dados = {
+            nome: texto($('#i-nome').value, 80),
+            tipo: texto($('#i-tipo').value, 40) || 'Geral',
+            desc: texto($('#i-desc').value, 500),
+            efeito: texto($('#i-efeito').value, 300),
+            preco: r2(num($('#i-preco').value, 0, 0, 1000000)),
+            estoque: Math.floor(num($('#i-estoque').value, 0, 0, 9999))
+        };
+        if (!dados.nome) return avisar('Dê um nome ao item.', true);
+
+        const id = editandoId || novoId();
+        const mapa = {};
+        Object.keys(dados).forEach(k => { mapa['loja/itens/' + id + '/' + k] = dados[k]; });
+        entradaLog(mapa, (editandoId ? 'Mestre alterou o item “' : 'Mestre criou o item “') + dados.nome + '” (' + fmtPR(dados.preco) + ', qtd ' + dados.estoque + ').');
+        if (await executar(mapa, editandoId ? 'Item atualizado.' : 'Item criado.')) $('#dlg-item').close();
+    }
+
+    async function excluirItem(id) {
+        const it = estado.itens.find(i => i.id === id);
+        if (!it || !confirm('Excluir “' + it.nome + '” da loja? Quem já comprou continua com o item no inventário.')) return;
+        const mapa = {};
+        mapa['loja/itens/' + id] = null;
+        entradaLog(mapa, 'Mestre excluiu o item “' + it.nome + '”.');
+        await executar(mapa, 'Item excluído.');
+    }
+
+    /* ---------- ações do mestre: PR e inventário ---------- */
+    const nomeJogador = uid => { const j = listaJogadores().find(x => x.uid === uid); return j ? j.nome : uid.slice(0, 6); };
+
+    async function mudarPR(uid, modo, bloco) {
+        const campo = bloco.querySelector('[data-campo="pr"]');
+        const v = r2(num(campo.value, NaN, 0, 1000000));
+        if (!Number.isFinite(v)) return avisar('Informe um valor de PR.', true);
+        const atual = num(estado.pr[uid], 0, 0, 1000000);
+        const novo = modo === 'definir' ? v : modo === 'somar' ? atual + v : Math.max(0, atual - v);
+        const final = r2(Math.min(1000000, novo));
+        const mapa = {};
+        mapa['loja/pr/' + uid] = final;
+        entradaLog(mapa, 'Mestre ajustou o PR de ' + nomeJogador(uid) + ': ' + fmtPR(atual) + ' → ' + fmtPR(final) + '.');
+        await executar(mapa, 'PR de ' + nomeJogador(uid) + ': ' + fmtPR(final) + '.');
+    }
+
+    async function mudarInventario(uid, id, delta) {
+        const inv = (estado.inventario[uid] || {})[id];
+        if (!inv) return;
+        const atual = num(inv.qtd, 0, 0, 9999), novo = Math.min(9999, Math.max(0, atual + delta));
+        const mapa = {};
+        if (novo === 0) mapa['loja/inventario/' + uid + '/' + id] = null;
+        else mapa['loja/inventario/' + uid + '/' + id + '/qtd'] = novo;
+        entradaLog(mapa, 'Mestre alterou o inventário de ' + nomeJogador(uid) + ': ' + texto(inv.nome, 80) + ' ' + atual + ' → ' + novo + '.');
+        await executar(mapa);
+    }
+
+    async function removerDoInventario(uid, id) {
+        const inv = (estado.inventario[uid] || {})[id];
+        if (!inv || !confirm('Remover ' + texto(inv.nome, 80) + ' do inventário de ' + nomeJogador(uid) + '?')) return;
+        const mapa = {};
+        mapa['loja/inventario/' + uid + '/' + id] = null;
+        entradaLog(mapa, 'Mestre removeu ' + texto(inv.nome, 80) + ' do inventário de ' + nomeJogador(uid) + '.');
+        await executar(mapa, 'Item removido.');
+    }
+
+    async function darItem(uid, bloco) {
+        const id = bloco.querySelector('[data-campo="dar-item"]').value;
+        const qtd = Math.floor(num(bloco.querySelector('[data-campo="dar-qtd"]').value, 1, 1, 999));
+        const descontar = bloco.querySelector('[data-campo="dar-estoque"]').checked;
+        const item = estado.itens.find(i => i.id === id);
+        if (!item) return;
+        if (descontar && item.estoque < qtd) return avisar('Não há estoque suficiente para descontar.', true);
+        const inv = (estado.inventario[uid] || {})[id];
+        const atual = inv ? num(inv.qtd, 0, 0, 9999) : 0;
+        if (atual + qtd > 9999) return avisar('Quantidade acima do limite.', true);
+        const mapa = {};
+        mapa['loja/inventario/' + uid + '/' + id + '/qtd'] = atual + qtd;
+        mapa['loja/inventario/' + uid + '/' + id + '/nome'] = item.nome;
+        if (descontar) mapa['loja/itens/' + id + '/estoque'] = item.estoque - qtd;
+        entradaLog(mapa, 'Mestre deu ' + qtd + '× ' + item.nome + ' a ' + nomeJogador(uid) + (descontar ? ' (descontado do estoque).' : '.'));
+        await executar(mapa, 'Item entregue.');
+    }
+
+    /* ---------- ações do mestre: ajustes de preço ---------- */
+    async function aplicarAjuste() {
+        const escopo = $('#aj-escopo').value, alvo = $('#aj-alvo').value, tipo = $('#aj-tipo').value;
+        const p = Math.floor(num($('#aj-pct').value, NaN, 1, tipo === 'desconto' ? 100 : 1000));
+        if (!Number.isFinite(p)) return avisar('Informe o percentual.', true);
+        const unid = $('#aj-unid').value;
+        const dur = Math.floor(num($('#aj-dur').value, NaN, 1, 9999));
+        if (unid !== 'sem' && !Number.isFinite(dur)) return avisar('Informe a duração.', true);
+        const fator = { min: 60000, h: 3600000, d: 86400000 }[unid];
+        const aj = { pct: tipo === 'desconto' ? -p : p, ate: unid === 'sem' ? SEM_PRAZO : Date.now() + dur * fator };
+
+        const mapa = {};
+        let onde;
+        if (escopo === 'loja') { mapa['loja/ajusteGlobal'] = aj; onde = 'em toda a loja'; }
+        else if (escopo === 'categoria') {
+            const alvos = estado.itens.filter(i => i.tipo === alvo);
+            if (!alvos.length) return avisar('Escolha uma categoria.', true);
+            alvos.forEach(i => { mapa['loja/itens/' + i.id + '/ajuste'] = aj; });
+            onde = 'na categoria ' + alvo;
+        } else {
+            const it = estado.itens.find(i => i.id === alvo);
+            if (!it) return avisar('Escolha um item.', true);
+            mapa['loja/itens/' + it.id + '/ajuste'] = aj; onde = 'em ' + it.nome;
+        }
+        entradaLog(mapa, 'Mestre aplicou ' + (tipo === 'desconto' ? 'desconto' : 'aumento') + ' de ' + p + '% ' + onde + ' (' + fmtRestante(aj.ate, Date.now()) + ').');
+        await executar(mapa, 'Ajuste aplicado.');
+    }
+
+    async function encerrarAjuste(caminho) {
+        if (caminho !== 'loja/ajusteGlobal' && !/^loja\/itens\/[^/]+\/ajuste$/.test(caminho)) return;
+        const mapa = {}; mapa[caminho] = null;
+        entradaLog(mapa, 'Mestre encerrou um ajuste de preço.');
+        await executar(mapa, 'Ajuste encerrado.');
+    }
+
+    async function encerrarTodos() {
+        if (!confirm('Encerrar todos os ajustes de preço?')) return;
+        const mapa = {};
+        mapa['loja/ajusteGlobal'] = null;
+        estado.itens.forEach(i => { if (i.ajuste) mapa['loja/itens/' + i.id + '/ajuste'] = null; });
+        entradaLog(mapa, 'Mestre encerrou todos os ajustes de preço.');
+        await executar(mapa, 'Todos os ajustes foram encerrados.');
+    }
+
+    async function limparLog() {
+        if (!confirm('Apagar todo o histórico da loja?')) return;
+        await executar({ 'loja/log': null }, 'Histórico apagado.');
+    }
+
+    /* ---------- eventos ---------- */
+    document.addEventListener('click', e => {
+        const el = e.target.closest('[data-acao]');
+        if (!el) return;
+        const acao = el.dataset.acao, id = el.dataset.id, uid = el.dataset.uid;
+        const bloco = el.closest('.jogador');
+
+        if (acao === 'aba') { estado.aba = el.dataset.aba; renderTudo(); return; }
+        if (acao === 'comprar' && !ehMestre) {
+            const campo = el.parentElement.querySelector('[data-qtd]');
+            comprar(id, campo ? campo.value : 1); return;
+        }
+        if (acao === 'fechar-item') { $('#dlg-item').close(); return; }
+        if (!ehMestre) return;   // tudo abaixo é só do Mestre (as regras do banco também barram)
+
+        switch (acao) {
+            case 'novo-item': abrirItem(null); break;
+            case 'editar-item': abrirItem(id); break;
+            case 'excluir-item': excluirItem(id); break;
+            case 'preco-item':
+                estado.aba = 'precos'; $('#aj-escopo').value = 'item'; renderTudo();
+                $('#aj-alvo').value = id; break;
+            case 'pr-definir': mudarPR(uid, 'definir', bloco); break;
+            case 'pr-somar': mudarPR(uid, 'somar', bloco); break;
+            case 'pr-subtrair': mudarPR(uid, 'subtrair', bloco); break;
+            case 'inv-mais': mudarInventario(uid, id, 1); break;
+            case 'inv-menos': mudarInventario(uid, id, -1); break;
+            case 'inv-remover': removerDoInventario(uid, id); break;
+            case 'dar-item': darItem(uid, bloco); break;
+            case 'aplicar-ajuste': aplicarAjuste(); break;
+            case 'encerrar-ajuste': encerrarAjuste(el.dataset.caminho); break;
+            case 'encerrar-todos': encerrarTodos(); break;
+            case 'limpar-log': limparLog(); break;
+        }
+    });
+
+    $('#form-item').addEventListener('submit', e => { e.preventDefault(); salvarItem(); });
+    ['busca', 'filtro-tipo', 'ordem', 'so-disponiveis', 'so-ajuste'].forEach(id => {
+        $('#' + id).addEventListener('input', renderLoja);
+    });
+    $('#busca-geral').addEventListener('input', renderJogadores);
+    $('#aj-escopo').addEventListener('change', () => { $('#aj-alvo').dataset.sig = ''; renderAjustes(); });
+    $('#aj-tipo').addEventListener('change', () => {
+        const campo = $('#aj-pct');
+        campo.max = $('#aj-tipo').value === 'desconto' ? 100 : 1000;
+    });
+    $('#aj-unid').addEventListener('change', () => { $('#aj-dur').disabled = $('#aj-unid').value === 'sem'; });
+    $('#aba-jogadores').addEventListener('focusout', () => { setTimeout(() => { if (estado.pendente) renderJogadores(); }, 0); });
+
+    // preços e prazos acompanham o relógio mesmo sem mudança no banco
+    setInterval(() => { renderTopo(); renderLoja(); if (estado.aba === 'precos') renderAjustes(); }, 30000);
+
+    RPG.sessao.then(s => {
+        if (!s) return;
+        estado.uid = s.user.uid;
+        ehMestre = s.modo === 'mestre';
+        renderTudo();
+        ligar();
+    });
+})();
+</script>
+</body>
+</html>
