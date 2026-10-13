@@ -8,7 +8,7 @@ Este guia publica o site em `https://gabrielbgoncalves.github.io/fonte_negra_tab
 |---|---|---|
 | Configuração web do Firebase (`apiKey`, `appId`, URLs) | Secrets do GitHub, injetada no deploy em `js/firebase-config.js` | **Fora do código e do Git.** Mas quem abre o site consegue ver os valores no navegador, porque é assim que o SDK web do Firebase funciona. Não existe forma de esconder isso num site estático. |
 | Senhas dos usuários | Firebase Authentication | Não. Nunca passam pelo repositório. |
-| Quem é Mestre ou Jogador | `/mestres` e `/jogadores` no banco; Mestres só criam entradas (página de cadastro), alterar ou revogar é pelo console | Não. |
+| Quem é Mestre ou Jogador | `/mestres` e `/jogadores` no banco; Mestres só criam entradas (página de cadastro), qualquer pessoa pode criar a própria conta de Jogador (`cadastro_jogador.html`), alterar ou revogar é pelo console | Não. |
 | Dados da mesa | Realtime Database, protegido por `database.rules.json` | Só para contas cadastradas. |
 
 A segurança dos dados vem de **três camadas**, todas configuradas abaixo:
@@ -28,7 +28,7 @@ Quem executa cada etapa:
 
 Abra https://console.firebase.google.com/ e selecione o projeto.
 
-1. **Authentication → Começar**. Depois, em **Sign-in method**, ative **E-mail/senha**.
+1. **Authentication → Começar**. Depois, em **Sign-in method**, ative **E-mail/senha**. Em **Settings → User actions**, deixe **Enable create (sign-up)** ligado: o auto-cadastro de jogadores (`cadastro_jogador.html`) depende disso.
 2. **Authentication → Settings → Authorized domains**: confirme que `gabrielbgoncalves.github.io` está na lista.
 3. **Authentication → Users → Add user**: crie uma conta para o Mestre e uma para cada jogador, com senhas fortes. Anote o **User UID** de cada conta.
 4. **Realtime Database → Data**: crie os papéis. O console ignora as regras, então dá para editar ali.
