@@ -64,7 +64,7 @@ Cada página tem o CSS e o JS embutidos (`<style>` e `<script>` no próprio arqu
 
 ## Como criar uma página nova
 
-1. Copie o `<head>` de uma página existente: CSP, `referrer`, os três scripts do Firebase com SRI, `js/firebase-config.js` e `js/sessao.js` com `data-exigir-login`.
+1. Copie o `<head>` de uma página existente: CSP, `referrer`, o bloco de favicons (`assets/favicon/`), os três scripts do Firebase com SRI, `js/firebase-config.js` e `js/sessao.js` com `data-exigir-login`.
 2. No script da página, use:
    ```js
    const db = RPG.db;
@@ -74,7 +74,7 @@ Cada página tem o CSS e o JS embutidos (`<style>` e `<script>` no próprio arqu
 3. Grave no banco só quando `modoAtual === 'mestre'`. Para os jogadores, escute com `db.ref('<nó>').on('value', ...)`.
 4. Adicione o nó em `database.rules.json` e um card no `index.html`.
 5. Avise o usuário de que as regras precisam ser **publicadas no Firebase** (console ou `firebase deploy --only database --project <id>`). Editar o arquivo não muda nada no banco.
-6. O workflow de deploy copia `*.html` e `js/*.js` da raiz. Se a página usar arquivos em outra pasta, inclua no passo "Montar o site".
+6. O workflow de deploy copia `*.html`, `js/*.js` e a pasta `assets/`. Se a página usar arquivos em outra pasta, inclua no passo "Montar o site".
 
 ## Testar localmente (Firebase Local Emulator Suite)
 
