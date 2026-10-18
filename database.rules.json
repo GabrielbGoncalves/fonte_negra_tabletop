@@ -46,8 +46,105 @@
       ".write": "auth != null && root.child('mestres/' + auth.uid).val() === true"
     },
     "loja": {
-      ".read": "auth != null && (root.child('mestres/' + auth.uid).val() === true || root.child('jogadores/' + auth.uid).val() === true)",
-      ".write": "auth != null && root.child('mestres/' + auth.uid).val() === true"
+      ".read": "auth != null && root.child('mestres').child(auth.uid).val() === true",
+      ".write": "auth != null && root.child('mestres').child(auth.uid).val() === true",
+      "itens": {
+        ".read": "auth != null && (root.child('mestres').child(auth.uid).val() === true || root.child('jogadores').child(auth.uid).val() === true)",
+        "$id": {
+          ".validate": "newData.hasChildren(['nome', 'tipo', 'preco', 'estoque'])",
+          "nome": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 80"
+          },
+          "tipo": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 40"
+          },
+          "desc": {
+            ".validate": "newData.isString() && newData.val().length >= 0 && newData.val().length <= 500"
+          },
+          "efeito": {
+            ".validate": "newData.isString() && newData.val().length >= 0 && newData.val().length <= 300"
+          },
+          "preco": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000"
+          },
+          "estoque": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 9999",
+            ".write": "auth != null && root.child('jogadores').child(auth.uid).val() === true && data.isNumber() && newData.isNumber() && newData.val() < data.val() && (newData.parent().parent().parent().child('inventario/' + auth.uid + '/' + $id + '/qtd').val() - (root.child('loja/inventario/' + auth.uid + '/' + $id + '/qtd').exists() ? root.child('loja/inventario/' + auth.uid + '/' + $id + '/qtd').val() : 0)) === (data.val() - newData.val())"
+          },
+          "ajuste": {
+            ".validate": "newData.hasChildren(['pct', 'ate'])",
+            "pct": {
+              ".validate": "newData.isNumber() && newData.val() >= -100 && newData.val() <= 1000"
+            },
+            "ate": {
+              ".validate": "newData.isNumber() && newData.val() >= 0"
+            },
+            "$other": {
+              ".validate": false
+            }
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      },
+      "ajusteGlobal": {
+        ".read": "auth != null && (root.child('mestres').child(auth.uid).val() === true || root.child('jogadores').child(auth.uid).val() === true)",
+        ".validate": "newData.hasChildren(['pct', 'ate'])",
+        "pct": {
+          ".validate": "newData.isNumber() && newData.val() >= -100 && newData.val() <= 1000"
+        },
+        "ate": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "$other": {
+          ".validate": false
+        }
+      },
+      "pr": {
+        "$uid": {
+          ".read": "auth != null && (root.child('mestres').child(auth.uid).val() === true || (root.child('jogadores').child(auth.uid).val() === true && auth.uid === $uid))",
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000",
+          ".write": "auth != null && root.child('jogadores').child(auth.uid).val() === true && auth.uid === $uid && data.isNumber() && newData.isNumber() && newData.val() < data.val()"
+        }
+      },
+      "inventario": {
+        "$uid": {
+          ".read": "auth != null && (root.child('mestres').child(auth.uid).val() === true || (root.child('jogadores').child(auth.uid).val() === true && auth.uid === $uid))",
+          "$id": {
+            ".validate": "newData.hasChildren(['nome', 'qtd'])",
+            "nome": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 80",
+              ".write": "auth != null && root.child('jogadores').child(auth.uid).val() === true && auth.uid === $uid && newData.val() === root.child('loja/itens/' + $id + '/nome').val()"
+            },
+            "qtd": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 9999",
+              ".write": "auth != null && root.child('jogadores').child(auth.uid).val() === true && auth.uid === $uid && newData.isNumber() && (newData.val() - (data.exists() ? data.val() : 0)) >= 1 && (root.child('loja/itens/' + $id + '/estoque').val() - newData.parent().parent().parent().parent().child('itens/' + $id + '/estoque').val()) === (newData.val() - (data.exists() ? data.val() : 0)) && (root.child('loja/pr/' + $uid).val() - newData.parent().parent().parent().parent().child('pr/' + $uid).val()) >= root.child('loja/itens/' + $id + '/preco').val() * (root.child('loja/itens/' + $id + '/ajuste').child('ate').exists() && root.child('loja/itens/' + $id + '/ajuste').child('ate').val() > now ? 1 + root.child('loja/itens/' + $id + '/ajuste').child('pct').val() / 100 : 1) * (root.child('loja/ajusteGlobal').child('ate').exists() && root.child('loja/ajusteGlobal').child('ate').val() > now ? 1 + root.child('loja/ajusteGlobal').child('pct').val() / 100 : 1) * (newData.val() - (data.exists() ? data.val() : 0)) - 0.01 * (newData.val() - (data.exists() ? data.val() : 0)) && (root.child('loja/pr/' + $uid).val() - newData.parent().parent().parent().parent().child('pr/' + $uid).val()) <= root.child('loja/itens/' + $id + '/preco').val() * (root.child('loja/itens/' + $id + '/ajuste').child('ate').exists() && root.child('loja/itens/' + $id + '/ajuste').child('ate').val() > now ? 1 + root.child('loja/itens/' + $id + '/ajuste').child('pct').val() / 100 : 1) * (root.child('loja/ajusteGlobal').child('ate').exists() && root.child('loja/ajusteGlobal').child('ate').val() > now ? 1 + root.child('loja/ajusteGlobal').child('pct').val() / 100 : 1) * (newData.val() - (data.exists() ? data.val() : 0)) + 0.01 * (newData.val() - (data.exists() ? data.val() : 0))"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        }
+      },
+      "log": {
+        "$id": {
+          ".validate": "newData.hasChildren(['t', 'uid', 'texto'])",
+          "t": {
+            ".validate": "newData.isNumber() && newData.val() <= now + 60000"
+          },
+          "uid": {
+            ".validate": "newData.isString() && newData.val() === auth.uid"
+          },
+          "texto": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 300"
+          },
+          "$other": {
+            ".validate": false
+          },
+          ".write": "auth != null && root.child('jogadores').child(auth.uid).val() === true && !data.exists()"
+        }
+      }
     },
     "map_total": {
       ".read": "auth != null && (root.child('mestres/' + auth.uid).val() === true || root.child('jogadores/' + auth.uid).val() === true)",
