@@ -90,6 +90,6 @@ Tudo nos emuladores e com o Chrome headless via DevTools Protocol:
 ## 9. Pendências
 
 - Configurar o Firebase, a chave e o GitHub conforme o [DEPLOY.md](DEPLOY.md). **Até as regras serem publicadas, o banco real continua aberto.**
-- `loja.html` está quebrado desde `15ab72a` (sobrou só um trecho de JS). A última versão completa está em `eb37f4d`. Se for restaurado, precisa das mesmas proteções e de regras de compra para jogadores.
+- `loja.html` foi reescrita (com SDK do Firebase, CSP e escape) e as regras de compra dos jogadores entraram em `database.rules.json`.
 - A CSP ainda tem `'unsafe-inline'`, e o Tailwind vem do Play CDN. Resolver os dois exige um passo de build.
 - App Check ainda não implementado.

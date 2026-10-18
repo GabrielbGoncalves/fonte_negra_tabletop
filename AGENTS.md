@@ -22,7 +22,7 @@ Idioma: código, comentários, textos de interface e mensagens de commit em **po
 | `velvet_room.html` | Calculadora de fusão | `velvet_room` |
 | `cadastro_usuarios.html` | Cadastro de contas (só Mestre) | `usuarios`, `mestres`, `jogadores` |
 | `cadastro_jogador.html` | Auto-cadastro aberto, só cria Jogadores (link no login do hub) | `usuarios`, `jogadores` |
-| `loja.html` | **Quebrado**: é só um trecho de JS (ver "Problemas conhecidos") | `loja` |
+| `loja.html` | Loja: o Mestre cadastra itens, preços e PR; o jogador compra com o próprio PR | `loja` (`itens`, `ajusteGlobal`, `pr`, `inventario`, `log`) |
 | `js/sessao.js` | Firebase, login, papel do usuário, cadastro de contas e helpers compartilhados | `mestres`, `jogadores`, `usuarios` |
 | `js/firebase-config.js` | **Placeholder** (`null`). No deploy, o workflow sobrescreve com a configuração real a partir dos secrets | — |
 | `.github/workflows/deploy-pages.yml` | Deploy no GitHub Pages; gera o `firebase-config.js` com `.github/scripts/gerar-firebase-config.js` | — |
@@ -55,7 +55,7 @@ Cada página tem o CSS e o JS embutidos (`<style>` e `<script>` no próprio arqu
 3. **Escape `\${` não existe em template string**: ele gera o texto literal `${...}`. Esse bug já quebrou vários botões.
 4. URLs vindas do banco (imagens, links) só são aceitas se começarem com `https://`.
 5. Valores numéricos do banco usados em loops, tamanhos ou estilos devem ser convertidos e limitados (ex.: `Math.min(100, Math.max(1, parseInt(v, 10) || 1))`), para um dado malicioso não travar o navegador.
-6. **Novo nó no banco exige entrada em `database.rules.json`**, porque a raiz nega tudo. Siga o padrão existente: leitura para mestres e jogadores, escrita só para mestres. Se jogadores precisarem escrever (ex.: compras na loja), crie uma regra específica e restrita, com `.validate`.
+6. **Novo nó no banco exige entrada em `database.rules.json`**, porque a raiz nega tudo. Siga o padrão existente: leitura para mestres e jogadores, escrita só para mestres. Se jogadores precisarem escrever, crie uma regra específica e restrita, com `.validate` (exemplo: as compras em `loja`, que conferem estoque, PR e preço com ajuste na mesma atualização).
 7. **CSP**: toda página tem o mesmo `<meta http-equiv="Content-Security-Policy">`. Ao adicionar uma origem externa (script, estilo, fonte, API), atualize a CSP **em todas as páginas**. Não adicione `'unsafe-eval'` nem curingas amplos (`*`, `https:` em `script-src`).
 8. **Bibliotecas de CDN** devem ter versão fixa e `integrity` (SRI) com `crossorigin="anonymous"`. Para calcular o hash:
    `curl -sL URL | openssl dgst -sha384 -binary | openssl base64 -A`.
@@ -114,7 +114,6 @@ node emulador/seed.js                  # em outro terminal: cria as contas e os 
 
 ## Problemas conhecidos
 
-- `loja.html` virou um trecho de JS sem HTML depois do commit `15ab72a` ("rowback"). A última versão completa está em `eb37f4d`. Restaurar a loja é decisão do usuário. Se for feito, aplique as regras de segurança acima (o código antigo usa `innerHTML` sem escape) e crie regras de banco para compras de jogadores.
 - Alguns textos têm restos de geração como `[cite: 5]` (grimório, velvet room, confidentes). São conteúdo, não código. Só remova se o usuário pedir.
 - A CSP ainda permite `'unsafe-inline'` por causa dos `onclick` estáticos e dos `<style>`/`<script>` embutidos. Ao mexer numa página, prefira `addEventListener`, para um dia ser possível remover isso.
 - O Tailwind Play CDN não é recomendado para produção (ele mesmo avisa no console). Migrar para um CSS compilado exigiria um build. Combine com o usuário antes.
