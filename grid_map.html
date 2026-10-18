@@ -11,71 +11,44 @@
     <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon/apple-touch-icon.png">
     <meta name="apple-mobile-web-app-title" content="Fonte Negra">
     <link rel="manifest" href="assets/favicon/site.webmanifest">
-  <title>Visualizador e Jogador de Mapa Grid</title>
-  
+  <title>Grid Map | Fonte Negra</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&display=swap" rel="stylesheet">
+
   <!-- Firebase SDK Compat -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" integrity="sha384-4gq9w/AGf72FXdNQ3Kn3EqWP7633NbCMjpYHt8YCZyXf23o2opcuAr4cif41tLrC" crossorigin="anonymous"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js" integrity="sha384-5PDE6CZvnNIJI5xu68GIFoOO3U73lAnRLBwPBmmKjWnYnYwKEHWr/ghtGooEOXGb" crossorigin="anonymous"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" integrity="sha384-xtdq4MQqPj1dB5DQsuw9O7dh4kHhMP/Wp5u8O1jiaWiou13ZfJIgiccjtVK2pBhL" crossorigin="anonymous"></script>
   <script src="js/firebase-config.js"></script>
   <script src="js/sessao.js" data-exigir-login></script>
+  <script src="js/topo.js" defer></script>
 
+  <link rel="stylesheet" href="assets/css/layout.css">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #1e1e1e;
-      color: #ffffff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
-    }
+    /* Layout, topo e controles vêm de assets/css/layout.css */
+    #info p { margin: 0 0 6px; font-family: Arial, Helvetica, sans-serif; color: #cbd5e1; }
+    #info strong { color: var(--azul-claro); }
+    #info #status { padding: 8px 12px; margin-top: 10px; background: var(--painel-2); border-left: 4px solid var(--azul); color: var(--texto); }
 
-    #info {
-      margin-bottom: 15px;
-      text-align: center;
-    }
-
-    .xml-input-area {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 20px;
-      width: 100%;
-      max-width: 600px;
-    }
-
-    textarea {
-      width: 100%;
+    .xml-input-area { display: flex; flex-direction: column; gap: 10px; }
+    .xml-input-area textarea {
       height: 120px;
-      background-color: #111;
       color: #75beff;
-      border: 1px solid #444;
-      border-radius: 4px;
-      padding: 8px;
       font-family: monospace;
       font-size: 12px;
-      resize: vertical;
     }
+    .xml-botoes { display: flex; flex-wrap: wrap; gap: 10px; }
 
-    button {
-      padding: 8px 16px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    button:hover { opacity: 0.9; }
-
+    .grid-rolagem { overflow-x: auto; }
     #grid-container {
       display: grid;
       gap: 2px;
-      background-color: #555;
+      width: max-content;
+      margin: 0 auto;
+      background-color: var(--azul-escuro);
       padding: 5px;
-      border-radius: 6px;
       user-select: none;
     }
 
@@ -106,6 +79,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      font-family: Arial, Helvetica, sans-serif;
       font-weight: bold;
       color: white;
       box-shadow: 0 0 6px rgba(0,0,0,0.7);
@@ -122,35 +96,40 @@
       box-shadow: 0 0 10px #ffeb3b;
       transform: scale(1.1);
     }
-
-    .modo-aviso {
-      display: inline-block;
-      padding: 4px 10px;
-      border-radius: 4px;
-      font-size: 0.8rem;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
   </style>
 </head>
 <body>
 
-  <div id="info">
-    <h2>Player Tático em Grid</h2>
-    <span id="indicador-modo" class="modo-aviso">Modo: a carregar...</span>
+<header class="topo">
+  <a class="voltar" href="index.html">‹ Hub</a>
+  <div class="titulo">
+    <h1>Grid Map</h1>
+    <p class="tagline">Mapa tático e tokens em tempo real</p>
+  </div>
+  <div class="espaco"></div>
+  <div class="usuario" data-usuario hidden></div>
+</header>
+
+<main class="conteudo">
+  <section class="bloco" id="info">
+    <h2>Mapa Tático</h2>
     <p id="descricao-instrucao">Cole o XML gerado pelo seu editor abaixo e clique em <strong>"Carregar Mapa"</strong>, ou use <strong>"Usar mapa do Editor"</strong>. Os jogadores veem o mapa em tempo real.</p>
     <p id="status">A aguardar sincronização...</p>
-  </div>
+  </section>
 
-  <div class="xml-input-area" id="painel-input-xml">
-    <textarea id="xmlInput" placeholder="Cole seu XML exportado aqui..."></textarea>
-    <div style="display: flex; gap: 8px;">
-      <button onclick="carregarMapaDoInput()">🎮 Carregar Mapa</button>
-      <button onclick="carregarMapaDoEditor()" style="background-color: #1565c0;">🧩 Usar mapa do Editor</button>
+  <section class="bloco xml-input-area" id="painel-input-xml">
+    <h2>Carregar Mapa</h2>
+    <textarea id="xmlInput" aria-label="XML do mapa" placeholder="Cole seu XML exportado aqui..."></textarea>
+    <div class="xml-botoes">
+      <button type="button" class="btn" onclick="carregarMapaDoInput()">🎮 Carregar Mapa</button>
+      <button type="button" class="btn sec" onclick="carregarMapaDoEditor()">🧩 Usar mapa do Editor</button>
     </div>
-  </div>
+  </section>
 
-  <div id="grid-container"></div>
+  <section class="bloco grid-rolagem">
+    <div id="grid-container"></div>
+  </section>
+</main>
 
   <script>
     const TABELA_CODIGOS = {
@@ -182,17 +161,8 @@
 
     // Gestão de Modo (Mestre vs Jogador)
     const modoAtual = localStorage.getItem('rpg_modo_sessao') || 'jogador';
-    const indicadorModo = document.getElementById('indicador-modo');
 
-    if (modoAtual === 'mestre') {
-      indicadorModo.textContent = "Modo: Mestre (Escrita Ativa)";
-      indicadorModo.style.background = "#4caf50";
-      indicadorModo.style.color = "#fff";
-    } else {
-      indicadorModo.textContent = "Modo: Jogador (Somente Leitura)";
-      indicadorModo.style.background = "#2196f3";
-      indicadorModo.style.color = "#fff";
-      
+    if (modoAtual !== 'mestre') {
       document.addEventListener("DOMContentLoaded", () => {
         const painelInput = document.getElementById('painel-input-xml');
         if (painelInput) painelInput.style.display = 'none';
@@ -417,4 +387,4 @@
     });
   </script>
 </body>
-</html>
+</html>

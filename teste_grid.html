@@ -12,68 +12,46 @@
     <meta name="apple-mobile-web-app-title" content="Fonte Negra">
     <link rel="manifest" href="assets/favicon/site.webmanifest">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editor de Mapa em Grid</title>
-    
+    <title>Editor de Grid | Fonte Negra</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&display=swap" rel="stylesheet">
+
     <!-- Firebase SDK Compat -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" integrity="sha384-4gq9w/AGf72FXdNQ3Kn3EqWP7633NbCMjpYHt8YCZyXf23o2opcuAr4cif41tLrC" crossorigin="anonymous"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js" integrity="sha384-5PDE6CZvnNIJI5xu68GIFoOO3U73lAnRLBwPBmmKjWnYnYwKEHWr/ghtGooEOXGb" crossorigin="anonymous"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" integrity="sha384-xtdq4MQqPj1dB5DQsuw9O7dh4kHhMP/Wp5u8O1jiaWiou13ZfJIgiccjtVK2pBhL" crossorigin="anonymous"></script>
     <script src="js/firebase-config.js"></script>
     <script src="js/sessao.js" data-exigir-login></script>
+    <script src="js/topo.js" defer></script>
 
+    <link rel="stylesheet" href="assets/css/layout.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-color: #222;
-            color: #fff;
-            padding-bottom: 40px;
-        }
+        /* Layout, topo e controles vêm de assets/css/layout.css */
+        main.conteudo { max-width: 760px; }
 
-        .controls {
-            margin: 20px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-            max-width: 700px;
-        }
+        .controls { display: flex; gap: 10px; flex-wrap: wrap; }
+        /* Cada ferramenta mantém a cor do tipo de célula na borda esquerda */
+        .controls .btn { border-left-width: 8px; }
+        .controls .btn.active { background: var(--azul); border-color: var(--azul-claro); }
+        .btn-chao { border-left-color: #e0e0e0 !important; }
+        .btn-parede { border-left-color: #444 !important; }
+        .btn-porta { border-left-color: #8B4513 !important; }
+        .btn-armadilha { border-left-color: #d9534f !important; }
+        .btn-tesouro { border-left-color: #f0ad4e !important; }
 
-        button {
-            padding: 10px 15px;
-            font-size: 14px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: opacity 0.2s;
-        }
-        button:hover { opacity: 0.9; }
-        button:disabled { background-color: #555 !important; color: #888 !important; cursor: not-allowed; }
-
-        .btn-chao { background-color: #e0e0e0; color: #000; }
-        .btn-parede { background-color: #444; color: #fff; }
-        .btn-porta { background-color: #8B4513; color: #fff; }
-        .btn-armadilha { background-color: #d9534f; color: #fff; }
-        .btn-tesouro { background-color: #f0ad4e; color: #000; }
-        .btn-aleatorio { background-color: #9c27b0; color: #fff; }
-        .btn-limpar { background-color: #5bc0de; color: #fff; }
-        .btn-xml { background-color: #4CAF50; color: #fff; }
-
-        button.active {
-            outline: 3px solid #00bcff;
-        }
-
+        .acoes-mapa { margin-top: 12px; }
+        .grid-rolagem { overflow-x: auto; }
         .grid {
             display: grid;
             grid-template-columns: repeat(15, 40px);
             grid-template-rows: repeat(15, 40px);
             gap: 2px;
-            background-color: #555;
+            width: max-content;
+            margin: 0 auto;
+            background-color: var(--azul-escuro);
             padding: 5px;
-            border-radius: 5px;
         }
 
         .cell {
@@ -95,67 +73,57 @@
         .cell.inicio { background-color: #5cb85c; }
         .cell.fim { background-color: #0275d8; }
 
-        .xml-container {
-            margin-top: 20px;
-            width: 100%;
-            max-width: 620px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
+        .xml-container { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
         .xml-container textarea {
-            width: 100%;
             height: 180px;
-            background-color: #1e1e1e;
             color: #75beff;
-            border: 1px solid #444;
-            border-radius: 5px;
-            padding: 10px;
             font-family: 'Courier New', Courier, monospace;
             font-size: 13px;
-            resize: vertical;
-            box-sizing: border-box;
-        }
-
-        .modo-aviso {
-            margin-top: 10px;
-            padding: 5px 15px;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            font-weight: bold;
-            text-transform: uppercase;
         }
     </style>
 </head>
 <body>
 
-    <h1>Editor de Mapa em Grid</h1>
-    <div id="indicador-modo" class="modo-aviso">Modo: a carregar...</div>
-    
-    <!-- Painel de Ferramentas -->
-    <div class="controls" id="painel-controles">
-        <button class="btn-chao active" onclick="setFerramenta('chao', this)">Chão (Borracha)</button>
-        <button class="btn-parede" onclick="setFerramenta('parede', this)">Parede (⬛)</button>
-        <button class="btn-porta" onclick="setFerramenta('porta', this)">Porta (🚪)</button>
-        <button class="btn-armadilha" onclick="setFerramenta('armadilha', this)">Armadilha (💀)</button>
-        <button class="btn-tesouro" onclick="setFerramenta('tesouro', this)">Tesouro (💎)</button>
-        
-        <button class="btn-aleatorio" onclick="gerarMapaAleatorio()">🎲 Gerar Labirinto Aleatório</button>
-        <button class="btn-limpar" onclick="limparMapa()">Limpar Tudo</button>
-        
-        <button class="btn-xml" onclick="exportarXML()">📄 Exportar XML</button>
+<header class="topo">
+    <a class="voltar" href="index.html">‹ Hub</a>
+    <div class="titulo">
+        <h1>Editor de Grid</h1>
+        <p class="tagline">Monte o mapa tático e exporte em XML</p>
     </div>
+    <div class="espaco"></div>
+    <div class="usuario" data-usuario hidden></div>
+</header>
+
+<main class="conteudo">
+    <!-- Painel de Ferramentas -->
+    <section class="bloco" id="painel-controles">
+        <h2>Ferramentas</h2>
+        <div class="controls">
+            <button type="button" class="btn sec btn-chao active" onclick="setFerramenta('chao', this)">Chão (Borracha)</button>
+            <button type="button" class="btn sec btn-parede" onclick="setFerramenta('parede', this)">Parede (⬛)</button>
+            <button type="button" class="btn sec btn-porta" onclick="setFerramenta('porta', this)">Porta (🚪)</button>
+            <button type="button" class="btn sec btn-armadilha" onclick="setFerramenta('armadilha', this)">Armadilha (💀)</button>
+            <button type="button" class="btn sec btn-tesouro" onclick="setFerramenta('tesouro', this)">Tesouro (💎)</button>
+        </div>
+        <div class="controls acoes-mapa">
+            <button type="button" class="btn sec btn-aleatorio" onclick="gerarMapaAleatorio()">🎲 Gerar Labirinto Aleatório</button>
+            <button type="button" class="btn perigo btn-limpar" onclick="limparMapa()">Limpar Tudo</button>
+            <button type="button" class="btn btn-xml" onclick="exportarXML()">📄 Exportar XML</button>
+        </div>
+    </section>
 
     <!-- Grid do Mapa -->
-    <div class="grid" id="grid"></div>
+    <section class="bloco grid-rolagem">
+        <div class="grid" id="grid"></div>
+    </section>
 
     <!-- Caixa para exibir e copiar o XML gerado -->
-    <div class="xml-container" id="painel-xml">
-        <label for="xmlArea"><strong>XML Gerado:</strong></label>
-        <textarea id="xmlArea" readonly placeholder="Clique em 'Exportar XML' para gerar a estrutura..."></textarea>
-        <button class="btn-xml" onclick="copiarXML()">📋 Copiar XML</button>
-    </div>
+    <section class="bloco xml-container" id="painel-xml">
+        <h2 id="titulo-xml">XML Gerado</h2>
+        <textarea id="xmlArea" aria-labelledby="titulo-xml" readonly placeholder="Clique em 'Exportar XML' para gerar a estrutura..."></textarea>
+        <button type="button" class="btn btn-xml" onclick="copiarXML()">📋 Copiar XML</button>
+    </section>
+</main>
 
     <script>
         // Firebase e sessão vêm de js/sessao.js (o acesso ao banco aguarda o login)
@@ -163,17 +131,8 @@
 
         // Gestão de Modo (Mestre vs Jogador)
         const modoAtual = localStorage.getItem('rpg_modo_sessao') || 'jogador';
-        const indicadorModo = document.getElementById('indicador-modo');
 
-        if (modoAtual === 'mestre') {
-            indicadorModo.textContent = "Modo: Mestre (Escrita Ativa)";
-            indicadorModo.style.backgroundColor = "#2e7d32";
-            indicadorModo.style.color = "#fff";
-        } else {
-            indicadorModo.textContent = "Modo: Jogador (Somente Leitura)";
-            indicadorModo.style.backgroundColor = "#1565c0";
-            indicadorModo.style.color = "#fff";
-            
+        if (modoAtual !== 'mestre') {
             document.addEventListener("DOMContentLoaded", () => {
                 document.getElementById('painel-controles').style.display = 'none';
                 document.getElementById('painel-xml').style.display = 'none';
@@ -444,4 +403,4 @@ ${linhasXML.join('\n')}
         };
     </script>
 </body>
-</html>
+</html>

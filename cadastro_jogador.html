@@ -12,9 +12,7 @@
     <meta name="apple-mobile-web-app-title" content="Fonte Negra">
     <link rel="manifest" href="assets/favicon/site.webmanifest">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Criar Conta de Jogador - Persona RPG</title>
-
-    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <title>Criar Conta | Fonte Negra</title>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" integrity="sha384-4gq9w/AGf72FXdNQ3Kn3EqWP7633NbCMjpYHt8YCZyXf23o2opcuAr4cif41tLrC" crossorigin="anonymous"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js" integrity="sha384-5PDE6CZvnNIJI5xu68GIFoOO3U73lAnRLBwPBmmKjWnYnYwKEHWr/ghtGooEOXGb" crossorigin="anonymous"></script>
@@ -22,113 +20,82 @@
     <script src="js/firebase-config.js"></script>
     <!-- Página aberta: sem data-exigir-login -->
     <script src="js/sessao.js"></script>
+    <script src="js/topo.js" defer></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&display=swap" rel="stylesheet">
 
+    <link rel="stylesheet" href="assets/css/layout.css">
     <style>
-        body {
-            font-family: 'Oswald', sans-serif;
-            background-color: #020617;
-            background-image: radial-gradient(#1e3a8a 15%, transparent 16%), radial-gradient(#1e3a8a 15%, transparent 16%);
-            background-size: 20px 20px;
-            background-position: 0 0, 10px 10px;
-            color: #f8fafc;
-            min-height: 100vh;
-        }
-
-        .clip-card {
-            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%);
-        }
-
-        .clip-header {
-            clip-path: polygon(0 0, 100% 0, 98% 100%, 2% 100%);
-        }
-
-        .skew-tag {
-            transform: skewX(-12deg);
-        }
-
-        .unskew {
-            transform: skewX(12deg);
-        }
-
-        .campo.invalido {
-            border-color: #ef4444;
-        }
+        /* Layout, topo, controles e blocos vêm de assets/css/layout.css */
+        .hidden { display: none !important; }
+        .painel-form { max-width: 480px; margin: 0 auto; box-shadow: 8px 8px 0 var(--azul-escuro); }
+        .painel-form .campo input { width: 100%; }
+        .painel-form .btn { width: 100%; margin-top: 4px; }
+        .painel-form .btn:disabled { cursor: wait; }
+        .campo .invalido { border-color: var(--perigo); }
+        .erro-campo { margin: 4px 0 0; color: var(--perigo); font-family: Arial, Helvetica, sans-serif; font-size: .85rem; }
+        .resultado { margin: 4px 0 12px; text-align: center; font-family: Arial, Helvetica, sans-serif; }
+        .resultado.ok { color: var(--ok); }
+        .resultado.erro { color: var(--perigo); }
+        .painel-form .nota { text-align: center; }
+        .aviso-painel { max-width: 480px; margin: 0 auto; text-align: center; }
+        .aviso-painel.restrito { border-color: var(--perigo); }
+        .aviso-painel.restrito h2 { color: var(--perigo); }
     </style>
 </head>
-<body class="p-4 md:p-8 flex flex-col items-center">
+<body>
 
-    <header class="w-full max-w-3xl bg-blue-600 text-black p-6 mb-8 clip-header border-4 border-white shadow-[8px_8px_0px_#000] flex flex-col md:flex-row justify-between items-center gap-4">
-        <div class="flex items-center gap-4">
-            <div class="bg-black text-white px-4 py-2 text-3xl font-black skew-tag border-2 border-blue-500">
-                <span class="inline-block unskew">ID</span>
-            </div>
-            <div>
-                <h1 class="text-3xl md:text-4xl font-black uppercase italic tracking-widest drop-shadow-[2px_2px_0px_#fff] text-white">
-                    Criar Conta
-                </h1>
-                <p class="text-black font-bold uppercase tracking-widest text-sm">Entre para a mesa como Jogador</p>
-            </div>
+    <header class="topo">
+        <a class="voltar" href="index.html">‹ Login</a>
+        <div class="titulo">
+            <h1>Criar Conta</h1>
+            <p class="tagline">Entre para a mesa como Jogador</p>
         </div>
-        <a href="index.html" class="bg-black text-white px-4 py-2 font-bold text-xs uppercase tracking-wider border-2 border-white skew-tag hover:bg-slate-800 transition-colors">
-            <span class="inline-block unskew">← Voltar ao Login</span>
-        </a>
+        <div class="espaco"></div>
+        <div class="usuario" data-usuario hidden></div>
     </header>
 
-    <!-- Quem já está logado não cria outra conta por aqui (o cadastro troca a sessão) -->
-    <div id="aviso-logado" class="hidden w-full max-w-md bg-slate-900 border-4 border-blue-500 p-6 clip-card shadow-[10px_10px_0px_#1d4ed8] text-center">
-        <p class="text-xl font-black uppercase tracking-widest text-blue-400 mb-2">Você já está conectado</p>
-        <p class="text-sm text-slate-400 uppercase tracking-wider mb-4">Saia da conta atual para criar outra.</p>
-        <a href="index.html" class="inline-block bg-blue-600 hover:bg-blue-500 text-black font-black py-3 px-4 text-xs uppercase tracking-wider transition-colors border-2 border-white shadow-[2px_2px_0px_#fff]">
-            Ir para o Hub
-        </a>
-    </div>
+    <main class="conteudo">
+        <!-- Quem já está logado não cria outra conta por aqui (o cadastro troca a sessão) -->
+        <section id="aviso-logado" class="bloco aviso-painel hidden">
+            <h2>Você já está conectado</h2>
+            <p class="txt">Saia da conta atual para criar outra.</p>
+            <a class="btn" href="index.html" style="display:inline-block;text-decoration:none">Ir para o Hub</a>
+        </section>
 
-    <main id="painel-cadastro" class="hidden w-full max-w-md bg-slate-900 border-4 border-blue-500 p-6 clip-card shadow-[10px_10px_0px_#1d4ed8]">
-        <div class="bg-blue-600 text-black px-4 py-2 text-2xl font-black skew-tag mb-6 text-center border-2 border-white">
-            <span class="inline-block unskew uppercase tracking-widest">Novo Jogador</span>
-        </div>
+        <section id="painel-cadastro" class="bloco painel-form hidden">
+            <h2>Novo jogador</h2>
+            <form id="form-cadastro" novalidate>
+                <div class="campo">
+                    <label for="cad-nome">Nome</label>
+                    <input type="text" id="cad-nome" name="nome" maxlength="60" autocomplete="name" placeholder="Nome do personagem ou jogador">
+                    <p data-erro="nome" class="erro-campo hidden"></p>
+                </div>
+                <div class="campo">
+                    <label for="cad-email">E-mail</label>
+                    <input type="email" id="cad-email" name="email" maxlength="254" autocomplete="email" placeholder="jogador@email.com">
+                    <p data-erro="email" class="erro-campo hidden"></p>
+                </div>
+                <div class="campo">
+                    <label for="cad-senha">Senha</label>
+                    <input type="password" id="cad-senha" name="senha" autocomplete="new-password" placeholder="Mínimo de 6 caracteres">
+                    <p data-erro="senha" class="erro-campo hidden"></p>
+                </div>
+                <div class="campo">
+                    <label for="cad-senha2">Repetir senha</label>
+                    <input type="password" id="cad-senha2" name="senha2" autocomplete="new-password" placeholder="••••••••">
+                    <p data-erro="senha2" class="erro-campo hidden"></p>
+                </div>
 
-        <form id="form-cadastro" class="space-y-4" novalidate>
-            <div>
-                <label for="cad-nome" class="block text-xs font-bold uppercase tracking-wider text-blue-400 mb-1">Nome</label>
-                <input type="text" id="cad-nome" name="nome" maxlength="60" autocomplete="name" placeholder="Nome do personagem ou jogador" class="campo w-full bg-black border-2 border-slate-700 p-3 text-sm text-white focus:border-blue-500 outline-none font-sans">
-                <p data-erro="nome" class="hidden mt-1 text-xs text-red-500 font-bold uppercase tracking-wider"></p>
-            </div>
+                <div id="cad-resultado" class="resultado hidden" role="status"></div>
 
-            <div>
-                <label for="cad-email" class="block text-xs font-bold uppercase tracking-wider text-blue-400 mb-1">E-mail</label>
-                <input type="email" id="cad-email" name="email" maxlength="254" autocomplete="email" placeholder="jogador@email.com" class="campo w-full bg-black border-2 border-slate-700 p-3 text-sm text-white focus:border-blue-500 outline-none font-sans">
-                <p data-erro="email" class="hidden mt-1 text-xs text-red-500 font-bold uppercase tracking-wider"></p>
-            </div>
+                <button type="submit" id="cad-enviar" class="btn">Criar conta</button>
+            </form>
 
-            <div>
-                <label for="cad-senha" class="block text-xs font-bold uppercase tracking-wider text-blue-400 mb-1">Senha</label>
-                <input type="password" id="cad-senha" name="senha" autocomplete="new-password" placeholder="Mínimo de 6 caracteres" class="campo w-full bg-black border-2 border-slate-700 p-3 text-sm text-white focus:border-blue-500 outline-none font-sans">
-                <p data-erro="senha" class="hidden mt-1 text-xs text-red-500 font-bold uppercase tracking-wider"></p>
-            </div>
-
-            <div>
-                <label for="cad-senha2" class="block text-xs font-bold uppercase tracking-wider text-blue-400 mb-1">Repetir senha</label>
-                <input type="password" id="cad-senha2" name="senha2" autocomplete="new-password" placeholder="••••••••" class="campo w-full bg-black border-2 border-slate-700 p-3 text-sm text-white focus:border-blue-500 outline-none font-sans">
-                <p data-erro="senha2" class="hidden mt-1 text-xs text-red-500 font-bold uppercase tracking-wider"></p>
-            </div>
-
-            <div id="cad-resultado" class="hidden text-xs font-bold uppercase tracking-wider text-center" role="status"></div>
-
-            <div class="pt-2">
-                <button type="submit" id="cad-enviar" class="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-wait text-black font-black py-3 px-4 text-xs uppercase tracking-wider transition-colors border-2 border-white shadow-[2px_2px_0px_#fff]">
-                    Criar conta
-                </button>
-            </div>
-        </form>
-
-        <p class="mt-6 text-center text-[10px] text-slate-500 uppercase tracking-widest">
-            A conta entra como Jogador. Só o Mestre pode dar outra permissão.
-        </p>
+            <p class="ajuda txt nota">A conta entra como Jogador. Só o Mestre pode dar outra permissão.</p>
+        </section>
     </main>
 
     <script>
@@ -187,8 +154,8 @@
 
         function mostrarResultado(texto, sucesso) {
             resultado.textContent = texto;
-            resultado.classList.toggle('text-emerald-400', sucesso);
-            resultado.classList.toggle('text-red-500', !sucesso);
+            resultado.classList.toggle('ok', sucesso);
+            resultado.classList.toggle('erro', !sucesso);
             resultado.classList.remove('hidden');
         }
 

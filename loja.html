@@ -25,95 +25,16 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" integrity="sha384-xtdq4MQqPj1dB5DQsuw9O7dh4kHhMP/Wp5u8O1jiaWiou13ZfJIgiccjtVK2pBhL" crossorigin="anonymous"></script>
     <script src="js/firebase-config.js"></script>
     <script src="js/sessao.js" data-exigir-login></script>
+    <script src="js/topo.js" defer></script>
 
+    <link rel="stylesheet" href="assets/css/layout.css">
     <style>
-        :root {
-            --bg: #020617;
-            --painel: #0f172a;
-            --painel-2: #16213f;
-            --azul: #3b82f6;
-            --azul-claro: #60a5fa;
-            --azul-escuro: #1e3a8a;
-            --texto: #f8fafc;
-            --suave: #94a3b8;
-            --ok: #22c55e;
-            --aviso: #f59e0b;
-            --perigo: #ef4444;
-        }
-        * { box-sizing: border-box; }
-        body {
-            margin: 0;
-            font-family: 'Oswald', sans-serif;
-            background-color: var(--bg);
-            background-image: radial-gradient(#1e3a8a 15%, transparent 16%), radial-gradient(#1e3a8a 15%, transparent 16%);
-            background-size: 20px 20px;
-            background-position: 0 0, 10px 10px;
-            color: var(--texto);
-            min-height: 100vh;
-        }
-        .clip-card { clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%); }
-        .clip-header { clip-path: polygon(0 0, 100% 0, 98% 100%, 2% 100%); }
-        .skew-tag { transform: skewX(-12deg); }
-        .unskew { transform: skewX(12deg); display: inline-block; }
-        .txt { font-family: Arial, Helvetica, sans-serif; text-transform: none; }
-
-        /* ---------- Topo ---------- */
-        .topo {
-            background: var(--azul-escuro);
-            border-bottom: 4px solid var(--azul);
-            padding: 14px 20px 22px;
-            display: flex; flex-wrap: wrap; align-items: center; gap: 14px;
-        }
-        .topo h1 { margin: 0; font-size: 2rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; font-style: italic; }
-        .topo .voltar { color: var(--texto); text-decoration: none; border: 2px solid var(--azul-claro); padding: 4px 12px; text-transform: uppercase; font-size: .9rem; }
-        .topo .voltar:hover { background: var(--azul); }
-        .topo .espaco { flex: 1; }
-        .selo { background: var(--bg); border: 2px solid var(--azul-claro); padding: 6px 18px; font-weight: 700; font-size: 1.15rem; }
-        .selo small { color: var(--suave); font-weight: 400; margin-right: 8px; }
-
-        main { max-width: 1180px; margin: 0 auto; padding: 22px 16px 60px; }
-
+        /* Layout, topo, controles, blocos e modal vêm de assets/css/layout.css */
         .faixa-ajuste {
             margin-bottom: 16px; padding: 10px 16px; border-left: 6px solid var(--ok);
             background: var(--painel); font-size: 1.05rem;
         }
         .faixa-ajuste.aumento { border-left-color: var(--aviso); }
-
-        /* ---------- Abas ---------- */
-        .abas { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
-        .aba {
-            font: inherit; text-transform: uppercase; letter-spacing: 1px; cursor: pointer;
-            background: var(--painel); color: var(--suave); border: 2px solid var(--azul-escuro);
-            padding: 8px 20px; transform: skewX(-12deg);
-        }
-        .aba > span { display: inline-block; transform: skewX(12deg); }
-        .aba:hover { color: var(--texto); border-color: var(--azul-claro); }
-        .aba.ativa { background: var(--azul); color: #fff; border-color: var(--azul-claro); }
-        .painel-aba[hidden] { display: none; }
-
-        /* ---------- Controles ---------- */
-        input, select, textarea {
-            font: inherit; font-family: Arial, Helvetica, sans-serif;
-            background: var(--bg); color: var(--texto);
-            border: 2px solid var(--azul-escuro); padding: 8px 10px; min-width: 0;
-        }
-        textarea { resize: vertical; width: 100%; }
-        input:focus, select:focus, textarea:focus, .btn:focus-visible, .aba:focus-visible {
-            outline: 2px solid var(--azul-claro); outline-offset: 2px; border-color: var(--azul-claro);
-        }
-        label { display: block; font-size: .85rem; color: var(--suave); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
-        .btn {
-            font: inherit; text-transform: uppercase; letter-spacing: 1px; cursor: pointer;
-            background: var(--azul); color: #fff; border: 2px solid var(--azul-claro);
-            padding: 7px 16px; box-shadow: 3px 3px 0 var(--azul-escuro);
-            transition: transform .12s, box-shadow .12s;
-        }
-        .btn:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--azul-escuro); }
-        .btn:disabled { opacity: .4; cursor: not-allowed; }
-        .btn.sec { background: var(--painel); border-color: var(--azul-escuro); color: var(--texto); }
-        .btn.sec:hover:not(:disabled) { border-color: var(--azul-claro); }
-        .btn.perigo { background: #7f1d1d; border-color: var(--perigo); box-shadow: 3px 3px 0 #450a0a; }
-        .btn.mini { padding: 3px 10px; font-size: .85rem; box-shadow: 2px 2px 0 var(--azul-escuro); }
 
         .filtros { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin-bottom: 22px; }
         .filtros .campo-busca { flex: 1 1 260px; }
@@ -133,7 +54,6 @@
         .card.esgotado { opacity: .6; }
         .card-topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
         .nome { margin: 0; font-size: 1.35rem; text-transform: uppercase; letter-spacing: 1px; line-height: 1.15; word-break: break-word; }
-        .tag { background: var(--azul-escuro); border: 1px solid var(--azul-claro); padding: 2px 10px; font-size: .75rem; text-transform: uppercase; white-space: nowrap; }
         .desc, .efeito { margin: 0; color: #cbd5e1; font-size: .92rem; line-height: 1.4; }
         .efeito b { color: var(--azul-claro); }
         .card-rodape { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
@@ -146,13 +66,8 @@
         .prazo { font-size: .8rem; color: var(--suave); width: 100%; }
         .acoes { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
         .acoes input[type=number] { width: 64px; padding: 6px; }
-        .vazio { padding: 40px 16px; text-align: center; color: var(--suave); border: 2px dashed var(--azul-escuro); background: var(--painel); }
 
         /* ---------- Blocos (mestre) ---------- */
-        .bloco { background: var(--painel); border: 2px solid var(--azul-escuro); padding: 16px; margin-bottom: 22px; }
-        .bloco h2 { margin: 0 0 12px; font-size: 1.3rem; text-transform: uppercase; letter-spacing: 1px; color: var(--azul-claro); }
-        .form-linha { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
-        .ajuda { color: var(--suave); font-size: .85rem; margin: 10px 0 0; }
         .lista { display: flex; flex-direction: column; gap: 8px; }
         .linha { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; background: var(--painel-2); border-left: 4px solid var(--azul); padding: 8px 12px; }
         .linha .grow { flex: 1 1 200px; }
@@ -163,42 +78,24 @@
         .jogador-topo h3 { margin: 0; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; }
         .pr-atual { font-size: 1.4rem; font-weight: 700; color: var(--azul-claro); }
         .qtd-controle { display: inline-flex; align-items: center; gap: 6px; }
-        table { width: 100%; border-collapse: collapse; font-family: Arial, Helvetica, sans-serif; }
-        th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--azul-escuro); vertical-align: top; }
-        th { color: var(--suave); font-weight: 400; font-size: .8rem; text-transform: uppercase; letter-spacing: 1px; }
-        .tabela-rolagem { overflow-x: auto; }
         .log-linha { font-family: Arial, Helvetica, sans-serif; font-size: .92rem; padding: 6px 0; border-bottom: 1px solid var(--azul-escuro); }
         .log-linha time { color: var(--suave); margin-right: 10px; }
-
-        /* ---------- Modal e aviso ---------- */
-        dialog { background: var(--painel); color: var(--texto); border: 3px solid var(--azul); padding: 22px; width: min(520px, 94vw); box-shadow: 8px 8px 0 var(--azul-escuro); }
-        dialog::backdrop { background: rgba(2, 6, 23, .8); }
-        dialog h2 { margin: 0 0 14px; text-transform: uppercase; letter-spacing: 1px; }
-        .campo { margin-bottom: 12px; }
-        .campo input, .campo select { width: 100%; }
-        .dupla { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .modal-acoes { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
-        #aviso {
-            position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
-            max-width: 92vw; padding: 10px 22px; background: var(--azul-escuro);
-            border: 2px solid var(--azul-claro); font-family: Arial, Helvetica, sans-serif; z-index: 50;
-        }
-        #aviso.erro { background: #7f1d1d; border-color: var(--perigo); }
-        #aviso[hidden] { display: none; }
-        @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
-        @media (max-width: 560px) { .topo h1 { font-size: 1.5rem; } .dupla { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
 <header class="topo">
     <a class="voltar" href="index.html">‹ Hub</a>
-    <h1>Loja</h1>
+    <div class="titulo">
+        <h1>Loja</h1>
+        <p class="tagline">Itens, preços e PR da mesa</p>
+    </div>
     <div class="espaco"></div>
-    <div class="selo skew-tag"><span class="unskew" id="selo-topo"></span></div>
+    <div class="selo skew-tag" id="selo-saldo" hidden><span class="unskew" id="selo-topo"></span></div>
+    <div class="usuario" data-usuario hidden></div>
 </header>
 
-<main>
+<main class="conteudo">
     <div id="faixa-global" class="faixa-ajuste txt" hidden></div>
 
     <nav class="abas" id="abas" aria-label="Seções da loja"></nav>
@@ -469,9 +366,9 @@
 
     function renderTopo() {
         const agora = Date.now();
-        $('#selo-topo').innerHTML = ehMestre
-            ? 'Modo Mestre'
-            : '<small>Seu saldo</small>' + esc(fmtPR(num(estado.pr[estado.uid], 0, 0, 1000000)));
+        // o Mestre não tem saldo; o nome e o papel ficam no componente de usuário (js/topo.js)
+        $('#selo-saldo').hidden = ehMestre || !estado.uid;
+        if (!ehMestre) $('#selo-topo').innerHTML = '<small>Seu saldo</small>' + esc(fmtPR(num(estado.pr[estado.uid], 0, 0, 1000000)));
 
         const faixa = $('#faixa-global');
         if (ativo(estado.global, agora)) {

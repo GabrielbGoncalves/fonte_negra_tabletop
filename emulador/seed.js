@@ -13,8 +13,8 @@ const CHAVE = 'chave-qualquer-no-emulador';
 
 // Credenciais antigas do código, aceitáveis aqui porque só existem no emulador local
 const CONTAS = [
-    { email: 'mestre@rpg.com', senha: 'mestre123', papel: 'mestres' },
-    { email: 'jogador@rpg.com', senha: 'jogador123', papel: 'jogadores' }
+    { email: 'mestre@rpg.com', senha: 'mestre123', papel: 'mestres', nome: 'Mestre de Teste' },
+    { email: 'jogador@rpg.com', senha: 'jogador123', papel: 'jogadores', nome: 'Jogador de Teste' }
 ];
 
 async function post(url, corpo) {
@@ -37,20 +37,26 @@ async function obterUid({ email, senha }) {
 }
 
 // "Bearer owner" é o acesso de administrador do emulador (ignora as regras, como o console)
-async function gravarPapel(papel, uid) {
-    const res = await fetch(`${DB}/${papel}/${uid}.json?ns=${NS}`, {
+async function gravar(caminho, valor) {
+    const res = await fetch(`${DB}/${caminho}.json?ns=${NS}`, {
         method: 'PUT',
         headers: { Authorization: 'Bearer owner' },
-        body: 'true'
+        body: JSON.stringify(valor)
     });
-    if (!res.ok) throw new Error(`Falha ao gravar /${papel}/${uid}: ${await res.text()}`);
+    if (!res.ok) throw new Error(`Falha ao gravar /${caminho}: ${await res.text()}`);
+}
+
+// Papel e perfil (/usuarios/{uid}), no mesmo formato do cadastro feito pelo site
+async function gravarPapel({ papel, email, nome }, uid) {
+    await gravar(`${papel}/${uid}`, true);
+    await gravar(`usuarios/${uid}`, { nome, email, papel: papel === 'mestres' ? 'mestre' : 'jogador' });
 }
 
 (async () => {
     try {
         for (const conta of CONTAS) {
             const { uid, criada } = await obterUid(conta);
-            await gravarPapel(conta.papel, uid);
+            await gravarPapel(conta, uid);
             console.log(`${criada ? 'criada ' : 'já existe'}  ${conta.email.padEnd(16)} senha: ${conta.senha.padEnd(11)} /${conta.papel}/${uid}`);
         }
     } catch (err) {
