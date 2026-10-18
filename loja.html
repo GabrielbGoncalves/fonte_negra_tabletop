@@ -726,7 +726,8 @@
 
         const mapa = {};
         mapa['loja/itens/' + id + '/estoque'] = item.estoque - qtd;
-        mapa['loja/pr/' + estado.uid] = r2(pr - total);
+        // Item grátis não mexe no PR: as regras só deixam o jogador diminuí-lo.
+        if (total > 0) mapa['loja/pr/' + estado.uid] = r2(pr - total);
         mapa['loja/inventario/' + estado.uid + '/' + id + '/qtd'] = atual + qtd;
         mapa['loja/inventario/' + estado.uid + '/' + id + '/nome'] = item.nome;
         entradaLog(mapa, 'Compra: ' + qtd + '× ' + item.nome + ' por ' + fmtPR(total) + '.');
