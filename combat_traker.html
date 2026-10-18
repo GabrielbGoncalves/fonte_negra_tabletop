@@ -12,187 +12,57 @@
   <meta name="apple-mobile-web-app-title" content="Fonte Negra">
   <link rel="manifest" href="assets/favicon/site.webmanifest">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Painel do Narrador - Persona RPG</title>
-  
+  <title>Combate | Fonte Negra</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&display=swap" rel="stylesheet">
+
   <!-- Firebase SDK Compat -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" integrity="sha384-4gq9w/AGf72FXdNQ3Kn3EqWP7633NbCMjpYHt8YCZyXf23o2opcuAr4cif41tLrC" crossorigin="anonymous"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js" integrity="sha384-5PDE6CZvnNIJI5xu68GIFoOO3U73lAnRLBwPBmmKjWnYnYwKEHWr/ghtGooEOXGb" crossorigin="anonymous"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" integrity="sha384-xtdq4MQqPj1dB5DQsuw9O7dh4kHhMP/Wp5u8O1jiaWiou13ZfJIgiccjtVK2pBhL" crossorigin="anonymous"></script>
   <script src="js/firebase-config.js"></script>
   <script src="js/sessao.js" data-exigir-login></script>
+  <script src="js/topo.js" defer></script>
 
+  <link rel="stylesheet" href="assets/css/layout.css">
   <style>
-    :root {
-      --bg-color: #f0f4f9;
-      --card-bg: #ffffff;
-      --royal-blue: #4169e1;
-      --royal-blue-dark: #1d3557;
-      --royal-blue-light: #eef2ff;
-      --text-color: #2b2d42;
-      --border-color: #d1d5db;
-      --input-bg: #ffffff;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    body {
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      padding: 20px;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    header {
-      background-color: var(--royal-blue);
-      color: white;
-      padding: 18px;
-      border-radius: 8px;
-      text-align: center;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .card {
-      background-color: var(--card-bg);
-      border-radius: 8px;
-      padding: 20px;
-      border-left: 6px solid var(--royal-blue);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-      border-top: 1px solid var(--border-color);
-      border-right: 1px solid var(--border-color);
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    h2 {
-      color: var(--royal-blue-dark);
-      margin-bottom: 15px;
-      font-size: 1.25rem;
-      border-bottom: 2px solid var(--royal-blue-light);
-      padding-bottom: 8px;
-    }
-
-    .table-container {
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-
-    th, td {
-      border: 1px solid var(--border-color);
-      padding: 10px;
-      text-align: left;
-    }
-
-    th {
-      background-color: var(--royal-blue);
-      color: white;
-      font-weight: 600;
-    }
-
-    tr:nth-child(even) {
-      background-color: var(--royal-blue-light);
-    }
-
-    .form-group {
-      margin-bottom: 15px;
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-
-    label {
-      font-weight: 600;
-      color: var(--royal-blue-dark);
-      font-size: 0.9rem;
-    }
-
-    input, select, textarea {
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid var(--border-color);
-      background-color: var(--input-bg);
-      color: var(--text-color);
-      font-size: 14px;
-      width: 100%;
-    }
-
-    input:focus, select:focus, textarea:focus {
-      outline: none;
-      border-color: var(--royal-blue);
-      box-shadow: 0 0 0 3px rgba(65, 105, 225, 0.2);
-    }
-
-    button {
-      background-color: var(--royal-blue);
-      color: white;
-      padding: 10px 16px;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-
-    button:hover {
-      background-color: #3154b3;
-    }
-
-    .grid-2 {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 20px;
-    }
-
-    .checkbox-group {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .checkbox-group input[type="checkbox"] {
-      width: auto;
-    }
-
-    .modo-aviso {
-      background: #ffeb3b;
-      color: #000;
-      padding: 5px 10px;
-      border-radius: 4px;
-      font-size: 0.8rem;
-      font-weight: bold;
-    }
+    /* Layout, topo, controles e tabelas vêm de assets/css/layout.css */
+    main.conteudo { display: flex; flex-direction: column; gap: 22px; }
+    main.conteudo .bloco { margin-bottom: 0; }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 22px; }
+    .form-group { margin-bottom: 14px; display: flex; flex-direction: column; gap: 4px; }
+    .form-group label { margin-bottom: 0; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; }
+    #tabela-iniciativa input { width: 100%; padding: 6px 8px; }
+    #tabela-iniciativa tr:nth-child(even) { background: var(--painel-2); }
+    #tabela-iniciativa td { padding: 6px; }
+    input:disabled, select:disabled, textarea:disabled { opacity: .85; color: var(--texto); }
+    .checkbox-group { display: flex; gap: 12px; align-items: center; }
+    .checkbox-group input[type="checkbox"] { width: 18px; height: 18px; padding: 0; accent-color: var(--azul); }
+    .checkbox-group label { margin: 0; text-transform: none; letter-spacing: 0; color: var(--texto); font-size: 1rem; }
+    #btn-adicionar { margin-top: 14px; }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <header>
-    <h1>Painel do Narrador - Combate & Negociação[cite: 2]</h1>
-    <span id="indicador-modo" class="modo-aviso">Modo: a carregar...</span>
-  </header>
+<header class="topo">
+  <a class="voltar" href="index.html">‹ Hub</a>
+  <div class="titulo">
+    <h1>Combate</h1>
+    <p class="tagline">Iniciativa, negociação e recursos do encontro</p>
+  </div>
+  <div class="espaco"></div>
+  <div class="usuario" data-usuario hidden></div>
+</header>
+
+<main class="conteudo">
 
   <!-- 1. Painel de Iniciativa -->
-  <section class="card">
+  <section class="bloco">
     <h2>1. Matriz de Combate e Iniciativa[cite: 2]</h2>
-    <div class="table-container">
+    <div class="tabela-rolagem">
       <table>
         <thead>
           <tr>
@@ -210,13 +80,12 @@
         </tbody>
       </table>
     </div>
-    <br>
-    <button id="btn-adicionar" onclick="adicionarLinha()">+ Adicionar Unidade</button>
+    <button type="button" class="btn" id="btn-adicionar" onclick="adicionarLinha()">+ Adicionar Unidade</button>
   </section>
 
   <div class="grid-2">
     <!-- 2. Painel de Negociação -->
-    <section class="card">
+    <section class="bloco">
       <h2>2. Negociação com Sombras[cite: 2]</h2>
       <div class="form-group">
         <label for="disposicao">Disposição da Sombra:</label>
@@ -248,26 +117,26 @@
         <input type="number" id="resultado-dado" class="sync-field" placeholder="Insira o valor final do teste">
       </div>
 
-      <button type="button" id="btn-negociacao">Calcular Resultado da Negociação</button>
+      <button type="button" class="btn" id="btn-negociacao">Calcular Resultado da Negociação</button>
     </section>
 
     <!-- 3. Controle de Recarga e Status -->
-    <section class="card">
+    <section class="bloco">
       <h2>3. Recursos & Interrupções[cite: 2]</h2>
       <div class="form-group">
         <label>Ação de Interrupção Disponível:</label>
         <div class="checkbox-group">
           <input type="checkbox" id="interrupcao" class="sync-field">
-          <label for="interrupcao" style="font-weight: normal;">Pronto para Interromper</label>
+          <label for="interrupcao">Pronto para Interromper</label>
         </div>
       </div>
 
       <div class="form-group">
         <label>Contadores de Status (Counters):</label>
         <div class="checkbox-group">
-          <input type="checkbox" id="c1" class="sync-field"><label for="c1" style="font-weight: normal;">1</label>
-          <input type="checkbox" id="c2" class="sync-field"><label for="c2" style="font-weight: normal;">2</label>
-          <input type="checkbox" id="c3" class="sync-field"><label for="c3" style="font-weight: normal;">3</label>
+          <input type="checkbox" id="c1" class="sync-field"><label for="c1">1</label>
+          <input type="checkbox" id="c2" class="sync-field"><label for="c2">2</label>
+          <input type="checkbox" id="c3" class="sync-field"><label for="c3">3</label>
         </div>
       </div>
 
@@ -279,7 +148,7 @@
   </div>
 
   <!-- 4. Ficha Rápida de NPC -->
-  <section class="card">
+  <section class="bloco">
     <h2>4. Cadastro / Bloco Rápido de NPC[cite: 2]</h2>
     <div class="grid-2">
       <div class="form-group">
@@ -296,7 +165,7 @@
       <textarea id="npc-hab" class="sync-field" rows="3" placeholder="- Hama: Dano/Efeito&#10;- Shining Arrows: Alcance/Dano"></textarea>
     </div>
   </section>
-</div>
+</main>
 
 <script>
   // Firebase e sessão vêm de js/sessao.js (o acesso ao banco aguarda o login)
@@ -304,17 +173,8 @@
 
   // Gestão de Modo (Mestre vs Jogador)
   const modoAtual = localStorage.getItem('rpg_modo_sessao') || 'jogador';
-  const indicadorModo = document.getElementById('indicador-modo');
 
-  if (modoAtual === 'mestre') {
-    indicadorModo.textContent = "Modo: Mestre (Escrita Ativa)";
-    indicadorModo.style.background = "#4caf50";
-    indicadorModo.style.color = "#fff";
-  } else {
-    indicadorModo.textContent = "Modo: Jogador (Somente Leitura)";
-    indicadorModo.style.background = "#2196f3";
-    indicadorModo.style.color = "#fff";
-    
+  if (modoAtual !== 'mestre') {
     // Desativar controlos para jogadores
     document.addEventListener("DOMContentLoaded", () => {
       document.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
@@ -451,4 +311,4 @@
 </script>
 
 </body>
-</html>
+</html>

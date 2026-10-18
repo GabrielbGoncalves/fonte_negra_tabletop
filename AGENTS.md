@@ -24,6 +24,8 @@ Idioma: código, comentários, textos de interface e mensagens de commit em **po
 | `cadastro_jogador.html` | Auto-cadastro aberto, só cria Jogadores (link no login do hub) | `usuarios`, `jogadores` |
 | `loja.html` | Loja: o Mestre cadastra itens, preços e PR; o jogador compra com o próprio PR | `loja` (`itens`, `ajusteGlobal`, `pr`, `inventario`, `log`) |
 | `js/sessao.js` | Firebase, login, papel do usuário, cadastro de contas e helpers compartilhados | `mestres`, `jogadores`, `usuarios` |
+| `js/topo.js` | Componente de usuário do cabeçalho (nome, papel e botão de sair) | `usuarios/{uid}/nome` (cada conta lê o próprio) |
+| `assets/css/layout.css` | Layout compartilhado: tokens de cor, fundo, cabeçalho `.topo`, `main.conteudo`, botões, campos, `.bloco`, abas e modal | — |
 | `js/firebase-config.js` | **Placeholder** (`null`). No deploy, o workflow sobrescreve com a configuração real a partir dos secrets | — |
 | `.github/workflows/deploy-pages.yml` | Deploy no GitHub Pages; gera o `firebase-config.js` com `.github/scripts/gerar-firebase-config.js` | — |
 | `database.rules.json` | Regras do Realtime Database (a proteção real dos dados) | — |
@@ -32,7 +34,9 @@ Idioma: código, comentários, textos de interface e mensagens de commit em **po
 
 O Editor (`teste_grid`) e o Grid Map (`grid_map`) usam nós separados: o mapa do editor só chega aos jogadores quando o Mestre o carrega no Grid Map (colando o XML ou usando "Usar mapa do Editor"). No `grid_map`, as posições dos tokens gravadas no banco têm precedência sobre as do XML.
 
-Cada página tem o CSS e o JS embutidos (`<style>` e `<script>` no próprio arquivo). As dependências vêm de CDN: Firebase compat 10.8.0, Tailwind Play CDN 3.4.17 em algumas páginas, Google Fonts e Font Awesome. Não existe `package.json` nem bundler. Não adicione um sem combinar com o usuário.
+Todas as páginas, exceto `map_total.html` (que mantém o visual próprio de HUD), seguem o layout da `loja.html`: `assets/css/layout.css` mais um cabeçalho `.topo` com o link de volta ao Hub, título (`h1`), tagline (`.tagline`) e o componente de usuário (`<div class="usuario" data-usuario hidden></div>`, preenchido por `js/topo.js`). O conteúdo fica em `<main class="conteudo">`. Nas páginas com Tailwind, as regras de controles do `layout.css` têm o prefixo `body` para vencer o preflight.
+
+Cada página tem o CSS e o JS específicos embutidos (`<style>` e `<script>` no próprio arquivo). As dependências vêm de CDN: Firebase compat 10.8.0, Tailwind Play CDN 3.4.17 em algumas páginas, Google Fonts e Font Awesome. Não existe `package.json` nem bundler. Não adicione um sem combinar com o usuário.
 
 ## Arquitetura de sessão e acesso
 
@@ -41,8 +45,9 @@ Cada página tem o CSS e o JS embutidos (`<style>` e `<script>` no próprio arqu
   - `RPG.sessao`: Promise que resolve com `{ user, modo }` ou `null`.
   - `RPG.entrar(email, senha)` e `RPG.sair()`.
   - `RPG.cadastrarUsuario({ nome, email, senha, papel })`: cria a conta no Auth numa instância secundária do Firebase (o Mestre continua logado) e grava `/usuarios/{uid}` e o papel numa única atualização. Se o banco recusar, a conta recém-criada é apagada.
+  - `RPG.perfil()`: `{ nome, email, modo }` da conta logada, para o cabeçalho (usa o e-mail se não houver nome em `/usuarios`).
   - `RPG.escaparHtml(valor)`.
-- O papel vem do banco: `/mestres/{uid} = true` ou `/jogadores/{uid} = true`. Um Mestre pode **criar** essas entradas (pela página de cadastro), mas não alterar nem apagar: trocar ou revogar papel continua sendo pelo Console do Firebase. Qualquer pessoa pode criar a própria conta de Jogador em `cadastro_jogador.html` (`RPG.cadastrarJogador`): as regras deixam a conta gravar só `/jogadores/{seu uid}` e `/usuarios/{seu uid}` com papel `jogador` e o e-mail do token, na mesma atualização. `/usuarios/{uid}` guarda nome, e-mail e papel, e só Mestres leem.
+- O papel vem do banco: `/mestres/{uid} = true` ou `/jogadores/{uid} = true`. Um Mestre pode **criar** essas entradas (pela página de cadastro), mas não alterar nem apagar: trocar ou revogar papel continua sendo pelo Console do Firebase. Qualquer pessoa pode criar a própria conta de Jogador em `cadastro_jogador.html` (`RPG.cadastrarJogador`): as regras deixam a conta gravar só `/jogadores/{seu uid}` e `/usuarios/{seu uid}` com papel `jogador` e o e-mail do token, na mesma atualização. `/usuarios/{uid}` guarda nome, e-mail e papel, e só Mestres leem a lista toda (cada conta lê apenas o próprio registro, para o cabeçalho mostrar o nome).
 - `localStorage['rpg_modo_sessao']` é **só um cache para a interface**. As páginas leem esse cache de forma síncrona em `const modoAtual = ...`. O `sessao.js` confere o cache contra o banco e recarrega a página se ele estiver errado.
 - Toda página inclui `<script src="js/firebase-config.js"></script>` antes de `js/sessao.js`. As páginas internas usam `<script src="js/sessao.js" data-exigir-login></script>` e, sem sessão válida, voltam para `index.html`.
 - Em `localhost`/`127.0.0.1`, o `sessao.js` ignora o `firebase-config.js` e usa uma configuração fixa do projeto demo, apontando para os emuladores.
@@ -65,7 +70,7 @@ Cada página tem o CSS e o JS embutidos (`<style>` e `<script>` no próprio arqu
 
 ## Como criar uma página nova
 
-1. Copie o `<head>` de uma página existente: CSP, `referrer`, o bloco de favicons (`assets/favicon/`), os três scripts do Firebase com SRI, `js/firebase-config.js` e `js/sessao.js` com `data-exigir-login`.
+1. Copie o `<head>` e o `<header class="topo">` da `loja.html`: CSP, `referrer`, o bloco de favicons (`assets/favicon/`), a fonte Oswald, `assets/css/layout.css`, os três scripts do Firebase com SRI, `js/firebase-config.js`, `js/sessao.js` com `data-exigir-login` e `js/topo.js` com `defer`. Escreva um título e uma tagline curtos e coloque o conteúdo em `<main class="conteudo">`, usando `.bloco`, `.btn` e os tokens de cor do layout.
 2. No script da página, use:
    ```js
    const db = RPG.db;
@@ -75,7 +80,7 @@ Cada página tem o CSS e o JS embutidos (`<style>` e `<script>` no próprio arqu
 3. Grave no banco só quando `modoAtual === 'mestre'`. Para os jogadores, escute com `db.ref('<nó>').on('value', ...)`.
 4. Adicione o nó em `database.rules.json` e um card no `index.html`.
 5. Avise o usuário de que as regras precisam ser **publicadas no Firebase** (console ou `firebase deploy --only database --project <id>`). Editar o arquivo não muda nada no banco.
-6. O workflow de deploy copia `*.html`, `js/*.js` e a pasta `assets/`. Se a página usar arquivos em outra pasta, inclua no passo "Montar o site".
+6. O workflow de deploy copia `*.html`, `js/*.js` e a pasta `assets/` (inclui `assets/css/`). Se a página usar arquivos em outra pasta, inclua no passo "Montar o site".
 
 ## Testar localmente (Firebase Local Emulator Suite)
 
@@ -90,8 +95,8 @@ node emulador/seed.js                  # em outro terminal: cria as contas e os 
 
 | Conta | Senha | Papel |
 |---|---|---|
-| `mestre@rpg.com` | `mestre123` | Mestre |
-| `jogador@rpg.com` | `jogador123` | Jogador |
+| `mestre@rpg.com` | `mestre123` | Mestre (nome "Mestre de Teste") |
+| `jogador@rpg.com` | `jogador123` | Jogador (nome "Jogador de Teste") |
 
 - Essas credenciais **só existem no emulador**. Nunca crie contas com elas no projeto real: as senhas estão públicas no Git.
 - Os dados do emulador somem quando ele é encerrado. Para mantê-los, use `--import emulador/dados --export-on-exit` (a pasta está no `.gitignore`).

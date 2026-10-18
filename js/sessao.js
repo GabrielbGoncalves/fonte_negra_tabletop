@@ -167,6 +167,24 @@
         await auth.signOut();
     }
 
+    // Dados para o cabeçalho (js/topo.js): nome de /usuarios/{uid}, que as Regras deixam a
+    // própria conta ler. O papel exibido vem do cache, já conferido contra o banco pela sessão.
+    async function perfil() {
+        const user = auth.currentUser;
+        if (!user) return null;
+        let nome = null;
+        try {
+            const snap = await comPrazo(database.ref('usuarios/' + user.uid + '/nome').once('value'), 10000, 'banco-indisponivel');
+            nome = snap.val();
+        } catch (err) {
+            registrarErro(err);
+        }
+        if (typeof nome !== 'string' || !nome.trim()) {
+            nome = user.displayName || String(user.email || '').split('@')[0] || 'Sem nome';
+        }
+        return { nome: nome.trim(), email: user.email || '', modo: lerCache() };
+    }
+
     // Cria uma conta (Auth) e grava o papel no banco. Só funciona para Mestres: as Regras
     // recusam a gravação em /usuarios, /mestres e /jogadores vinda de outra conta.
     // A conta nova é criada numa instância separada do Firebase, para o Mestre não perder a sessão.
@@ -234,6 +252,7 @@
         sessao: pronto,
         entrar,
         sair,
+        perfil,
         cadastrarUsuario,
         cadastrarJogador,
         escaparHtml

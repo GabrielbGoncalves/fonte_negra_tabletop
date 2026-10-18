@@ -12,167 +12,117 @@
     <meta name="apple-mobile-web-app-title" content="Fonte Negra">
     <link rel="manifest" href="assets/favicon/site.webmanifest">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro de Usuários - Persona RPG</title>
-
-    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <title>Cadastro de Usuários | Fonte Negra</title>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" integrity="sha384-4gq9w/AGf72FXdNQ3Kn3EqWP7633NbCMjpYHt8YCZyXf23o2opcuAr4cif41tLrC" crossorigin="anonymous"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js" integrity="sha384-5PDE6CZvnNIJI5xu68GIFoOO3U73lAnRLBwPBmmKjWnYnYwKEHWr/ghtGooEOXGb" crossorigin="anonymous"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" integrity="sha384-xtdq4MQqPj1dB5DQsuw9O7dh4kHhMP/Wp5u8O1jiaWiou13ZfJIgiccjtVK2pBhL" crossorigin="anonymous"></script>
     <script src="js/firebase-config.js"></script>
     <script src="js/sessao.js" data-exigir-login></script>
+    <script src="js/topo.js" defer></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&display=swap" rel="stylesheet">
 
+    <link rel="stylesheet" href="assets/css/layout.css">
     <style>
-        body {
-            font-family: 'Oswald', sans-serif;
-            background-color: #020617;
-            background-image: radial-gradient(#1e3a8a 15%, transparent 16%), radial-gradient(#1e3a8a 15%, transparent 16%);
-            background-size: 20px 20px;
-            background-position: 0 0, 10px 10px;
-            color: #f8fafc;
-            min-height: 100vh;
-        }
-
-        .clip-card {
-            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%);
-        }
-
-        .clip-header {
-            clip-path: polygon(0 0, 100% 0, 98% 100%, 2% 100%);
-        }
-
-        .skew-tag {
-            transform: skewX(-12deg);
-        }
-
-        .unskew {
-            transform: skewX(12deg);
-        }
-
-        .campo.invalido {
-            border-color: #ef4444;
-        }
-
+        /* Layout, topo, controles e blocos vêm de assets/css/layout.css */
+        .hidden { display: none !important; }
+        .painel-form { max-width: 480px; margin: 0 auto; box-shadow: 8px 8px 0 var(--azul-escuro); }
+        .painel-form .campo input { width: 100%; }
+        .painel-form .btn { width: 100%; margin-top: 4px; }
+        .painel-form .btn:disabled { cursor: wait; }
+        .campo .invalido { border-color: var(--perigo); }
+        .erro-campo { margin: 4px 0 0; color: var(--perigo); font-family: Arial, Helvetica, sans-serif; font-size: .85rem; }
+        .resultado { margin: 4px 0 12px; text-align: center; font-family: Arial, Helvetica, sans-serif; }
+        .resultado.ok { color: var(--ok); }
+        .resultado.erro { color: var(--perigo); }
+        .painel-form .nota { text-align: center; }
+        .aviso-painel { max-width: 480px; margin: 0 auto; text-align: center; }
+        .aviso-painel.restrito { border-color: var(--perigo); }
+        .aviso-painel.restrito h2 { color: var(--perigo); }
+        fieldset { border: 0; padding: 0; margin: 0 0 12px; }
+        legend { padding: 0; font-size: .85rem; color: var(--suave); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+        .papeis { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 0 4px; }
         /* Seletor de permissão: rádios escondidos, rótulos inclinados */
-        .opcao-papel input {
-            position: absolute;
-            opacity: 0;
-            pointer-events: none;
-        }
-
+        .opcao-papel { position: relative; cursor: pointer; margin: 0; }
+        .opcao-papel input { position: absolute; opacity: 0; pointer-events: none; }
         .opcao-papel span {
-            transition: all 0.15s ease;
+            display: block; text-align: center; padding: 8px; transform: skewX(-12deg);
+            background: var(--bg); color: var(--suave); border: 2px solid var(--azul-escuro);
+            font-size: 1rem; color: var(--suave); transition: background .12s, border-color .12s;
         }
-
-        .opcao-papel input:focus-visible + span {
-            outline: 2px solid #60a5fa;
-            outline-offset: 2px;
-        }
-
-        .opcao-papel input:checked + span.papel-jogador {
-            background-color: #2563eb;
-            color: #000;
-            border-color: #fff;
-            box-shadow: 3px 3px 0px #fff;
-        }
-
-        .opcao-papel input:checked + span.papel-mestre {
-            background-color: #dc2626;
-            color: #fff;
-            border-color: #fff;
-            box-shadow: 3px 3px 0px #fff;
-        }
+        .opcao-papel span span { display: inline-block; padding: 0; border: 0; background: none; transform: skewX(12deg); color: inherit; }
+        .opcao-papel:hover > span { border-color: var(--azul-claro); }
+        .opcao-papel input:focus-visible + span { outline: 2px solid var(--azul-claro); outline-offset: 2px; }
+        .opcao-papel input:checked + span.papel-jogador { background: var(--azul); color: #fff; border-color: var(--azul-claro); }
+        .opcao-papel input:checked + span.papel-mestre { background: #7f1d1d; color: #fff; border-color: var(--perigo); }
     </style>
 </head>
-<body class="p-4 md:p-8 flex flex-col items-center">
+<body>
 
-    <header class="w-full max-w-3xl bg-blue-600 text-black p-6 mb-8 clip-header border-4 border-white shadow-[8px_8px_0px_#000] flex flex-col md:flex-row justify-between items-center gap-4">
-        <div class="flex items-center gap-4">
-            <div class="bg-black text-white px-4 py-2 text-3xl font-black skew-tag border-2 border-blue-500">
-                <span class="inline-block unskew">ID</span>
-            </div>
-            <div>
-                <h1 class="text-3xl md:text-4xl font-black uppercase italic tracking-widest drop-shadow-[2px_2px_0px_#fff] text-white">
-                    Cadastro de Usuários
-                </h1>
-                <p class="text-black font-bold uppercase tracking-widest text-sm">Novos membros da mesa</p>
-            </div>
+    <header class="topo">
+        <a class="voltar" href="index.html">‹ Hub</a>
+        <div class="titulo">
+            <h1>Cadastro de Usuários</h1>
+            <p class="tagline">Novos membros da mesa</p>
         </div>
-        <a href="index.html" class="bg-black text-white px-4 py-2 font-bold text-xs uppercase tracking-wider border-2 border-white skew-tag hover:bg-slate-800 transition-colors">
-            <span class="inline-block unskew">← Voltar ao Hub</span>
-        </a>
+        <div class="espaco"></div>
+        <div class="usuario" data-usuario hidden></div>
     </header>
 
-    <!-- Aviso para quem não é Mestre (restrição visual; quem bloqueia de fato são as Regras do Firebase) -->
-    <div id="aviso-restrito" class="hidden w-full max-w-md bg-slate-900 border-4 border-red-600 p-6 clip-card shadow-[10px_10px_0px_#7f1d1d] text-center">
-        <p class="text-xl font-black uppercase tracking-widest text-red-500 mb-2">Acesso restrito</p>
-        <p class="text-sm text-slate-400 uppercase tracking-wider">Só o Mestre pode cadastrar usuários.</p>
-    </div>
+    <main class="conteudo">
+        <!-- Aviso para quem não é Mestre (restrição visual; quem bloqueia de fato são as Regras do Firebase) -->
+        <section id="aviso-restrito" class="bloco aviso-painel restrito hidden">
+            <h2>Acesso restrito</h2>
+            <p class="txt">Só o Mestre pode cadastrar usuários.</p>
+        </section>
 
-    <main id="painel-cadastro" class="hidden w-full max-w-md bg-slate-900 border-4 border-blue-500 p-6 clip-card shadow-[10px_10px_0px_#1d4ed8]">
-        <div class="bg-blue-600 text-black px-4 py-2 text-2xl font-black skew-tag mb-6 text-center border-2 border-white">
-            <span class="inline-block unskew uppercase tracking-widest">Novo Usuário</span>
-        </div>
-
-        <form id="form-cadastro" class="space-y-4" novalidate>
-            <div>
-                <label for="cad-nome" class="block text-xs font-bold uppercase tracking-wider text-blue-400 mb-1">Nome</label>
-                <input type="text" id="cad-nome" name="nome" maxlength="60" autocomplete="off" placeholder="Nome do personagem ou jogador" class="campo w-full bg-black border-2 border-slate-700 p-3 text-sm text-white focus:border-blue-500 outline-none font-sans">
-                <p data-erro="nome" class="hidden mt-1 text-xs text-red-500 font-bold uppercase tracking-wider"></p>
-            </div>
-
-            <div>
-                <label for="cad-email" class="block text-xs font-bold uppercase tracking-wider text-blue-400 mb-1">E-mail</label>
-                <input type="email" id="cad-email" name="email" maxlength="254" autocomplete="off" placeholder="jogador@email.com" class="campo w-full bg-black border-2 border-slate-700 p-3 text-sm text-white focus:border-blue-500 outline-none font-sans">
-                <p data-erro="email" class="hidden mt-1 text-xs text-red-500 font-bold uppercase tracking-wider"></p>
-            </div>
-
-            <div>
-                <label for="cad-senha" class="block text-xs font-bold uppercase tracking-wider text-blue-400 mb-1">Senha</label>
-                <input type="password" id="cad-senha" name="senha" autocomplete="new-password" placeholder="Mínimo de 6 caracteres" class="campo w-full bg-black border-2 border-slate-700 p-3 text-sm text-white focus:border-blue-500 outline-none font-sans">
-                <p data-erro="senha" class="hidden mt-1 text-xs text-red-500 font-bold uppercase tracking-wider"></p>
-            </div>
-
-            <div>
-                <label for="cad-senha2" class="block text-xs font-bold uppercase tracking-wider text-blue-400 mb-1">Repetir senha</label>
-                <input type="password" id="cad-senha2" name="senha2" autocomplete="new-password" placeholder="••••••••" class="campo w-full bg-black border-2 border-slate-700 p-3 text-sm text-white focus:border-blue-500 outline-none font-sans">
-                <p data-erro="senha2" class="hidden mt-1 text-xs text-red-500 font-bold uppercase tracking-wider"></p>
-            </div>
-
-            <fieldset>
-                <legend class="block text-xs font-bold uppercase tracking-wider text-blue-400 mb-2">Permissão</legend>
-                <div class="grid grid-cols-2 gap-4 px-1">
-                    <label class="opcao-papel relative cursor-pointer">
-                        <input type="radio" name="papel" value="jogador" checked>
-                        <span class="papel-jogador block text-center skew-tag border-2 border-slate-700 bg-black text-slate-400 py-2 font-black text-sm uppercase tracking-wider hover:border-blue-500">
-                            <span class="inline-block unskew">Jogador</span>
-                        </span>
-                    </label>
-                    <label class="opcao-papel relative cursor-pointer">
-                        <input type="radio" name="papel" value="mestre">
-                        <span class="papel-mestre block text-center skew-tag border-2 border-slate-700 bg-black text-slate-400 py-2 font-black text-sm uppercase tracking-wider hover:border-red-500">
-                            <span class="inline-block unskew">Mestre</span>
-                        </span>
-                    </label>
+        <section id="painel-cadastro" class="bloco painel-form hidden">
+            <h2>Novo usuário</h2>
+            <form id="form-cadastro" novalidate>
+                <div class="campo">
+                    <label for="cad-nome">Nome</label>
+                    <input type="text" id="cad-nome" name="nome" maxlength="60" autocomplete="off" placeholder="Nome do personagem ou jogador">
+                    <p data-erro="nome" class="erro-campo hidden"></p>
                 </div>
-            </fieldset>
+                <div class="campo">
+                    <label for="cad-email">E-mail</label>
+                    <input type="email" id="cad-email" name="email" maxlength="254" autocomplete="off" placeholder="jogador@email.com">
+                    <p data-erro="email" class="erro-campo hidden"></p>
+                </div>
+                <div class="campo">
+                    <label for="cad-senha">Senha</label>
+                    <input type="password" id="cad-senha" name="senha" autocomplete="new-password" placeholder="Mínimo de 6 caracteres">
+                    <p data-erro="senha" class="erro-campo hidden"></p>
+                </div>
+                <div class="campo">
+                    <label for="cad-senha2">Repetir senha</label>
+                    <input type="password" id="cad-senha2" name="senha2" autocomplete="new-password" placeholder="••••••••">
+                    <p data-erro="senha2" class="erro-campo hidden"></p>
+                </div>
+                <fieldset>
+                    <legend>Permissão</legend>
+                    <div class="papeis">
+                        <label class="opcao-papel">
+                            <input type="radio" name="papel" value="jogador" checked>
+                            <span class="papel-jogador"><span>Jogador</span></span>
+                        </label>
+                        <label class="opcao-papel">
+                            <input type="radio" name="papel" value="mestre">
+                            <span class="papel-mestre"><span>Mestre</span></span>
+                        </label>
+                    </div>
+                </fieldset>
 
-            <div id="cad-resultado" class="hidden text-xs font-bold uppercase tracking-wider text-center" role="status"></div>
+                <div id="cad-resultado" class="resultado hidden" role="status"></div>
 
-            <div class="pt-2">
-                <button type="submit" id="cad-enviar" class="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-wait text-black font-black py-3 px-4 text-xs uppercase tracking-wider transition-colors border-2 border-white shadow-[2px_2px_0px_#fff]">
-                    Cadastrar
-                </button>
-            </div>
-        </form>
+                <button type="submit" id="cad-enviar" class="btn">Cadastrar</button>
+            </form>
 
-        <p class="mt-6 text-center text-[10px] text-slate-500 uppercase tracking-widest">
-            A conta pode entrar no Hub logo após o cadastro.
-        </p>
+            <p class="ajuda txt nota">A conta pode entrar no Hub logo após o cadastro.</p>
+        </section>
     </main>
 
     <script>
@@ -231,8 +181,8 @@
 
         function mostrarResultado(texto, sucesso) {
             resultado.textContent = texto;
-            resultado.classList.toggle('text-emerald-400', sucesso);
-            resultado.classList.toggle('text-red-500', !sucesso);
+            resultado.classList.toggle('ok', sucesso);
+            resultado.classList.toggle('erro', !sucesso);
             resultado.classList.remove('hidden');
         }
 

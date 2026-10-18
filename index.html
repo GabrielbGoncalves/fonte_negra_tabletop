@@ -1,5 +1,5 @@
-<!DOCTYPE html> 
-<html lang="pt">
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://www.gstatic.com https://*.firebaseio.com https://*.firebasedatabase.app http://127.0.0.1:9000; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://*.firebaseio.com wss://*.firebaseio.com https://*.firebasedatabase.app wss://*.firebasedatabase.app https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com http://127.0.0.1:9099 http://127.0.0.1:9000 ws://127.0.0.1:9000; frame-src https://*.firebaseapp.com https://*.firebaseio.com http://127.0.0.1:9000; object-src 'none'; base-uri 'self'; form-action 'self'">
@@ -12,247 +12,200 @@
     <meta name="apple-mobile-web-app-title" content="Fonte Negra">
     <link rel="manifest" href="assets/favicon/site.webmanifest">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hub do Sistema - Persona RPG</title>
-    
-    <!-- Tailwind CSS para estilização rápida -->
-    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-    
-    <!-- Firebase SDK Compat (Modular build via compat for Realtime Database & Auth) -->
+    <title>Hub | Fonte Negra</title>
+
+    <!-- Firebase SDK Compat (Realtime Database & Auth) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" integrity="sha384-4gq9w/AGf72FXdNQ3Kn3EqWP7633NbCMjpYHt8YCZyXf23o2opcuAr4cif41tLrC" crossorigin="anonymous"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js" integrity="sha384-5PDE6CZvnNIJI5xu68GIFoOO3U73lAnRLBwPBmmKjWnYnYwKEHWr/ghtGooEOXGb" crossorigin="anonymous"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" integrity="sha384-xtdq4MQqPj1dB5DQsuw9O7dh4kHhMP/Wp5u8O1jiaWiou13ZfJIgiccjtVK2pBhL" crossorigin="anonymous"></script>
     <script src="js/firebase-config.js"></script>
     <script src="js/sessao.js"></script>
+    <script src="js/topo.js" defer></script>
 
     <!-- Google Fonts: Oswald para manter o estilo visual dos menus do sistema -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700;900&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="assets/css/layout.css">
     <style>
-        body {
-            font-family: 'Oswald', sans-serif;
-            background-color: #020617;
-            background-image: radial-gradient(#1e3a8a 15%, transparent 16%), radial-gradient(#1e3a8a 15%, transparent 16%);
-            background-size: 20px 20px;
-            background-position: 0 0, 10px 10px;
-            color: #f8fafc;
-            min-height: 100vh;
-        }
+        /* Layout, topo, controles e blocos vêm de assets/css/layout.css */
 
-        .clip-card {
-            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%);
+        /* ---------- Login ---------- */
+        .fundo-login {
+            position: fixed; inset: 0; z-index: 60; padding: 16px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(2, 6, 23, .85);
         }
+        .fundo-login[hidden] { display: none; }
+        .painel-login {
+            background: var(--painel); border: 3px solid var(--azul); padding: 22px;
+            width: min(440px, 94vw); box-shadow: 8px 8px 0 var(--azul-escuro);
+        }
+        .painel-login h2 { margin: 0 0 6px; text-transform: uppercase; letter-spacing: 1px; }
+        .painel-login .ajuda { margin: 0 0 16px; }
+        .painel-login .btn { width: 100%; margin-top: 4px; }
+        .erro-login { color: var(--perigo); font-family: Arial, Helvetica, sans-serif; margin: 0 0 10px; }
+        .erro-login[hidden] { display: none; }
+        .rodape-login { text-align: center; margin: 16px 0 6px; color: var(--suave); }
+        .rodape-login a { color: var(--azul-claro); font-weight: 700; }
+        .painel-login .nota { text-align: center; margin: 0; }
 
-        .clip-header {
-            clip-path: polygon(0 0, 100% 0, 98% 100%, 2% 100%);
+        /* ---------- Cards do hub ---------- */
+        .grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 24px; }
+        .sombra { filter: drop-shadow(4px 4px 0 var(--azul)); transition: transform .15s, filter .15s, opacity .15s; }
+        .sombra:hover { transform: translate(-3px, -3px); filter: drop-shadow(8px 8px 0 var(--azul-claro)); }
+        .card {
+            background: var(--painel); border: 2px solid var(--azul-escuro); color: var(--texto); text-decoration: none;
+            padding: 16px 16px 30px; height: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 10px;
         }
-
-        .hub-card {
-            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 4px 4px 0px #3b82f6;
-            /* Mesmo recorte do .clip-card, mas com o topo estendido para fora da caixa,
-               para a tag (que sobe metade da altura com -mt-3) não ser cortada. */
-            clip-path: polygon(0 -40px, 100% -40px, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%);
-        }
-
-        .hub-card:hover {
-            transform: translate(-5px, -5px) scale(1.02);
-            box-shadow: 10px 10px 0px #60a5fa;
-            border-color: #60a5fa;
-        }
-
-        .skew-tag {
-            transform: skewX(-12deg);
-        }
-        
-        .unskew {
-            transform: skewX(12deg);
-        }
+        .card:hover { border-color: var(--azul-claro); }
+        .card:focus-visible { outline: 2px solid var(--azul-claro); outline-offset: -4px; }
+        .card .tag { display: inline-block; }
+        .card .tag.restrito { background: #7f1d1d; border-color: var(--perigo); }
+        .nome { margin: 0; font-size: 1.35rem; text-transform: uppercase; letter-spacing: 1px; line-height: 1.15; }
+        .desc { margin: 0; color: #cbd5e1; font-size: .92rem; line-height: 1.4; }
+        .arquivo { margin-top: auto; color: var(--azul-claro); font-size: .8rem; }
     </style>
 </head>
-<body class="p-4 md:p-8 flex flex-col items-center">
+<body>
 
-    <!-- MODAL DE AUTENTICAÇÃO / LOGIN -->
-    <div id="auth-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-slate-900 border-4 border-blue-500 w-full max-w-md p-6 clip-card shadow-[10px_10px_0px_#1d4ed8]">
-            <div class="bg-blue-600 text-black px-4 py-2 text-2xl font-black skew-tag mb-6 text-center border-2 border-white">
-                <span class="inline-block unskew uppercase tracking-widest">Acesso ao Sistema</span>
-            </div>
-            
-            <p class="text-xs text-slate-400 mb-4 uppercase tracking-wider text-center">Identifique-se para entrar na sessão</p>
-            
-            <form id="auth-form" class="space-y-4">
-                <div>
-                    <label for="auth-user" class="block text-xs font-bold uppercase tracking-wider text-blue-400 mb-1">Email</label>
-                    <input type="email" id="auth-user" autocomplete="username" required placeholder="seu@email.com" class="w-full bg-black border-2 border-slate-700 p-3 text-sm text-white focus:border-blue-500 outline-none font-sans">
+    <!-- LOGIN -->
+    <div id="auth-modal" class="fundo-login" role="dialog" aria-modal="true" aria-labelledby="titulo-login">
+        <div class="painel-login">
+            <h2 id="titulo-login">Acesso ao sistema</h2>
+            <p class="ajuda txt">Identifique-se para entrar na sessão.</p>
+
+            <form id="auth-form">
+                <div class="campo">
+                    <label for="auth-user">Email</label>
+                    <input type="email" id="auth-user" autocomplete="username" required placeholder="seu@email.com">
                 </div>
-                <div>
-                    <label for="auth-pass" class="block text-xs font-bold uppercase tracking-wider text-blue-400 mb-1">Palavra-passe</label>
-                    <input type="password" id="auth-pass" autocomplete="current-password" required placeholder="••••••••" class="w-full bg-black border-2 border-slate-700 p-3 text-sm text-white focus:border-blue-500 outline-none font-sans">
+                <div class="campo">
+                    <label for="auth-pass">Palavra-passe</label>
+                    <input type="password" id="auth-pass" autocomplete="current-password" required placeholder="••••••••">
                 </div>
 
-                <div id="auth-error" class="text-xs text-red-500 font-bold uppercase tracking-wider hidden text-center"></div>
+                <p id="auth-error" class="erro-login" role="alert" hidden></p>
 
-                <div class="pt-2">
-                    <button type="submit" id="auth-submit" class="w-full bg-blue-600 hover:bg-blue-500 text-black font-black py-3 px-4 text-xs uppercase tracking-wider transition-colors border-2 border-white shadow-[2px_2px_0px_#fff]">
-                        Entrar
-                    </button>
-                </div>
+                <button type="submit" id="auth-submit" class="btn">Entrar</button>
             </form>
 
-            <p class="mt-4 text-center text-xs text-slate-400 uppercase tracking-wider">
+            <p class="rodape-login txt">
                 Não tem conta?
-                <a href="cadastro_jogador.html" class="text-blue-400 font-bold hover:text-blue-300 underline underline-offset-2">Criar conta de jogador</a>
+                <a href="cadastro_jogador.html">Criar conta de jogador</a>
             </p>
-
-            <p class="mt-6 text-center text-[10px] text-slate-500 uppercase tracking-widest">
-                O modo (Mestre ou Jogador) é definido pela sua conta.
-            </p>
+            <p class="ajuda txt nota">O modo (Mestre ou Jogador) é definido pela sua conta.</p>
         </div>
     </div>
 
-    <!-- CABEÇALHO DO HUB -->
-    <header class="w-full max-w-7xl bg-blue-600 text-black p-6 mb-6 clip-header border-4 border-white shadow-[8px_8px_0px_#000] flex flex-col md:flex-row justify-between items-center gap-4">
-        <div class="flex items-center gap-4">
-            <div class="bg-black text-white px-4 py-2 text-3xl font-black skew-tag border-2 border-blue-500">
-                <span class="inline-block unskew">HUB</span>
-            </div>
-            <div>
-                <h1 class="text-4xl md:text-5xl font-black uppercase italic tracking-widest drop-shadow-[2px_2px_0px_#fff] text-white">
-                    Central de Ferramentas RPG
-                </h1>
-                <p class="text-black font-bold uppercase tracking-widest">Painel de Controlo Geral & Firebase (Persona 5 Royal)</p>
-            </div>
+    <header class="topo">
+        <div class="titulo">
+            <h1>Central de Ferramentas</h1>
+            <p class="tagline">Tudo o que a mesa precisa num só lugar</p>
         </div>
-
-        <!-- SELETOR DE MODO DE SESSÃO & LOGOUT -->
-        <div class="bg-black p-3 border-2 border-white flex flex-col items-center gap-2 skew-tag">
-            <div class="unskew flex items-center gap-3">
-                <span class="text-xs font-bold uppercase tracking-wider text-white">Modo Atual:</span>
-                <span class="px-3 py-1 font-black text-xs uppercase tracking-wider bg-blue-600 text-black border border-white" id="display-modo-ativo">Jogador</span>
-                <button onclick="terminarSessao()" class="px-2 py-1 font-bold text-[10px] uppercase tracking-wider bg-red-600 text-white hover:bg-red-500 transition-colors">
-                    Sair / Trocar
-                </button>
-            </div>
-            <div id="status-conexao" class="unskew text-[10px] text-emerald-400 font-bold uppercase tracking-widest">
-                Firebase: Ligado com Sucesso ✓
-            </div>
-        </div>
+        <div class="espaco"></div>
+        <div class="usuario" data-usuario hidden></div>
     </header>
 
-    <!-- GRID DE APLICATIVOS -->
-    <main class="w-full max-w-7xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-12">
-
-        <!-- 1. Combat Tracker -->
-        <a href="combat_traker.html" class="hub-card block bg-slate-900 border-2 border-blue-500 p-6 clip-card relative group">
-            <div class="absolute top-0 right-0 bg-blue-600 text-white font-bold text-xs px-2 py-1 skew-tag -mt-3 mr-4">
-                <span class="inline-block unskew">COMBATE</span>
-            </div>
-            <h2 class="text-2xl font-black text-white uppercase italic mb-2 group-hover:text-blue-400 transition-colors">Combat Tracker</h2>
-            <p class="text-slate-400 text-sm leading-relaxed mb-4">Gerenciador de turnos, iniciativa e controle de combate para os encontros do RPG.</p>
-            <span class="inline-block bg-black text-blue-400 text-xs px-2 py-1 font-bold border border-blue-900">combat_traker.html</span>
-        </a>
-
-        <!-- 2. Conversor -->
-        <a href="conversor.html" class="hub-card block bg-slate-900 border-2 border-blue-500 p-6 clip-card relative group">
-            <div class="absolute top-0 right-0 bg-blue-600 text-white font-bold text-xs px-2 py-1 skew-tag -mt-3 mr-4">
-                <span class="inline-block unskew">UTILIDADE</span>
-            </div>
-            <h2 class="text-2xl font-black text-white uppercase italic mb-2 group-hover:text-blue-400 transition-colors">Conversor</h2>
-            <p class="text-slate-400 text-sm leading-relaxed mb-4">Conversor de fichas e atributos entre sistemas (Don't Forget TTRPG para P5 / GDC Engine).</p>
-            <span class="inline-block bg-black text-blue-400 text-xs px-2 py-1 font-bold border border-blue-900">conversor.html</span>
-        </a>
-
-        <!-- 3. Grid Map -->
-        <a href="grid_map.html" class="hub-card block bg-slate-900 border-2 border-blue-500 p-6 clip-card relative group">
-            <div class="absolute top-0 right-0 bg-blue-500 text-black font-black text-xs px-2 py-1 skew-tag -mt-3 mr-4">
-                <span class="inline-block unskew">TÁTICO</span>
-            </div>
-            <h2 class="text-2xl font-black text-white uppercase italic mb-2 group-hover:text-blue-300 transition-colors">Grid Map (Player)</h2>
-            <p class="text-slate-400 text-sm leading-relaxed mb-4">Visualizador interativo de mapas em grid para movimentação de tokens e exploração.</p>
-            <span class="inline-block bg-black text-blue-400 text-xs px-2 py-1 font-bold border border-blue-900">grid_map.html</span>
-        </a>
-
-        <!-- 4. Grimório do Coração -->
-        <a href="grim_rio_do_cora_o.html" class="hub-card block bg-slate-900 border-2 border-blue-500 p-6 clip-card relative group">
-            <div class="absolute top-0 right-0 bg-indigo-600 text-white font-black text-xs px-2 py-1 skew-tag -mt-3 mr-4">
-                <span class="inline-block unskew">VELVET ROOM</span>
-            </div>
-            <h2 class="text-2xl font-black text-white uppercase italic mb-2 group-hover:text-indigo-400 transition-colors">Grimório do Coração</h2>
-            <p class="text-slate-400 text-sm leading-relaxed mb-4">Calculadora oficial de fusão de Personae baseada em cruzamento de Arcanas e níveis.</p>
-            <span class="inline-block bg-black text-indigo-400 text-xs px-2 py-1 font-bold border border-indigo-900">grim_rio_do_cora_o.html</span>
-        </a>
-
-        <!-- 5. Loja -->
-        <a href="loja.html" class="hub-card block bg-slate-900 border-2 border-blue-500 p-6 clip-card relative group">
-            <div class="absolute top-0 right-0 bg-cyan-500 text-black font-black text-xs px-2 py-1 skew-tag -mt-3 mr-4">
-                <span class="inline-block unskew">COMÉRCIO</span>
-            </div>
-            <h2 class="text-2xl font-black text-white uppercase italic mb-2 group-hover:text-cyan-400 transition-colors">Loja (Remédios)</h2>
-            <p class="text-slate-400 text-sm leading-relaxed mb-4">Loja interativa de itens e equipamentos com mecânicas de pechincha e PR.</p>
-            <span class="inline-block bg-black text-cyan-400 text-xs px-2 py-1 font-bold border border-cyan-900">loja.html</span>
-        </a>
-
-        <!-- 6. Map Total -->
-        <a href="map_total.html" class="hub-card block bg-slate-900 border-2 border-blue-500 p-6 clip-card relative group">
-            <div class="absolute top-0 right-0 bg-blue-600 text-white font-bold text-xs px-2 py-1 skew-tag -mt-3 mr-4">
-                <span class="inline-block unskew">MAPA GERAL</span>
-            </div>
-            <h2 class="text-2xl font-black text-white uppercase italic mb-2 group-hover:text-blue-400 transition-colors">Map Total</h2>
-            <p class="text-slate-400 text-sm leading-relaxed mb-4">Visão macro e navegação integrada de todos os mapas e setores do mundo de jogo.</p>
-            <span class="inline-block bg-black text-blue-400 text-xs px-2 py-1 font-bold border border-blue-900">map_total.html</span>
-        </a>
-
-        <!-- 7. Sistema de Confidentes -->
-        <a href="sistema_de_confidentes.html" class="hub-card block bg-slate-900 border-2 border-blue-500 p-6 clip-card relative group">
-            <div class="absolute top-0 right-0 bg-sky-400 text-black font-black text-xs px-2 py-1 skew-tag -mt-3 mr-4">
-                <span class="inline-block unskew">SOCIAL LINK</span>
-            </div>
-            <h2 class="text-2xl font-black text-white uppercase italic mb-2 group-hover:text-sky-300 transition-colors">Sistema de Confidentes</h2>
-            <p class="text-slate-400 text-sm leading-relaxed mb-4">Rastreador de vínculos sociais, pontos de afinidade, cenas e recompensas de rank.</p>
-            <span class="inline-block bg-black text-sky-400 text-xs px-2 py-1 font-bold border border-sky-900">sistema_de_confidentes.html</span>
-        </a>
-
-        <!-- 8. Teste Grid (Editor) - Restrito para Mestre -->
-        <div id="card-editor" class="relative">
-            <a href="teste_grid.html" class="hub-card block bg-slate-900 border-2 border-blue-500 p-6 clip-card relative group">
-                <div class="absolute top-0 right-0 bg-red-600 text-white font-black text-xs px-2 py-1 skew-tag -mt-3 mr-4">
-                    <span class="inline-block unskew">EDITOR (MESTRE)</span>
-                </div>
-                <h2 class="text-2xl font-black text-white uppercase italic mb-2 group-hover:text-blue-400 transition-colors">Editor de Grid (Mapa)</h2>
-                <p class="text-slate-400 text-sm leading-relaxed mb-4">Ferramenta de criação de labirintos, paredes, armadilhas e exportação em XML.</p>
-                <span class="inline-block bg-black text-blue-400 text-xs px-2 py-1 font-bold border border-blue-900">teste_grid.html</span>
+    <main class="conteudo">
+        <div class="grade">
+        <div class="sombra">
+            <a class="card clip-card" href="combat_traker.html">
+                <span class="tag skew-tag"><span class="unskew">Combate</span></span>
+                <h2 class="nome">Combat Tracker</h2>
+                <p class="desc txt">Gerenciador de turnos, iniciativa e controle de combate para os encontros do RPG.</p>
+                <span class="arquivo txt">combat_traker.html</span>
             </a>
         </div>
 
-        <!-- 9. Velvet Room -->
-        <a href="velvet_room.html" class="hub-card block bg-slate-900 border-2 border-blue-500 p-6 clip-card relative group">
-            <div class="absolute top-0 right-0 bg-blue-600 text-white font-bold text-xs px-2 py-1 skew-tag -mt-3 mr-4">
-                <span class="inline-block unskew">FUSÃO</span>
-            </div>
-            <h2 class="text-2xl font-black text-white uppercase italic mb-2 group-hover:text-blue-400 transition-colors">Velvet Room</h2>
-            <p class="text-slate-400 text-sm leading-relaxed mb-4">Painel clássico de cálculo e testes para fusão de Personae.</p>
-            <span class="inline-block bg-black text-blue-400 text-xs px-2 py-1 font-bold border border-blue-900">velvet_room.html</span>
-        </a>
-
-        <!-- 10. Cadastro de Usuários - Restrito para Mestre -->
-        <div id="card-cadastro" class="relative">
-            <a href="cadastro_usuarios.html" class="hub-card block bg-slate-900 border-2 border-blue-500 p-6 clip-card relative group">
-                <div class="absolute top-0 right-0 bg-red-600 text-white font-black text-xs px-2 py-1 skew-tag -mt-3 mr-4">
-                    <span class="inline-block unskew">CONTAS (MESTRE)</span>
-                </div>
-                <h2 class="text-2xl font-black text-white uppercase italic mb-2 group-hover:text-blue-400 transition-colors">Cadastro de Usuários</h2>
-                <p class="text-slate-400 text-sm leading-relaxed mb-4">Criação de contas para novos membros da mesa, com permissão de Mestre ou Jogador.</p>
-                <span class="inline-block bg-black text-blue-400 text-xs px-2 py-1 font-bold border border-blue-900">cadastro_usuarios.html</span>
+        <div class="sombra">
+            <a class="card clip-card" href="conversor.html">
+                <span class="tag skew-tag"><span class="unskew">Utilidade</span></span>
+                <h2 class="nome">Conversor</h2>
+                <p class="desc txt">Conversor de fichas e atributos entre sistemas (Don't Forget TTRPG para P5 / GDC Engine).</p>
+                <span class="arquivo txt">conversor.html</span>
             </a>
         </div>
 
+        <div class="sombra">
+            <a class="card clip-card" href="grid_map.html">
+                <span class="tag skew-tag"><span class="unskew">Tático</span></span>
+                <h2 class="nome">Grid Map (Player)</h2>
+                <p class="desc txt">Visualizador interativo de mapas em grid para movimentação de tokens e exploração.</p>
+                <span class="arquivo txt">grid_map.html</span>
+            </a>
+        </div>
+
+        <div class="sombra">
+            <a class="card clip-card" href="grim_rio_do_cora_o.html">
+                <span class="tag skew-tag"><span class="unskew">Velvet Room</span></span>
+                <h2 class="nome">Grimório do Coração</h2>
+                <p class="desc txt">Calculadora oficial de fusão de Personae baseada em cruzamento de Arcanas e níveis.</p>
+                <span class="arquivo txt">grim_rio_do_cora_o.html</span>
+            </a>
+        </div>
+
+        <div class="sombra">
+            <a class="card clip-card" href="loja.html">
+                <span class="tag skew-tag"><span class="unskew">Comércio</span></span>
+                <h2 class="nome">Loja (Remédios)</h2>
+                <p class="desc txt">Loja interativa de itens e equipamentos com mecânicas de pechincha e PR.</p>
+                <span class="arquivo txt">loja.html</span>
+            </a>
+        </div>
+
+        <div class="sombra">
+            <a class="card clip-card" href="map_total.html">
+                <span class="tag skew-tag"><span class="unskew">Mapa geral</span></span>
+                <h2 class="nome">Map Total</h2>
+                <p class="desc txt">Visão macro e navegação integrada de todos os mapas e setores do mundo de jogo.</p>
+                <span class="arquivo txt">map_total.html</span>
+            </a>
+        </div>
+
+        <div class="sombra">
+            <a class="card clip-card" href="sistema_de_confidentes.html">
+                <span class="tag skew-tag"><span class="unskew">Social link</span></span>
+                <h2 class="nome">Sistema de Confidentes</h2>
+                <p class="desc txt">Rastreador de vínculos sociais, pontos de afinidade, cenas e recompensas de rank.</p>
+                <span class="arquivo txt">sistema_de_confidentes.html</span>
+            </a>
+        </div>
+
+        <div class="sombra" id="card-editor">
+            <a class="card clip-card" href="teste_grid.html">
+                <span class="tag skew-tag restrito"><span class="unskew">Editor (Mestre)</span></span>
+                <h2 class="nome">Editor de Grid (Mapa)</h2>
+                <p class="desc txt">Ferramenta de criação de labirintos, paredes, armadilhas e exportação em XML.</p>
+                <span class="arquivo txt">teste_grid.html</span>
+            </a>
+        </div>
+
+        <div class="sombra">
+            <a class="card clip-card" href="velvet_room.html">
+                <span class="tag skew-tag"><span class="unskew">Fusão</span></span>
+                <h2 class="nome">Velvet Room</h2>
+                <p class="desc txt">Painel clássico de cálculo e testes para fusão de Personae.</p>
+                <span class="arquivo txt">velvet_room.html</span>
+            </a>
+        </div>
+
+        <div class="sombra" id="card-cadastro">
+            <a class="card clip-card" href="cadastro_usuarios.html">
+                <span class="tag skew-tag restrito"><span class="unskew">Contas (Mestre)</span></span>
+                <h2 class="nome">Cadastro de Usuários</h2>
+                <p class="desc txt">Criação de contas para novos membros da mesa, com permissão de Mestre ou Jogador.</p>
+                <span class="arquivo txt">cadastro_usuarios.html</span>
+            </a>
+        </div>
+        </div>
     </main>
 
     <script>
         // Firebase, login e verificação de papel ficam em js/sessao.js.
         // O papel (Mestre/Jogador) vem do banco, e as Regras do Firebase garantem que só Mestres escrevem.
+        // Nome, papel e o botão de sair ficam no topo (js/topo.js); sair volta para esta página.
         const authModal = document.getElementById('auth-modal');
         const authForm = document.getElementById('auth-form');
         const authError = document.getElementById('auth-error');
@@ -261,7 +214,7 @@
         RPG.sessao.then((sessao) => {
             if (sessao) {
                 aplicarModo(sessao.modo);
-                authModal.classList.add('hidden');
+                authModal.hidden = true;
             }
         });
 
@@ -270,13 +223,14 @@
             const email = document.getElementById('auth-user').value.trim();
             const senha = document.getElementById('auth-pass').value;
 
-            authError.classList.add('hidden');
+            authError.hidden = true;
             authSubmit.disabled = true;
             try {
                 const modo = await RPG.entrar(email, senha);
                 document.getElementById('auth-pass').value = '';
                 aplicarModo(modo);
-                authModal.classList.add('hidden');
+                authModal.hidden = true;
+                Topo.atualizar();
             } catch (err) {
                 console.error('Falha no login:', err);
                 const codigo = (err && (err.code || err.message)) || '';
@@ -288,40 +242,19 @@
                     'auth/too-many-requests': 'Muitas tentativas. Aguarde um pouco e tente novamente.'
                 };
                 authError.textContent = mensagens[codigo] || 'Email ou palavra-passe inválidos.';
-                authError.classList.remove('hidden');
+                authError.hidden = false;
             } finally {
                 authSubmit.disabled = false;
             }
         });
 
-        async function terminarSessao() {
-            await RPG.sair();
-            authError.classList.add('hidden');
-            document.getElementById('auth-user').value = '';
-            document.getElementById('auth-pass').value = '';
-            authModal.classList.remove('hidden');
-        }
-
         function aplicarModo(modo) {
-            const displayEl = document.getElementById('display-modo-ativo');
-            const cardsRestritos = [document.getElementById('card-editor'), document.getElementById('card-cadastro')];
-
-            if (modo === 'mestre') {
-                displayEl.textContent = "Mestre (Total)";
-                displayEl.className = "px-3 py-1 font-black text-xs uppercase tracking-wider bg-red-600 text-white border border-white";
-                cardsRestritos.forEach((card) => {
-                    card.style.opacity = "1";
-                    card.title = "";
-                });
-            } else {
-                displayEl.textContent = "Jogador (Leitura)";
-                displayEl.className = "px-3 py-1 font-black text-xs uppercase tracking-wider bg-blue-600 text-black border border-white";
-                // Restrição visual; a proteção real está nas Regras do Firebase
-                cardsRestritos.forEach((card) => {
-                    card.style.opacity = "0.5";
-                    card.title = "Acesso restrito ao Mestre";
-                });
-            }
+            const mestre = modo === 'mestre';
+            // Restrição visual; a proteção real está nas Regras do Firebase
+            [document.getElementById('card-editor'), document.getElementById('card-cadastro')].forEach((card) => {
+                card.style.opacity = mestre ? '1' : '0.5';
+                card.title = mestre ? '' : 'Acesso restrito ao Mestre';
+            });
         }
     </script>
 </body>

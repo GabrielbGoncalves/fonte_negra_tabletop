@@ -12,7 +12,11 @@
     <meta name="apple-mobile-web-app-title" content="Fonte Negra">
     <link rel="manifest" href="assets/favicon/site.webmanifest">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Calculadora de Fusão - Grimório do Coração[cite: 10]</title>
+<title>Velvet Room | Fonte Negra</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&display=swap" rel="stylesheet">
 
 <!-- Firebase SDK Compat -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" integrity="sha384-4gq9w/AGf72FXdNQ3Kn3EqWP7633NbCMjpYHt8YCZyXf23o2opcuAr4cif41tLrC" crossorigin="anonymous"></script>
@@ -20,114 +24,39 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" integrity="sha384-xtdq4MQqPj1dB5DQsuw9O7dh4kHhMP/Wp5u8O1jiaWiou13ZfJIgiccjtVK2pBhL" crossorigin="anonymous"></script>
 <script src="js/firebase-config.js"></script>
 <script src="js/sessao.js" data-exigir-login></script>
+<script src="js/topo.js" defer></script>
 
+<link rel="stylesheet" href="assets/css/layout.css">
 <style>
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #1a1a1a;
-        color: #f0f0f0;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        margin: 0;
-        padding: 20px;
-    }
-    .calculator-container {
-        background-color: #2d2d2d;
-        padding: 30px;
-        border-radius: 8px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        width: 100%;
-        max-width: 500px;
-        border-top: 5px solid #1976d2;
-    }
-    h2 {
-        text-align: center;
-        color: #1976d2;
-        margin-top: 0;
-    }
-    .input-group {
-        margin-bottom: 20px;
-        display: flex;
-        flex-direction: column;
-    }
-    .input-row {
-        display: flex;
-        gap: 15px;
-        margin-bottom: 10px;
-    }
-    .input-row > div {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-    }
-    label {
-        margin-bottom: 5px;
-        font-size: 0.9em;
-        color: #aaaaaa;
-    }
-    select, input {
-        padding: 10px;
-        border: 1px solid #444;
-        border-radius: 4px;
-        background-color: #1e1e1e;
-        color: #fff;
-        font-size: 1em;
-        width: 100%;
-    }
-    button {
-        width: 100%;
-        padding: 12px;
-        background-color: #1976d2;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        font-size: 1.1em;
-        cursor: pointer;
-        font-weight: bold;
-        transition: background-color 0.3s;
-    }
-    button:hover {
-        background-color: #115293;
-    }
-    button:disabled {
-        background-color: #444;
-        color: #888;
-        cursor: not-allowed;
-    }
+    /* Layout, topo e controles vêm de assets/css/layout.css */
+    main.conteudo { max-width: 560px; }
+    .input-group { margin-bottom: 18px; display: flex; flex-direction: column; gap: 12px; }
+    .input-row { display: flex; gap: 14px; }
+    .input-row > div { flex: 1; display: flex; flex-direction: column; }
+    .input-row select, .input-row input { width: 100%; }
+    #btn-calcular { width: 100%; font-size: 1.1rem; }
     .result {
-        margin-top: 25px;
-        padding: 15px;
-        background-color: #1e1e1e;
-        border: 1px solid #444;
-        border-radius: 4px;
-        text-align: center;
-        min-height: 50px;
+        margin-top: 22px; padding: 16px; text-align: center; min-height: 50px;
+        background: var(--painel-2); border-left: 4px solid var(--azul);
+        font-family: Arial, Helvetica, sans-serif;
     }
-    .result span {
-        display: block;
-        font-size: 1.2em;
-        font-weight: bold;
-        color: #1976d2;
-    }
-    .modo-aviso {
-        margin-bottom: 20px;
-        padding: 6px 12px;
-        border-radius: 4px;
-        font-size: 0.85rem;
-        font-weight: bold;
-        text-align: center;
-        text-transform: uppercase;
-    }
+    .result span { display: block; font-family: 'Oswald', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--azul-claro); text-transform: uppercase; letter-spacing: 1px; }
 </style>
 </head>
 <body>
 
-<div id="indicador-modo" class="modo-aviso">Modo: a carregar...</div>
+<header class="topo">
+    <a class="voltar" href="index.html">‹ Hub</a>
+    <div class="titulo">
+        <h1>Velvet Room</h1>
+        <p class="tagline">Calculadora de fusão de Personae</p>
+    </div>
+    <div class="espaco"></div>
+    <div class="usuario" data-usuario hidden></div>
+</header>
 
-<div class="calculator-container">
+<main class="conteudo">
+<section class="bloco calculator-container">
     <h2>Fusão de Personae[cite: 10]</h2>
     
     <div class="input-group">
@@ -154,29 +83,21 @@
         </div>
     </div>
     
-    <button id="btn-calcular" onclick="calcularFusao()">Calcular Fusão[cite: 10]</button>
+    <button type="button" class="btn" id="btn-calcular" onclick="calcularFusao()">Calcular Fusão[cite: 10]</button>
     
     <div class="result" id="result-box">
         Insira os dados das Personae.[cite: 10]
     </div>
-</div>
+</section>
+</main>
 
 <script>
     // Firebase e sessão vêm de js/sessao.js (o acesso ao banco aguarda o login)
     const db = RPG.db;
 
     const modoAtual = localStorage.getItem('rpg_modo_sessao') || 'jogador';
-    const indicadorModo = document.getElementById('indicador-modo');
 
-    if (modoAtual === 'mestre') {
-        indicadorModo.textContent = "Modo: Mestre (Escrita Ativa)";
-        indicadorModo.style.backgroundColor = "#2e7d32";
-        indicadorModo.style.color = "#fff";
-    } else {
-        indicadorModo.textContent = "Modo: Jogador (Somente Leitura)";
-        indicadorModo.style.backgroundColor = "#1565c0";
-        indicadorModo.style.color = "#fff";
-        
+    if (modoAtual !== 'mestre') {
         document.addEventListener("DOMContentLoaded", () => {
             document.querySelectorAll('select, input').forEach(el => el.disabled = true);
             const btnCalc = document.getElementById('btn-calcular');
@@ -373,4 +294,4 @@
 </script>
 
 </body>
-</html>
+</html>

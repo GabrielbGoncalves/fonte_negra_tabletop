@@ -20,153 +20,117 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" integrity="sha384-xtdq4MQqPj1dB5DQsuw9O7dh4kHhMP/Wp5u8O1jiaWiou13ZfJIgiccjtVK2pBhL" crossorigin="anonymous"></script>
   <script src="js/firebase-config.js"></script>
   <script src="js/sessao.js" data-exigir-login></script>
+  <script src="js/topo.js" defer></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/layout.css">
 
   <style>
-   :root{
-        --royal-dark:#020617;
-        --royal-card:#111827;
-        --royal-border:#1d4ed8;
-        --royal-light:#3b82f6;
-        --royal-accent:#60a5fa;
-   }
+   /* Layout, topo e controles vêm de assets/css/layout.css */
+   .bg-royal-dark{ background:var(--bg); }
+   .bg-royal-card{ background:var(--painel); }
+   .bg-royal-light{ background:var(--azul); }
+   .border-royal-border{ border-color:var(--azul-escuro); }
+   .text-royal-accent{ color:var(--azul-claro); }
 
-   body{
-        background:#020617;
-        color:white;
-        font-family:Arial,sans-serif;
-   }
-
-   .bg-royal-dark{
-        background:var(--royal-dark);
-   }
-
-   .bg-royal-card{
-        background:var(--royal-card);
-   }
-
-   .bg-royal-light{
-        background:var(--royal-light);
-   }
-
-   .border-royal-border{
-        border-color:var(--royal-border);
-   }
-
-   .text-royal-accent{
-        color:var(--royal-accent);
-   }
-
-   .p5-card-clip{
-        clip-path:polygon(0 0, 100% 0, 100% 90%, 95% 100%, 0 100%);
-   }
-
-   .p5-clip{
-        clip-path:polygon(0 0, 100% 0, 95% 100%, 0 100%);
-   }
-
-   .p5-button{
-        transition:all .3s ease;
-   }
-
-   .p5-button:hover{
-        transform:translateY(-2px);
-        filter:brightness(1.1);
-   }
+   .grade-conversor{ display:grid; grid-template-columns:1fr; gap:24px; }
+   @media (min-width: 768px){ .grade-conversor{ grid-template-columns:1fr 1fr; } }
+   .grade-conversor .bloco{ margin-bottom:0; display:flex; flex-direction:column; justify-content:space-between; }
+   .bloco h2.saida{ color:#22d3ee; }
+   .bloco input{ width:100%; }
+   .caixa{ background:var(--bg); border:2px solid var(--azul-escuro); padding:12px; }
+   .rotulo{ display:block; font-size:.75rem; color:var(--suave); text-transform:uppercase; letter-spacing:1px; }
   </style>
  </head>
 
- <body class="bg-slate-950 text-white p-8">
+ <body>
 
-  <header class="w-full max-w-5xl text-center mb-8 relative flex flex-col items-center">
-       <span id="indicador-modo" class="mb-4 px-3 py-1 rounded text-xs font-bold uppercase tracking-wider">Modo: a carregar...</span>
-       <div class="absolute top-8 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-royal-light shadow-[0_0_15px_#3b82f6]"></div>
-       <h1 class="text-5xl md:text-7xl font-bold tracking-wider text-white uppercase drop-shadow-[3px_3px_0px_#1d4ed8]">
-          Conversor <span class="text-royal-accent italic">Grimório do Coração</span>
-       </h1>
-       <p class="text-slate-400 text-sm md:text-base font-semibold tracking-wide uppercase mt-1"> Don't Forget TTRPG ➔ Sistema P5 / GDC Engine </p>
+  <header class="topo">
+       <a class="voltar" href="index.html">‹ Hub</a>
+       <div class="titulo">
+            <h1>Conversor de Fichas</h1>
+            <p class="tagline">Don't Forget TTRPG ➔ Grimório do Coração (GDC)</p>
+       </div>
+       <div class="espaco"></div>
+       <div class="usuario" data-usuario hidden></div>
   </header>
 
-  <main class="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-8 mx-auto">
+  <main class="conteudo grade-conversor">
        <!-- Painel de Entrada (Don't Forget) -->
-       <section class="bg-royal-card border-2 border-royal-border p5-card-clip p-6 shadow-[0_0_20px_rgba(29,78,216,0.2)] flex flex-col justify-between">
+       <section class="bloco">
           <div>
-               <div class="flex items-center gap-3 mb-6 border-b-2 border-royal-border pb-3 bg-royal-dark/20 p-2 p5-clip">
-                   <div class="w-4 h-4 bg-royal-light rotate-45"></div>
-                   <h2 class="text-2xl font-bold tracking-wide text-royal-accent uppercase">Dados Originais (Don't Forget)</h2>
-               </div>
+               <h2>Dados Originais (Don't Forget)</h2>
 
                <div class="space-y-4">
                    <div>
-                        <label class="block text-xs font-bold text-royal-accent uppercase tracking-wider mb-1">Nome da Criatura</label>
-                        <input type="text" id="df-name" value="Lancer" class="w-full bg-[#030712] border-2 border-royal-border rounded-none px-3 py-2 text-sm focus:outline-none focus:border-royal-light text-slate-100 font-semibold shadow-inner">
+                        <label>Nome da Criatura</label>
+                        <input type="text" id="df-name" value="Lancer">
                    </div>
 
                    <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-xs font-bold text-royal-accent uppercase tracking-wider mb-1">Nível de Desafio (DIF)</label>
-                            <input type="number" id="df-dif" value="1" min="1" max="20" class="w-full bg-[#030712] border-2 border-royal-border rounded-none px-3 py-2 text-sm focus:outline-none focus:border-royal-light text-slate-100 font-semibold">
+                            <label>Nível de Desafio (DIF)</label>
+                            <input type="number" id="df-dif" value="1" min="1" max="20">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-royal-accent uppercase tracking-wider mb-1">HP Original</label>
-                            <input type="number" id="df-hp" value="128" min="1" class="w-full bg-[#030712] border-2 border-royal-border rounded-none px-3 py-2 text-sm focus:outline-none focus:border-royal-light text-slate-100 font-semibold">
-                        </div>
-                   </div>
-
-                   <div class="grid grid-cols-3 gap-2">
-                        <div>
-                            <label class="block text-[10px] font-bold text-royal-accent uppercase tracking-wider mb-1">GRR (Guerra)</label>
-                            <input type="number" id="df-grr" value="5" class="w-full bg-[#030712] border-2 border-royal-border rounded-none px-2 py-2 text-sm text-center focus:outline-none focus:border-royal-light text-slate-100 font-semibold">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-royal-accent uppercase tracking-wider mb-1">FRM (Firmeza)</label>
-                            <input type="number" id="df-frm" value="1" class="w-full bg-[#030712] border-2 border-royal-border rounded-none px-2 py-2 text-sm text-center focus:outline-none focus:border-royal-light text-slate-100 font-semibold">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-royal-accent uppercase tracking-wider mb-1">RPZ (Rapidez)</label>
-                            <input type="number" id="df-rpz" value="2" class="w-full bg-[#030712] border-2 border-royal-border rounded-none px-2 py-2 text-sm text-center focus:outline-none focus:border-royal-light text-slate-100 font-semibold">
+                            <label>HP Original</label>
+                            <input type="number" id="df-hp" value="128" min="1">
                         </div>
                    </div>
 
                    <div class="grid grid-cols-3 gap-2">
                         <div>
-                            <label class="block text-[10px] font-bold text-royal-accent uppercase tracking-wider mb-1">ESP (Esperteza)</label>
-                            <input type="number" id="df-esp" value="0" class="w-full bg-[#030712] border-2 border-royal-border rounded-none px-2 py-2 text-sm text-center focus:outline-none focus:border-royal-light text-slate-100 font-semibold">
+                            <label>GRR (Guerra)</label>
+                            <input type="number" id="df-grr" value="5" class="text-center">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-royal-accent uppercase tracking-wider mb-1">CHR (Charme)</label>
-                            <input type="number" id="df-chr" value="4" class="w-full bg-[#030712] border-2 border-royal-border rounded-none px-2 py-2 text-sm text-center focus:outline-none focus:border-royal-light text-slate-100 font-semibold">
+                            <label>FRM (Firmeza)</label>
+                            <input type="number" id="df-frm" value="1" class="text-center">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-royal-accent uppercase tracking-wider mb-1">DEF Original</label>
-                            <input type="number" id="df-def" value="3" class="w-full bg-[#030712] border-2 border-royal-border rounded-none px-2 py-2 text-sm text-center focus:outline-none focus:border-royal-light text-slate-100 font-semibold">
+                            <label>RPZ (Rapidez)</label>
+                            <input type="number" id="df-rpz" value="2" class="text-center">
+                        </div>
+                   </div>
+
+                   <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label>ESP (Esperteza)</label>
+                            <input type="number" id="df-esp" value="0" class="text-center">
+                        </div>
+                        <div>
+                            <label>CHR (Charme)</label>
+                            <input type="number" id="df-chr" value="4" class="text-center">
+                        </div>
+                        <div>
+                            <label>DEF Original</label>
+                            <input type="number" id="df-def" value="3" class="text-center">
                         </div>
                    </div>
 
                    <div>
-                        <label class="block text-xs font-bold text-royal-accent uppercase tracking-wider mb-1">Habilidade / Ataque Principal</label>
-                    <input type="text" id="df-skill" value="Golpe Energético (Custo: 2 HOPE)" class="w-full bg-[#030712] border-2 border-royal-border rounded-none px-3 py-2 text-sm focus:outline-none focus:border-royal-light text-slate-100 font-semibold">
+                        <label>Habilidade / Ataque Principal</label>
+                    <input type="text" id="df-skill" value="Golpe Energético (Custo: 2 HOPE)">
                    </div>
                </div>
           </div>
 
-          <button id="btn-converter" onclick="converterFicha()" class="mt-6 w-full bg-royal-light hover:bg-blue-600 text-white text-2xl tracking-widest uppercase py-3 px-4 p5-button shadow-[0_4px_20px_rgba(37,99,235,0.4)] cursor-pointer font-bold">
+          <button id="btn-converter" onclick="converterFicha()" class="btn mt-6 w-full text-xl">
             Converter Ficha ➔
           </button>
        </section>
 
        <!-- Painel de Saída (Grimório do Coração) -->
-       <section class="bg-royal-card border-2 border-royal-border p5-card-clip p-6 shadow-[0_0_20px_rgba(29,78,216,0.2)] flex flex-col justify-between">
+       <section class="bloco">
           <div>
-               <div class="flex items-center gap-3 mb-6 border-b-2 border-royal-border pb-3 bg-royal-dark/20 p-2 p5-clip">
-                   <div class="w-4 h-4 bg-cyan-400 rotate-45"></div>
-                   <h2 class="text-2xl font-bold tracking-wide text-cyan-400 uppercase">Ficha Convertida (GDC)</h2>
-               </div>
+               <h2 class="saida">Ficha Convertida (GDC)</h2>
 
                <div class="space-y-4">
-                   <div class="bg-[#030712] p-4 border-2 border-royal-border p5-clip relative overflow-hidden">
-                        <div class="absolute right-0 top-0 w-16 h-full bg-gradient-to-l from-royal-dark/20 to-transparent pointer-events-none"></div>
+                   <div class="caixa">
                         <div class="flex justify-between items-center mb-2">
-                            <h3 id="res-name" class="text-3xl font-bold tracking-wide text-cyan-300">Sombra: Lancer</h3>
+                            <h3 id="res-name" class="text-3xl font-bold tracking-wide uppercase text-cyan-300">Sombra: Lancer</h3>
                             <span id="res-lvl" class="bg-royal-dark text-cyan-200 text-xs px-3 py-1 font-bold border border-cyan-400/40 uppercase tracking-wider">Nível 2</span>
                         </div>
                         <div class="text-xs text-slate-300 grid grid-cols-2 gap-2 mt-2 font-medium">
@@ -176,40 +140,40 @@
                    </div>
 
                    <div class="grid grid-cols-2 gap-3">
-                        <div class="bg-[#030712] p-3 border-2 border-royal-border text-center">
-                            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">PV (Pontos de Vida)</span>
+                        <div class="caixa text-center">
+                            <span class="rotulo">PV (Pontos de Vida)</span>
                             <span id="res-hp" class="text-2xl font-bold tracking-wider text-emerald-400">130</span>
                         </div>
-                        <div class="bg-[#030712] p-3 border-2 border-royal-border text-center">
-                            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Energia / PM</span>
+                        <div class="caixa text-center">
+                            <span class="rotulo">Energia / PM</span>
                             <span id="res-pm" class="text-2xl font-bold tracking-wider text-cyan-400">15</span>
                         </div>
                    </div>
 
                    <!-- Atributos GDC -->
-                   <div class="bg-[#030712] p-3 border-2 border-royal-border">
-                        <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Atributos GDC Calculados</span>
-                        <div class="grid grid-cols-3 gap-2 text-center text-sm text-xl">
-                            <div class="bg-royal-card/80 p-1 border border-royal-border">FOR: <span id="res-for" class="font-bold text-royal-accent">4</span></div>
-                            <div class="bg-royal-card/80 p-1 border border-royal-border">TEC: <span id="res-tec" class="font-bold text-royal-accent">2</span></div>
-                            <div class="bg-royal-card/80 p-1 border border-royal-border">VIT: <span id="res-vit" class="font-bold text-royal-accent">3</span></div>
-                            <div class="bg-royal-card/80 p-1 border border-royal-border">AGI: <span id="res-agi" class="font-bold text-royal-accent">2</span></div>
-                            <div class="bg-royal-card/80 p-1 border border-royal-border">MAG: <span id="res-mag" class="font-bold text-royal-accent">1</span></div>
-                            <div class="bg-royal-card/80 p-1 border border-royal-border">SOR: <span id="res-sor" class="font-bold text-royal-accent">3</span></div>
+                   <div class="caixa">
+                        <span class="rotulo mb-2">Atributos GDC Calculados</span>
+                        <div class="grid grid-cols-3 gap-2 text-center text-xl">
+                            <div class="bg-royal-card p-1 border border-royal-border">FOR: <span id="res-for" class="font-bold text-royal-accent">4</span></div>
+                            <div class="bg-royal-card p-1 border border-royal-border">TEC: <span id="res-tec" class="font-bold text-royal-accent">2</span></div>
+                            <div class="bg-royal-card p-1 border border-royal-border">VIT: <span id="res-vit" class="font-bold text-royal-accent">3</span></div>
+                            <div class="bg-royal-card p-1 border border-royal-border">AGI: <span id="res-agi" class="font-bold text-royal-accent">2</span></div>
+                            <div class="bg-royal-card p-1 border border-royal-border">MAG: <span id="res-mag" class="font-bold text-royal-accent">1</span></div>
+                            <div class="bg-royal-card p-1 border border-royal-border">SOR: <span id="res-sor" class="font-bold text-royal-accent">3</span></div>
                         </div>
                    </div>
 
                    <div>
-                        <label class="block text-xs font-bold text-cyan-400 uppercase tracking-wider mb-1">Habilidade Adaptada (GDC)</label>
-                        <div id="res-skill" class="bg-[#030712] border-2 border-royal-border p-3 text-xs text-slate-300 font-medium">
+                        <label>Habilidade Adaptada (GDC)</label>
+                        <div id="res-skill" class="caixa txt text-sm text-slate-300">
                             Golpe Energético (Custo: 2 de Energia). Adiciona bônus físico baseado na agressividade.
                         </div>
                    </div>
                </div>
           </div>
 
-          <div class="mt-6 pt-3 border-t-2 border-royal-border text-center">
-               <button onclick="copiarFicha()" class="text-xs text-cyan-400 hover:text-cyan-300 font-bold uppercase tracking-wider transition-colors cursor-pointer flex items-center justify-center gap-2 mx-auto">
+          <div class="mt-6 text-center">
+               <button onclick="copiarFicha()" class="btn sec">
                    <span>📋</span> Copiar Ficha Formatada para Discord/Mesa
                </button>
           </div>
@@ -222,17 +186,9 @@
 
    // Gestão de Modo (Mestre vs Jogador)
    const modoAtual = localStorage.getItem('rpg_modo_sessao') || 'jogador';
-   const indicadorModo = document.getElementById('indicador-modo');
-
-   if (modoAtual === 'mestre') {
-     indicadorModo.textContent = "Modo: Mestre (Escrita Ativa)";
-     indicadorModo.className = "mb-4 bg-emerald-600 text-white px-3 py-1 rounded text-xs font-bold uppercase tracking-wider";
-   } else {
-     indicadorModo.textContent = "Modo: Jogador (Somente Leitura)";
-     indicadorModo.className = "mb-4 bg-blue-600 text-white px-3 py-1 rounded text-xs font-bold uppercase tracking-wider";
-     
+   if (modoAtual !== 'mestre') {
      document.addEventListener("DOMContentLoaded", () => {
-       document.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
+       document.querySelectorAll('main input, main select, main textarea').forEach(el => el.disabled = true);
        const btnConv = document.getElementById('btn-converter');
        if (btnConv) btnConv.style.display = 'none';
      });
@@ -356,4 +312,4 @@
    };
   </script>
  </body>
-</html>
+</html>

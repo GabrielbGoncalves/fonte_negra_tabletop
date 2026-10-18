@@ -20,6 +20,7 @@
     "usuarios": {
       ".read": "auth != null && root.child('mestres/' + auth.uid).val() === true",
       "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
         ".write": "auth != null && !data.exists() && (root.child('mestres/' + auth.uid).val() === true || (auth.uid === $uid && newData.child('papel').val() === 'jogador' && newData.child('email').val() === auth.token.email))",
         ".validate": "newData.hasChildren(['nome', 'email', 'papel'])",
         "nome": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 60" },
