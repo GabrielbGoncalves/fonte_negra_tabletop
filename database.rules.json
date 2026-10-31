@@ -38,6 +38,46 @@
       ".read": "auth != null && (root.child('mestres/' + auth.uid).val() === true || root.child('jogadores/' + auth.uid).val() === true)",
       ".write": "auth != null && root.child('mestres/' + auth.uid).val() === true"
     },
+    "dice": {
+      ".read": "auth != null && (root.child('mestres/' + auth.uid).val() === true || root.child('jogadores/' + auth.uid).val() === true)",
+      "participantes": {
+        ".write": "auth != null && (root.child('mestres/' + auth.uid).val() === true || root.child('jogadores/' + auth.uid).val() === true)",
+        "$pid": {
+          ".validate": "newData.hasChildren(['nome', 'faces', 'qtd', 'mod', 'ordem'])",
+          "nome": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 30" },
+          "faces": { ".validate": "newData.val() === 2 || newData.val() === 4 || newData.val() === 6 || newData.val() === 8 || newData.val() === 10 || newData.val() === 12 || newData.val() === 20 || newData.val() === 100" },
+          "qtd": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 10 && newData.val() % 1 === 0" },
+          "mod": { ".validate": "newData.isNumber() && newData.val() >= -99 && newData.val() <= 99 && newData.val() % 1 === 0" },
+          "ordem": { ".validate": "newData.isNumber()" },
+          "$other": { ".validate": false }
+        }
+      },
+      "disputas": {
+        ".write": "auth != null && root.child('mestres/' + auth.uid).val() === true",
+        "$id": {
+          ".write": "auth != null && root.child('jogadores/' + auth.uid).val() === true && !data.exists() && newData.exists()",
+          ".validate": "newData.hasChildren(['uid', 'autor', 'quando', 'competidores'])",
+          "uid": { ".validate": "newData.val() === auth.uid" },
+          "autor": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 60" },
+          "quando": { ".validate": "newData.val() === now" },
+          "competidores": {
+            "$i": {
+              ".validate": "newData.hasChildren(['pid', 'nome', 'faces', 'qtd', 'mod', 'rolagens'])",
+              "pid": { ".validate": "newData.isString() && newData.val().length <= 40" },
+              "nome": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 30" },
+              "faces": { ".validate": "newData.val() === 2 || newData.val() === 4 || newData.val() === 6 || newData.val() === 8 || newData.val() === 10 || newData.val() === 12 || newData.val() === 20 || newData.val() === 100" },
+              "qtd": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 10 && newData.val() % 1 === 0" },
+              "mod": { ".validate": "newData.isNumber() && newData.val() >= -99 && newData.val() <= 99 && newData.val() % 1 === 0" },
+              "rolagens": {
+                "$j": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= newData.parent().parent().child('faces').val() && newData.val() % 1 === 0" }
+              },
+              "$other": { ".validate": false }
+            }
+          },
+          "$other": { ".validate": false }
+        }
+      }
+    },
     "grid_map": {
       ".read": "auth != null && (root.child('mestres/' + auth.uid).val() === true || root.child('jogadores/' + auth.uid).val() === true)",
       ".write": "auth != null && root.child('mestres/' + auth.uid).val() === true"

@@ -23,6 +23,7 @@ Idioma: código, comentários, textos de interface e mensagens de commit em **po
 | `cadastro_usuarios.html` | Cadastro de contas (só Mestre) | `usuarios`, `mestres`, `jogadores` |
 | `cadastro_jogador.html` | Auto-cadastro aberto, só cria Jogadores (link no login do hub) | `usuarios`, `jogadores` |
 | `loja.html` | Loja: o Mestre cadastra itens, preços e PR; o jogador compra com o próprio PR | `loja` (`itens`, `ajusteGlobal`, `pr`, `inventario`, `log`) |
+| `dice.html` | Rolagem de dados. Solo fica só no navegador; na Disputa, Mestre e jogadores montam os competidores e rolam, e todos veem o resultado (jogadores só criam disputas; apagar o histórico é do Mestre) | `dice` (`participantes`, `disputas`) |
 | `js/sessao.js` | Firebase, login, papel do usuário, cadastro de contas e helpers compartilhados | `mestres`, `jogadores`, `usuarios` |
 | `js/topo.js` | Componente de usuário do cabeçalho (nome, papel e botão de sair) | `usuarios/{uid}/nome` (cada conta lê o próprio) |
 | `assets/css/layout.css` | Layout compartilhado: tokens de cor, fundo, cabeçalho `.topo`, `main.conteudo`, botões, campos, `.bloco`, abas e modal | — |
