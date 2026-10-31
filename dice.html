@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dados | Fonte Negra</title>
+
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://www.gstatic.com https://*.firebaseio.com https://*.firebasedatabase.app http://127.0.0.1:9000; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://*.firebaseio.com wss://*.firebaseio.com https://*.firebasedatabase.app wss://*.firebasedatabase.app https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com http://127.0.0.1:9099 http://127.0.0.1:9000 ws://127.0.0.1:9000; frame-src https://*.firebaseapp.com https://*.firebaseio.com http://127.0.0.1:9000; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" href="assets/favicon/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/svg+xml" href="assets/favicon/favicon.svg">
+    <link rel="shortcut icon" href="assets/favicon/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-title" content="Fonte Negra">
+    <link rel="manifest" href="assets/favicon/site.webmanifest">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@400;600;800;900&family=Permanent+Marker&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous" referrerpolicy="no-referrer">
+
+    <!-- Firebase SDK Compat -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" integrity="sha384-4gq9w/AGf72FXdNQ3Kn3EqWP7633NbCMjpYHt8YCZyXf23o2opcuAr4cif41tLrC" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js" integrity="sha384-5PDE6CZvnNIJI5xu68GIFoOO3U73lAnRLBwPBmmKjWnYnYwKEHWr/ghtGooEOXGb" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" integrity="sha384-xtdq4MQqPj1dB5DQsuw9O7dh4kHhMP/Wp5u8O1jiaWiou13ZfJIgiccjtVK2pBhL" crossorigin="anonymous"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/sessao.js" data-exigir-login></script>
+    <script src="js/topo.js" defer></script>
+
+    <!-- Tailwind Play CDN (sem SRI: o CDN não envia CORS) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        p5title: ['"Bebas Neue"', 'Impact', 'sans-serif'],
+                        p5hand: ['"Permanent Marker"', 'cursive'],
+                        sans: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        p5: {
+                            blue: '#0a369d',
+                            royal: '#0047ab',
+                            electric: '#00d2ff',
+                            dark: '#05070e',
+                            panel: '#0d1322',
+                            yellow: '#0073FF',
+                            accent: '#1e40af'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <link rel="stylesheet" href="assets/css/layout.css">
+    <style>
+        /* Topo, botão de voltar e usuário vêm de assets/css/layout.css */
+        .topo { font-family: 'Oswald', sans-serif; }
+
+        /* Estética P5 Dynamic Background */
+        body {
+            background-color: #05070e;
+            background-image: 
+                repeating-linear-gradient(
+                    -45deg,
+                    rgba(0, 71, 171, 0.15),
+                    rgba(0, 71, 171, 0.15) 15px,
+                    rgba(5, 7, 14, 0.95) 15px,
+                    rgba(5, 7, 14, 0.95) 30px
+                );
+            background-attachment: fixed;
+            overflow-x: hidden;
+        }
+
+        /* Clips Poligonais e Angulares P5 */
+        .p5-clip-1 {
+            clip-path: polygon(0% 0%, 100% 2%, 98% 98%, 2% 100%);
+        }
+        .p5-clip-badge {
+            clip-path: polygon(8% 0%, 100% 0%, 92% 100%, 0% 100%);
+        }
+        .p5-clip-btn {
+            clip-path: polygon(5% 0%, 100% 0%, 95% 100%, 0% 100%);
+        }
+        .p5-banner-clip {
+            clip-path: polygon(0 0, 100% 5%, 97% 95%, 2% 100%);
+        }
+
+        /* Sombras Duras Estilo Comic/Visual Novel */
+        .p5-shadow {
+            box-shadow: 6px 6px 0px #000000;
+        }
+        .p5-shadow-blue {
+            box-shadow: 6px 6px 0px #00d2ff;
+        }
+        .p5-shadow-yellow {
+            box-shadow: 6px 6px 0px #0073ff;
+        }
+
+        /* Efeito de inclinação / Skew nos containers */
+        .skew-neg-2 {
+            transform: rotate(-1.8deg) skewX(-1deg);
+        }
+        .skew-pos-2 {
+            transform: rotate(1.8deg) skewX(1deg);
+        }
+
+        /* Transições Snappy e Explosivas */
+        .p5-btn {
+            transition: transform 0.1s cubic-bezier(0, 0, 0.2, 1), box-shadow 0.1s ease;
+        }
+        .p5-btn:hover {
+            transform: translate(-3px, -3px) scale(1.02);
+            box-shadow: 8px 8px 0px #000000;
+        }
+        .p5-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px #000000;
+        }
+
+        /* Animação do Dado Rolando P5 Style */
+        @keyframes p5-pop-roll {
+            0% { transform: scale(0.6) rotate(-20deg); filter: brightness(2); }
+            30% { transform: scale(1.2) rotate(15deg); }
+            60% { transform: scale(0.9) rotate(-10deg); }
+            80% { transform: scale(1.08) rotate(5deg); }
+            100% { transform: scale(1) rotate(0deg); filter: brightness(1); }
+        }
+
+        .p5-rolling {
+            animation: p5-pop-roll 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Faixa inclinada com texto correndo da direita para a esquerda.
+           A trilha tem duas cópias iguais; ao andar 50% ela volta ao início sem emenda. */
+        .faixa-marquee {
+            background: #0047ab;
+            border-top: 3px solid #000;
+            border-bottom: 3px solid #000;
+            margin: 14px -20px 0;
+            transform: rotate(-1.2deg);
+            overflow: hidden;
+            box-shadow: 0 6px 0 rgba(0, 0, 0, .55);
+        }
+        .faixa-marquee .trilha {
+            display: flex;
+            width: max-content;
+            animation: faixa-correr 28s linear infinite;
+        }
+        .faixa-marquee .grupo {
+            display: flex;
+            flex-shrink: 0;
+            justify-content: space-around;
+            gap: 3rem;
+            min-width: 100vw;
+            padding: 4px 1.5rem;
+            font-family: 'Bebas Neue', Impact, sans-serif;
+            font-size: 1.25rem;
+            letter-spacing: 2px;
+            color: #fff;
+            white-space: nowrap;
+        }
+        .faixa-marquee .grupo span:nth-child(odd) { color: #00d2ff; }
+        /* Faixa de baixo: inclinação contrária */
+        .faixa-marquee.inversa { margin: 32px -20px 14px; transform: rotate(1.2deg); }
+        @keyframes faixa-correr {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .faixa-marquee .trilha { animation: none; }
+        }
+
+        /* Scrollbar customizada */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #05070e;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #0047ab;
+            border: 2px solid #000;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00d2ff;
+        }
+    </style>
+</head>
+<body class="text-white font-sans min-h-screen flex flex-col justify-between selection:bg-p5-electric selection:text-black">
+
+<header class="topo">
+    <a class="voltar" href="index.html">‹ Hub</a>
+    <div class="titulo">
+        <h1>Rolagem de Dados</h1>
+        <p class="tagline">Rolagens solo e disputas</p>
+    </div>
+    <div class="espaco"></div>
+    <div class="usuario" data-usuario hidden></div>
+</header>
+
+<div class="faixa-marquee" aria-label="Sistema de dados Fonte Negra">
+    <div class="trilha" aria-hidden="true">
+        <div class="grupo">
+            <span>★ SISTEMA DE DADOS FONTE NEGRA ★</span>
+            <span>FULL RANDOMNESS: ON</span>
+            <span>AZUL REAL DA ESCURIDÃO</span>
+            <span>★ MUDE A PROFECIA ★</span>
+        </div>
+        <div class="grupo">
+            <span>★ SISTEMA DE DADOS FONTE NEGRA ★</span>
+            <span>FULL RANDOMNESS: ON</span>
+            <span>AZUL REAL DA ESCURIDÃO</span>
+            <span>★ MUDE A PROFECIA ★</span>
+        </div>
+    </div>
+</div>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="conteudo w-full flex-grow">
+
+        <!-- Seletor de Modo (Abas P5) -->
+        <div class="flex flex-wrap justify-center gap-4 skew-pos-2 mb-8">
+            <button id="tab-solo-btn" onclick="switchTab('solo')" class="p5-btn p5-clip-btn bg-p5-electric text-black font-p5title text-xl px-6 py-2 border-2 border-black p5-shadow font-bold">
+                <i class="fa-solid fa-dice-d20 mr-2"></i> ROLAGEM SOLO
+            </button>
+            <button id="tab-versus-btn" onclick="switchTab('versus')" class="p5-btn p5-clip-btn bg-black text-white hover:text-p5-electric font-p5title text-xl px-6 py-2 border-2 border-p5-electric p5-shadow font-bold">
+                <i class="fa-solid fa-swords mr-2"></i> DISPUTA / VS
+            </button>
+        </div>
+
+        <!-- ================= ABA 1: ROLAGEM SOLO ================= -->
+        <div id="tab-solo" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Painel Esquerdo: Opções de Lançamento -->
+            <div class="lg:col-span-5 space-y-6">
+                
+                <!-- Seleção dos Dados P5 Style -->
+                <div class="bg-p5-panel border-4 border-black p5-shadow p-5 skew-neg-2 relative overflow-hidden">
+                    <div class="bg-p5-royal text-white font-p5title text-xl px-4 py-1 border-2 border-black inline-block p5-clip-badge -ml-7 -mt-2 mb-4 p5-shadow">
+                        <i class="fa-solid fa-cubes mr-2"></i> SELEÇÃO DE DADOS
+                    </div>
+
+                    <div class="grid grid-cols-4 gap-3" id="dice-selector">
+                        <button onclick="selectDice(2)" class="dice-btn p5-btn bg-black border-2 border-p5-royal text-white hover:bg-p5-royal font-p5title text-xl p-2 flex flex-col items-center p5-shadow" data-faces="2">
+                            <span>D2</span>
+                            <i class="fa-solid fa-coins text-sm text-p5-electric"></i>
+                        </button>
+                        <button onclick="selectDice(4)" class="dice-btn p5-btn bg-black border-2 border-p5-royal text-white hover:bg-p5-royal font-p5title text-xl p-2 flex flex-col items-center p5-shadow" data-faces="4">
+                            <span>D4</span>
+                            <i class="fa-solid fa-play -rotate-90 text-sm text-p5-electric"></i>
+                        </button>
+                        <button onclick="selectDice(6)" class="dice-btn p5-btn bg-p5-electric text-black font-extrabold border-2 border-black font-p5title text-xl p-2 flex flex-col items-center p5-shadow" data-faces="6">
+                            <span>D6</span>
+                            <i class="fa-solid fa-dice-d6 text-sm text-black"></i>
+                        </button>
+                        <button onclick="selectDice(8)" class="dice-btn p5-btn bg-black border-2 border-p5-royal text-white hover:bg-p5-royal font-p5title text-xl p-2 flex flex-col items-center p5-shadow" data-faces="8">
+                            <span>D8</span>
+                            <i class="fa-solid fa-gem text-sm text-p5-electric"></i>
+                        </button>
+                        <button onclick="selectDice(10)" class="dice-btn p5-btn bg-black border-2 border-p5-royal text-white hover:bg-p5-royal font-p5title text-xl p-2 flex flex-col items-center p5-shadow" data-faces="10">
+                            <span>D10</span>
+                            <i class="fa-solid fa-shield text-sm text-p5-electric"></i>
+                        </button>
+                        <button onclick="selectDice(12)" class="dice-btn p5-btn bg-black border-2 border-p5-royal text-white hover:bg-p5-royal font-p5title text-xl p-2 flex flex-col items-center p5-shadow" data-faces="12">
+                            <span>D12</span>
+                            <i class="fa-solid fa-certificate text-sm text-p5-electric"></i>
+                        </button>
+                        <button onclick="selectDice(20)" class="dice-btn p5-btn bg-black border-2 border-p5-royal text-white hover:bg-p5-royal font-p5title text-xl p-2 flex flex-col items-center p5-shadow" data-faces="20">
+                            <span>D20</span>
+                            <i class="fa-solid fa-dice-d20 text-sm text-p5-electric"></i>
+                        </button>
+                        <button onclick="selectDice(100)" class="dice-btn p5-btn bg-black border-2 border-p5-royal text-white hover:bg-p5-royal font-p5title text-xl p-2 flex flex-col items-center p5-shadow" data-faces="100">
+                            <span>D100</span>
+                            <i class="fa-solid fa-percent text-sm text-p5-electric"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Controles de Quantidade e Modificador -->
+                <div class="bg-p5-panel border-4 border-black p5-shadow p-5 skew-pos-2 space-y-4">
+                    <div class="bg-p5-royal text-white font-p5title text-xl px-4 py-1 border-2 border-black inline-block p5-clip-badge -ml-7 -mt-2 p5-shadow">
+                        <i class="fa-solid fa-sliders mr-2"></i> AJUSTE DE PARÂMETROS
+                    </div>
+
+                    <!-- Quantidade -->
+                    <div class="bg-black border-2 border-p5-royal p-3 p5-shadow">
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="font-p5title text-lg text-white">QTD DE DADOS</label>
+                            <span id="qty-val" class="font-p5title text-2xl text-p5-yellow">1</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="adjustQty(-1)" class="w-8 h-8 bg-p5-royal text-white font-bold border border-black hover:bg-p5-electric hover:text-black">-</button>
+                            <input type="range" id="dice-qty" min="1" max="30" value="1" oninput="updateQtyDisplay(this.value)" class="w-full accent-p5-electric bg-gray-900">
+                            <button onclick="adjustQty(1)" class="w-8 h-8 bg-p5-royal text-white font-bold border border-black hover:bg-p5-electric hover:text-black">+</button>
+                        </div>
+                    </div>
+
+                    <!-- Modificador -->
+                    <div class="bg-black border-2 border-p5-royal p-3 p5-shadow">
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="font-p5title text-lg text-white">MODIFICADOR (+ / -)</label>
+                            <span id="mod-val-display" class="font-p5title text-2xl text-p5-yellow">+0</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="adjustMod(-1)" class="w-8 h-8 bg-p5-royal text-white font-bold border border-black hover:bg-p5-electric hover:text-black">-</button>
+                            <input type="number" id="dice-mod" value="0" oninput="updateModDisplay(this.value)" class="w-full bg-p5-dark border border-p5-royal px-2 py-1 text-center font-p5title text-xl text-p5-electric focus:outline-none">
+                            <button onclick="adjustMod(1)" class="w-8 h-8 bg-p5-royal text-white font-bold border border-black hover:bg-p5-electric hover:text-black">+</button>
+                        </div>
+                    </div>
+
+                    <!-- Filtro de Maior / Menor -->
+                    <div class="bg-black border-2 border-p5-royal p-3 p5-shadow">
+                        <label class="font-p5title text-lg text-white block mb-1">REGRA DE SELEÇÃO</label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <select id="filter-type" onchange="toggleFilterCount()" class="bg-p5-dark border border-p5-royal text-sm text-white px-2 py-1 font-sans focus:outline-none focus:border-p5-electric">
+                                <option value="all">Somar Todos</option>
+                                <option value="keep-highest">Manter N Maiores</option>
+                                <option value="keep-lowest">Manter N Menores</option>
+                                <option value="drop-highest">Descartar N Maiores</option>
+                                <option value="drop-lowest">Descartar N Menores</option>
+                            </select>
+                            <input type="number" id="filter-count" value="1" min="1" max="30" class="bg-p5-dark border border-p5-royal px-2 py-1 text-center font-p5title text-xl text-p5-yellow focus:outline-none disabled:opacity-30" disabled>
+                        </div>
+                    </div>
+
+                    <!-- BOTÃO DISPARAR ROLAGEM -->
+                    <button onclick="rollSolo()" class="p5-btn w-full py-4 bg-p5-electric text-black font-p5title text-3xl tracking-wider border-4 border-black p5-shadow-yellow transform hover:rotate-1">
+                        <i class="fa-solid fa-burst mr-2"></i> LANÇAR DADOS!
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Painel Direito: Exibição dos Resultados -->
+            <div class="lg:col-span-7 space-y-6">
+                
+                <!-- Display Result Persona Visual -->
+                <div class="bg-p5-panel border-4 border-black p5-shadow p-6 skew-neg-2 relative overflow-hidden">
+                    <div class="flex justify-between items-center mb-4 border-b-2 border-p5-royal pb-2">
+                        <span class="font-p5title text-2xl text-p5-electric tracking-widest">MESA DE RESULTADO</span>
+                        <span id="formula-display" class="bg-p5-yellow text-black font-p5title text-lg px-3 py-0.5 border border-black font-bold transform rotate-1">1d6 + 0</span>
+                    </div>
+
+                    <!-- Total Result Display -->
+                    <div class="flex flex-col items-center justify-center py-4 relative">
+                        <span class="font-p5hand text-p5-electric text-sm uppercase">Total Calculado</span>
+                        <div id="total-result" class="font-p5title text-7xl sm:text-9xl text-p5-yellow drop-shadow-[4px_4px_0px_#000] leading-none my-2 min-h-[6rem] flex items-center">
+                            -
+                        </div>
+                        <div id="result-status" class="bg-black text-white border border-p5-electric px-4 py-1 text-xs font-mono mt-1 p5-shadow">
+                            AGUARDANDO AÇÃO DO JOGADOR...
+                        </div>
+                    </div>
+
+                    <!-- Dados Sorteadados -->
+                    <div class="mt-6 pt-4 border-t-2 border-p5-royal">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="font-p5title text-xl text-white">DADOS SORTEADOS (<span id="dice-count-indicator">0</span>)</span>
+                            <span class="text-[10px] font-mono text-p5-electric">VERDE = MAIOR | VERMELHO = MENOR</span>
+                        </div>
+
+                        <div id="dice-container" class="flex flex-wrap gap-3 min-h-[70px] p-3 bg-black border-2 border-p5-royal justify-center items-center">
+                            <span class="font-p5hand text-gray-500 text-sm">Clique em "Lançar Dados" para girar a sorte!</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Histórico Solo -->
+                <div class="bg-p5-panel border-4 border-black p5-shadow p-5 skew-pos-2">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-p5title text-2xl text-white flex items-center gap-2">
+                            <i class="fa-solid fa-history text-p5-electric"></i> HISTÓRICO DE LANÇAMENTOS
+                        </h3>
+                        <button onclick="clearHistory('solo')" class="font-p5title text-sm bg-black border border-p5-royal text-p5-electric px-3 py-1 hover:bg-p5-royal hover:text-white transition">
+                            LIMPAR
+                        </button>
+                    </div>
+                    <div id="solo-history" class="space-y-2 max-h-56 overflow-y-auto pr-1">
+                        <p class="font-p5hand text-xs text-gray-500 text-center py-4">Nenhum registro encontrado no diário.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ================= ABA 2: DISPUTA / VERSUS ================= -->
+        <div id="tab-versus" class="hidden space-y-6">
+            
+            <div class="bg-p5-panel border-4 border-black p5-shadow p-6 skew-neg-2">
+                <div class="flex flex-wrap justify-between items-center gap-4 mb-6 pb-4 border-b-2 border-p5-royal">
+                    <div>
+                        <h2 class="font-p5title text-4xl text-p5-electric tracking-wider">MODO DISPUTA CONCORRENTE</h2>
+                        <p class="font-p5hand text-xs text-gray-300">Confronto direto! A rolagem e o resultado aparecem para todos que estiverem nesta página.</p>
+                    </div>
+                    <div class="flex gap-3">
+                        <button onclick="addParticipant()" class="p5-btn bg-black text-p5-electric border-2 border-p5-electric font-p5title text-xl px-4 py-2 p5-shadow">
+                            <i class="fa-solid fa-user-plus mr-1"></i> ADD ADVERSÁRIO
+                        </button>
+                        <button id="btn-rolar-versus" onclick="rollVersus()" class="p5-btn bg-p5-yellow text-black font-p5title text-2xl px-6 py-2 border-2 border-black p5-shadow-blue font-bold">
+                            <i class="fa-solid fa-swords mr-1"></i> EXECUTAR DISPUTA!
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Lista de Participantes -->
+                <div id="participants-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Dinâmico -->
+                </div>
+            </div>
+
+            <!-- Card Banner de Vitória -->
+            <div id="versus-result-card" class="hidden bg-p5-royal border-4 border-black p-6 p5-shadow-yellow text-center skew-pos-2 relative overflow-hidden">
+                <div class="bg-p5-yellow text-black font-p5title text-sm px-4 py-0.5 inline-block border border-black mb-2 font-bold transform -rotate-2">
+                    VENCEDOR DA CONFRONTADA
+                </div>
+                <h3 id="versus-winner-name" class="font-p5title text-5xl sm:text-6xl text-p5-electric drop-shadow-[3px_3px_0px_#000]">
+                    -
+                </h3>
+                <p id="versus-winner-details" class="font-p5hand text-sm text-white mt-1">
+                    -
+                </p>
+                <div id="versus-rolagens" class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-left"></div>
+                <p id="versus-autor" class="font-p5hand text-xs text-gray-200 mt-3"></p>
+            </div>
+
+            <!-- Histórico de Disputa -->
+            <div class="bg-p5-panel border-4 border-black p5-shadow p-5 skew-neg-2">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-p5title text-2xl text-white flex items-center gap-2">
+                        <i class="fa-solid fa-trophy text-p5-yellow"></i> REGISTRO DE DISPUTAS
+                    </h3>
+                    <button id="btn-limpar-versus" hidden onclick="clearHistory('versus')" class="font-p5title text-sm bg-black border border-p5-royal text-p5-electric px-3 py-1 hover:bg-p5-royal hover:text-white transition">
+                        LIMPAR
+                    </button>
+                </div>
+                <div id="versus-history" class="space-y-2 max-h-56 overflow-y-auto pr-1">
+                    <p class="font-p5hand text-xs text-gray-500 text-center py-4">Nenhuma disputa iniciada.</p>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <div class="faixa-marquee inversa" aria-label="Take your time">
+    <div class="trilha" aria-hidden="true">
+        <div class="grupo">
+            <span>TAKE YOUR TIME </span>
+            <span>TAKE YOUR TIME </span>
+            <span>TAKE YOUR TIME </span>
+            <span>TAKE YOUR TIME </span>
+            <span>TAKE YOUR TIME </span>
+            <span>TAKE YOUR TIME </span>
+            <span>TAKE YOUR TIME </span>
+            <span>TAKE YOUR TIME </span>
+        </div>
+        <div class="grupo">
+            <span>TAKE YOUR TIME </span>
+            <span>TAKE YOUR TIME </span>
+            <span>TAKE YOUR TIME </span>
+            <span>TAKE YOUR TIME </span>
+            <span>TAKE YOUR TIME </span>
+            <span>TAKE YOUR TIME </span>
+            <span>TAKE YOUR TIME </span>
+            <span>TAKE YOUR TIME </span>
+        </div>
+    </div>
+</div>
+
+    <!-- FOOTER PERSONA STYLE -->
+    <footer class="bg-black border-t-4 border-p5-royal py-3 text-center text-xs font-mono text-gray-400">
+        <div class="max-w-7xl mx-auto px-4 flex justify-center items-center">
+            <span>Sistema Aleatório Criptográfico Livre de Viés (&ZeroWidthSpace;<code>window.crypto</code>)</span>
+        </div>
+    </footer>
+
+    <!-- LOGICA JAVASCRIPT -->
+    <script>
+        const esc = RPG.escaparHtml;
+
+        /**
+         * ESTADO GLOBAL DA APLICAÇÃO
+         */
+        const state = {
+            selectedFaces: 6,
+            quantity: 1,
+            modifier: 0,
+            soloHistory: [],
+            versusHistory: [],
+            participants: []
+        };
+
+        /**
+         * GERADOR DE ALEATORIEDADE CRIPTOGRÁFICA JUSTA (Fair-Play P5)
+         */
+        function rollCryptoDie(faces) {
+            const array = new Uint32Array(1);
+            const maxValid = Math.floor(4294967296 / faces) * faces; // Evita viés do operador resto
+            let randomValue;
+            
+            do {
+                window.crypto.getRandomValues(array);
+                randomValue = array[0];
+            } while (randomValue >= maxValid);
+
+            return (randomValue % faces) + 1;
+        }
+
+        /**
+         * TROCA DE ABAS (P5 STYLE)
+         */
+        function switchTab(tab) {
+            const soloTab = document.getElementById('tab-solo');
+            const versusTab = document.getElementById('tab-versus');
+            const soloBtn = document.getElementById('tab-solo-btn');
+            const versusBtn = document.getElementById('tab-versus-btn');
+
+            if (tab === 'solo') {
+                soloTab.classList.remove('hidden');
+                versusTab.classList.add('hidden');
+                
+                soloBtn.className = "p5-btn p5-clip-btn bg-p5-electric text-black font-p5title text-xl px-6 py-2 border-2 border-black p5-shadow font-bold";
+                versusBtn.className = "p5-btn p5-clip-btn bg-black text-white hover:text-p5-electric font-p5title text-xl px-6 py-2 border-2 border-p5-electric p5-shadow font-bold";
+            } else {
+                soloTab.classList.add('hidden');
+                versusTab.classList.remove('hidden');
+                
+                versusBtn.className = "p5-btn p5-clip-btn bg-p5-electric text-black font-p5title text-xl px-6 py-2 border-2 border-black p5-shadow font-bold";
+                soloBtn.className = "p5-btn p5-clip-btn bg-black text-white hover:text-p5-electric font-p5title text-xl px-6 py-2 border-2 border-p5-electric p5-shadow font-bold";
+                renderParticipants();
+            }
+        }
+
+        /**
+         * CONTROLES SOLO
+         */
+        function selectDice(faces) {
+            state.selectedFaces = faces;
+            document.querySelectorAll('#dice-selector .dice-btn').forEach(btn => {
+                const btnFaces = parseInt(btn.getAttribute('data-faces'));
+                if (btnFaces === faces) {
+                    btn.className = "dice-btn p5-btn bg-p5-electric text-black font-extrabold border-2 border-black font-p5title text-xl p-2 flex flex-col items-center p5-shadow";
+                    btn.querySelector('i').className = btn.querySelector('i').className.replace('text-p5-electric', 'text-black');
+                } else {
+                    btn.className = "dice-btn p5-btn bg-black border-2 border-p5-royal text-white hover:bg-p5-royal font-p5title text-xl p-2 flex flex-col items-center p5-shadow";
+                    btn.querySelector('i').className = btn.querySelector('i').className.replace('text-black', 'text-p5-electric');
+                }
+            });
+            updateFormulaDisplay();
+        }
+
+        function updateQtyDisplay(val) {
+            state.quantity = parseInt(val) || 1;
+            document.getElementById('qty-val').innerText = state.quantity;
+            updateFormulaDisplay();
+            toggleFilterCount();
+        }
+
+        function adjustQty(delta) {
+            const input = document.getElementById('dice-qty');
+            let newVal = parseInt(input.value) + delta;
+            if (newVal >= 1 && newVal <= 30) {
+                input.value = newVal;
+                updateQtyDisplay(newVal);
+            }
+        }
+
+        function updateModDisplay(val) {
+            state.modifier = parseInt(val) || 0;
+            const sign = state.modifier >= 0 ? '+' : '';
+            document.getElementById('mod-val-display').innerText = `${sign}${state.modifier}`;
+            updateFormulaDisplay();
+        }
+
+        function adjustMod(delta) {
+            const input = document.getElementById('dice-mod');
+            let newVal = (parseInt(input.value) || 0) + delta;
+            input.value = newVal;
+            updateModDisplay(newVal);
+        }
+
+        function updateFormulaDisplay() {
+            const modSign = state.modifier >= 0 ? '+' : '-';
+            const absMod = Math.abs(state.modifier);
+            document.getElementById('formula-display').innerText = `${state.quantity}D${state.selectedFaces} ${modSign} ${absMod}`;
+        }
+
+        function toggleFilterCount() {
+            const type = document.getElementById('filter-type').value;
+            const countInput = document.getElementById('filter-count');
+            if (type === 'all') {
+                countInput.disabled = true;
+            } else {
+                countInput.disabled = false;
+                countInput.max = state.quantity;
+                if (parseInt(countInput.value) > state.quantity) {
+                    countInput.value = state.quantity;
+                }
+            }
+        }
+
+        function rollSolo() {
+            const container = document.getElementById('dice-container');
+            const totalDisplay = document.getElementById('total-result');
+            const statusDisplay = document.getElementById('result-status');
+
+            // Animação de Entrada
+            container.innerHTML = '';
+            totalDisplay.innerText = '??';
+            totalDisplay.classList.add('p5-rolling');
+            statusDisplay.innerText = 'SORTIANDO SEQUÊNCIA CRIPTOGRÁFICA...';
+
+            setTimeout(() => {
+                totalDisplay.classList.remove('p5-rolling');
+
+                // Lançar dados
+                const rolls = [];
+                for (let i = 0; i < state.quantity; i++) {
+                    rolls.push(rollCryptoDie(state.selectedFaces));
+                }
+
+                const maxVal = Math.max(...rolls);
+                const minVal = Math.min(...rolls);
+
+                // Aplicar Filtro de Seleção
+                const filterType = document.getElementById('filter-type').value;
+                const filterCount = parseInt(document.getElementById('filter-count').value) || 1;
+
+                let keptIndexes = new Set();
+                let rollsWithIndex = rolls.map((val, idx) => ({ val, idx }));
+
+                if (filterType === 'all') {
+                    rolls.forEach((_, idx) => keptIndexes.add(idx));
+                } else if (filterType === 'keep-highest') {
+                    rollsWithIndex.sort((a, b) => b.val - a.val);
+                    rollsWithIndex.slice(0, filterCount).forEach(item => keptIndexes.add(item.idx));
+                } else if (filterType === 'keep-lowest') {
+                    rollsWithIndex.sort((a, b) => a.val - b.val);
+                    rollsWithIndex.slice(0, filterCount).forEach(item => keptIndexes.add(item.idx));
+                } else if (filterType === 'drop-highest') {
+                    rollsWithIndex.sort((a, b) => b.val - a.val);
+                    rollsWithIndex.slice(filterCount).forEach(item => keptIndexes.add(item.idx));
+                } else if (filterType === 'drop-lowest') {
+                    rollsWithIndex.sort((a, b) => a.val - b.val);
+                    rollsWithIndex.slice(filterCount).forEach(item => keptIndexes.add(item.idx));
+                }
+
+                let sumKept = 0;
+                rolls.forEach((val, idx) => {
+                    if (keptIndexes.has(idx)) {
+                        sumKept += val;
+                    }
+                });
+
+                const finalTotal = sumKept + state.modifier;
+                totalDisplay.innerText = finalTotal;
+
+                // Renderizar Dados na Tela com Estilo Comic/P5
+                container.innerHTML = '';
+                document.getElementById('dice-count-indicator').innerText = rolls.length;
+
+                rolls.forEach((val, idx) => {
+                    const isKept = keptIndexes.has(idx);
+                    const isMax = val === maxVal;
+                    const isMin = val === minVal;
+
+                    const dieEl = document.createElement('div');
+                    
+                    dieEl.className = `w-12 h-12 flex items-center justify-center font-p5title text-2xl border-2 transition-transform transform p5-shadow ${
+                        !isKept 
+                            ? 'bg-gray-900 border-gray-700 text-gray-600 line-through scale-90 opacity-40' 
+                            : isMax && rolls.length > 1
+                            ? 'bg-emerald-400 text-black border-black font-extrabold scale-110 p5-shadow-yellow'
+                            : isMin && rolls.length > 1
+                            ? 'bg-rose-600 text-white border-black scale-95'
+                            : 'bg-p5-royal text-white border-black'
+                    }`;
+                    
+                    dieEl.innerText = val;
+                    container.appendChild(dieEl);
+                });
+
+                // Status
+                statusDisplay.innerText = `Lançamentos: [${rolls.join(', ')}] ${state.modifier !== 0 ? `| Mod: ${state.modifier >= 0 ? '+' : ''}${state.modifier}` : ''}`;
+
+                // Salvar Histórico
+                addSoloHistory({
+                    formula: `${state.quantity}D${state.selectedFaces}${state.modifier >= 0 ? '+' : ''}${state.modifier}`,
+                    rolls: rolls,
+                    total: finalTotal,
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+                });
+
+            }, 300);
+        }
+
+        function addSoloHistory(item) {
+            state.soloHistory.unshift(item);
+            if (state.soloHistory.length > 12) state.soloHistory.pop();
+            renderSoloHistory();
+        }
+
+        function renderSoloHistory() {
+            const container = document.getElementById('solo-history');
+            if (state.soloHistory.length === 0) {
+                container.innerHTML = `<p class="font-p5hand text-xs text-gray-500 text-center py-4">Nenhum registro encontrado no diário phantom.</p>`;
+                return;
+            }
+
+            container.innerHTML = state.soloHistory.map(h => `
+                <div class="flex justify-between items-center p-2 bg-black border border-p5-royal text-xs font-mono">
+                    <div class="flex items-center gap-2">
+                        <span class="bg-p5-electric text-black font-p5title px-2 py-0.5 font-bold">${h.formula}</span>
+                        <span class="text-gray-300">[${h.rolls.join(', ')}]</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="font-p5title text-lg text-p5-yellow">TOTAL: ${h.total}</span>
+                        <span class="text-[10px] text-gray-500">${h.time}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        /**
+         * MÓDULO VERSUS / DISPUTA
+         * Participantes e disputas ficam no banco (nó dice): qualquer conta logada
+         * monta os participantes e rola, e todos veem a mesma rolagem em tempo real.
+         * Apagar o histórico é só do Mestre (as regras do banco garantem isso).
+         */
+        const db = RPG.db;
+        const modoAtual = localStorage.getItem('rpg_modo_sessao') || 'jogador';
+        const FACES_VALIDAS = [2, 4, 6, 8, 10, 12, 20, 100];
+        const MAX_PARTICIPANTES = 12;
+        const MAX_DADOS = 10;
+        const MAX_HISTORICO = 8;
+        const PARTICIPANTES_PADRAO = {
+            p1: { nome: 'JOKER', faces: 20, qtd: 1, mod: 0, ordem: 1 },
+            p2: { nome: 'SHADOW BOSS', faces: 20, qtd: 1, mod: 0, ordem: 2 }
+        };
+
+        let ultimaDisputaId = null;
+        let carregouDisputas = false;
+        let ultimosTotais = {};
+        let renderAdiado = false;
+
+        const inteiro = (v, min, max, padrao) => {
+            const n = parseInt(v, 10);
+            return Number.isNaN(n) ? padrao : Math.min(max, Math.max(min, n));
+        };
+        const valoresDe = v => Array.isArray(v) ? v : (v && typeof v === 'object' ? Object.values(v) : []);
+        const facesValidas = v => FACES_VALIDAS.includes(Number(v)) ? Number(v) : 20;
+        const textoCurto = (v, max) => String(v ?? '').slice(0, max);
+        const novoId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+        const formula = c => `${c.qty}D${c.faces}${c.mod >= 0 ? '+' : ''}${c.mod}`;
+
+        function normalizarParticipante(id, p) {
+            p = p && typeof p === 'object' ? p : {};
+            return {
+                id,
+                name: textoCurto(p.nome, 30) || 'SEM NOME',
+                faces: facesValidas(p.faces),
+                qty: inteiro(p.qtd, 1, MAX_DADOS, 1),
+                mod: inteiro(p.mod, -99, 99, 0),
+                ordem: Number(p.ordem) || 0
+            };
+        }
+
+        function paraBanco(p) {
+            return { nome: p.name, faces: p.faces, qtd: p.qty, mod: p.mod, ordem: p.ordem };
+        }
+
+        function normalizarDisputa(id, d) {
+            if (!d || typeof d !== 'object') return null;
+            const competidores = valoresDe(d.competidores)
+                .filter(c => c && typeof c === 'object')
+                .slice(0, MAX_PARTICIPANTES)
+                .map(c => {
+                    const faces = facesValidas(c.faces);
+                    const rolagens = valoresDe(c.rolagens).slice(0, MAX_DADOS).map(v => inteiro(v, 1, faces, 1));
+                    const mod = inteiro(c.mod, -99, 99, 0);
+                    return {
+                        pid: textoCurto(c.pid, 40),
+                        name: textoCurto(c.nome, 30) || 'SEM NOME',
+                        faces, qty: rolagens.length, mod, rolagens,
+                        // O total é sempre recalculado aqui: não se confia em um total gravado
+                        total: rolagens.reduce((a, b) => a + b, 0) + mod
+                    };
+                });
+            if (competidores.length === 0) return null;
+
+            const maxTotal = Math.max(...competidores.map(c => c.total));
+            const quando = Number(d.quando) || 0;
+            return {
+                id,
+                autor: textoCurto(d.autor, 60) || 'Alguém',
+                quando,
+                competidores,
+                maxTotal,
+                winners: competidores.filter(c => c.total === maxTotal).map(c => c.name),
+                details: competidores.map(c => ({ name: c.name, total: c.total, formula: formula(c) })),
+                time: new Date(quando).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+            };
+        }
+
+        function addParticipant() {
+            if (state.participants.length >= MAX_PARTICIPANTES) {
+                alert(`A disputa aceita no máximo ${MAX_PARTICIPANTES} competidores.`);
+                return;
+            }
+            const ordem = Math.max(0, ...state.participants.map(p => p.ordem)) + 1;
+            db.ref(`dice/participantes/p${novoId()}`).set({ nome: `INIMIGO ${state.participants.length + 1}`, faces: 20, qtd: 1, mod: 0, ordem });
+        }
+
+        function removeParticipant(id) {
+            if (state.participants.length <= 2) {
+                alert('A disputa necessita de pelo menos 2 competidores.');
+                return;
+            }
+            db.ref(`dice/participantes/${id}`).remove();
+        }
+
+        function updateParticipant(id, field, value) {
+            const atual = state.participants.find(item => item.id === id);
+            if (!atual) return;
+            const p = { ...atual };
+            if (field === 'name') p.name = textoCurto(value.trim().toUpperCase(), 30) || atual.name;
+            if (field === 'faces') p.faces = facesValidas(value);
+            if (field === 'qty') p.qty = inteiro(value, 1, MAX_DADOS, 1);
+            if (field === 'mod') p.mod = inteiro(value, -99, 99, 0);
+            db.ref(`dice/participantes/${id}`).set(paraBanco(p));
+        }
+
+        // Não redesenha a lista enquanto alguém está editando um campo dela (perderia o que digitou).
+        // Só campos contam: um botão focado (como o X de remover) não pode segurar a atualização.
+        function editandoParticipante() {
+            const ativo = document.activeElement;
+            return !!ativo && listaParticipantes.contains(ativo) && ativo.matches('input, select, textarea');
+        }
+
+        function agendarRenderParticipantes() {
+            if (editandoParticipante()) { renderAdiado = true; return; }
+            renderParticipants();
+        }
+
+        function renderParticipants() {
+            renderAdiado = false;
+            const container = document.getElementById('participants-list');
+            if (state.participants.length === 0) {
+                container.innerHTML = `<p class="font-p5hand text-xs text-gray-500 py-4">Carregando competidores...</p>`;
+                return;
+            }
+            container.innerHTML = state.participants.map(p => `
+                <div data-id="${esc(p.id)}" class="bg-black border-2 border-p5-royal p-4 p5-shadow relative space-y-3 transform hover:-rotate-1 transition">
+                    <div class="flex justify-between items-center border-b border-p5-royal pb-1">
+                        <input type="text" maxlength="30" value="${esc(p.name)}" data-campo="name" aria-label="Nome do competidor" class="bg-transparent font-p5title text-2xl text-p5-electric focus:outline-none w-3/4">
+                        <button type="button" data-remover title="Remover competidor" class="text-xs text-gray-500 hover:text-red-500 p-1">
+                            <i class="fa-solid fa-times"></i>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2 font-p5title text-sm">
+                        <div>
+                            <label class="text-[10px] text-gray-400 block font-sans">DADO</label>
+                            <select data-campo="faces" class="w-full bg-p5-panel border border-p5-royal text-white px-1 py-1">
+                                ${FACES_VALIDAS.map(f => `<option value="${f}" ${p.faces === f ? 'selected' : ''}>D${f}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-gray-400 block font-sans">QTD</label>
+                            <input type="number" min="1" max="${MAX_DADOS}" value="${p.qty}" data-campo="qty" class="w-full bg-p5-panel border border-p5-royal text-center text-p5-yellow font-bold py-0.5">
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-gray-400 block font-sans">MOD</label>
+                            <input type="number" min="-99" max="99" value="${p.mod}" data-campo="mod" class="w-full bg-p5-panel border border-p5-royal text-center text-p5-yellow font-bold py-0.5">
+                        </div>
+                    </div>
+
+                    <div class="pt-2 border-t border-p5-royal/50 flex justify-between items-center">
+                        <span class="font-p5hand text-xs text-gray-400">PONTUAÇÃO:</span>
+                        <span class="font-p5title text-3xl text-p5-yellow">
+                            ${ultimosTotais[p.id] !== undefined ? ultimosTotais[p.id] : '-'}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function rollVersus() {
+            if (state.participants.length < 2) {
+                alert('A disputa necessita de pelo menos 2 competidores.');
+                return;
+            }
+            const botao = document.getElementById('btn-rolar-versus');
+            botao.disabled = true;
+            try {
+                const [sessao, perfil] = await Promise.all([RPG.sessao, RPG.perfil()]);
+                if (!sessao) return;
+                const competidores = state.participants.map(p => {
+                    const rolagens = [];
+                    for (let i = 0; i < p.qty; i++) rolagens.push(rollCryptoDie(p.faces));
+                    return { pid: p.id, nome: p.name, faces: p.faces, qtd: p.qty, mod: p.mod, rolagens };
+                });
+                // O resultado aparece para todos (inclusive aqui) pelo listener de dice/disputas
+                await db.ref(`dice/disputas/${novoId()}`).set({
+                    uid: sessao.user.uid,
+                    autor: textoCurto((perfil && perfil.nome) || 'Alguém', 60),
+                    quando: firebase.database.ServerValue.TIMESTAMP,
+                    competidores
+                });
+            } finally {
+                setTimeout(() => { botao.disabled = false; }, 600);
+            }
+        }
+
+        function mostrarResultado(d, animar) {
+            const card = document.getElementById('versus-result-card');
+            if (!d) { card.classList.add('hidden'); return; }
+
+            const winnerNameEl = document.getElementById('versus-winner-name');
+            const winnerDetailsEl = document.getElementById('versus-winner-details');
+            if (d.winners.length === 1) {
+                winnerNameEl.innerText = `👑 ${d.winners[0]} DOMINOU!`;
+                winnerDetailsEl.innerText = `Vitória suprema com um total de ${d.maxTotal} pontos acumulados.`;
+            } else {
+                winnerNameEl.innerText = `⚖️ EMPATE: ${d.winners.join(' & ')}`;
+                winnerDetailsEl.innerText = `Os phantom thieves empataram com exatamente ${d.maxTotal} pontos.`;
+            }
+
+            document.getElementById('versus-rolagens').innerHTML = d.competidores.map(c => `
+                <div class="bg-black border-2 ${c.total === d.maxTotal ? 'border-p5-electric' : 'border-black'} p-3">
+                    <div class="flex justify-between items-baseline gap-2">
+                        <span class="font-p5title text-xl text-white truncate">${esc(c.name)}</span>
+                        <span class="font-p5title text-3xl text-p5-electric">${c.total}</span>
+                    </div>
+                    <div class="flex flex-wrap gap-1 mt-1">
+                        ${c.rolagens.map(v => `<span class="dado-versus inline-flex items-center justify-center min-w-[2rem] h-8 px-1 bg-p5-panel border border-p5-royal font-p5title text-lg ${v === c.faces ? 'text-p5-electric' : v === 1 ? 'text-red-400' : 'text-white'}">${v}</span>`).join('')}
+                    </div>
+                    <p class="font-mono text-[11px] text-gray-400 mt-1">${formula(c)}</p>
+                </div>
+            `).join('');
+            document.getElementById('versus-autor').innerText = `Rolado por ${d.autor} às ${d.time}`;
+
+            card.classList.remove('hidden');
+            if (animar) {
+                card.querySelectorAll('.dado-versus').forEach(el => el.classList.add('p5-rolling'));
+                card.classList.remove('p5-rolling');
+                void card.offsetWidth; // reinicia a animação
+                card.classList.add('p5-rolling');
+            }
+        }
+
+        function renderVersusHistory() {
+            const container = document.getElementById('versus-history');
+            if (state.versusHistory.length === 0) {
+                container.innerHTML = `<p class="font-p5hand text-xs text-gray-500 text-center py-4">Nenhuma disputa iniciada.</p>`;
+                return;
+            }
+
+            container.innerHTML = state.versusHistory.map(h => `
+                <div class="p-2 bg-black border border-p5-royal text-xs font-mono space-y-1">
+                    <div class="flex justify-between items-center gap-2">
+                        <span class="font-p5title text-lg text-p5-yellow">VENCEDOR: ${h.winners.map(esc).join(', ')} (${h.maxTotal} PTS)</span>
+                        <span class="text-[10px] text-gray-500 text-right">${esc(h.autor)} · ${h.time}</span>
+                    </div>
+                    <p class="text-gray-400 text-[11px]">
+                        ${h.details.map(d => `${esc(d.name)}: <strong class="text-p5-electric">${d.total}</strong> (${d.formula})`).join(' | ')}
+                    </p>
+                </div>
+            `).join('');
+        }
+
+        // Eventos da lista de competidores (delegação, sem handlers inline com dados)
+        const listaParticipantes = document.getElementById('participants-list');
+        listaParticipantes.addEventListener('change', e => {
+            const campo = e.target.dataset.campo;
+            const card = e.target.closest('[data-id]');
+            if (campo && card) updateParticipant(card.dataset.id, campo, e.target.value);
+        });
+        listaParticipantes.addEventListener('click', e => {
+            const botao = e.target.closest('[data-remover]');
+            if (botao) removeParticipant(botao.closest('[data-id]').dataset.id);
+        });
+        listaParticipantes.addEventListener('focusout', () => {
+            setTimeout(() => {
+                if (renderAdiado && !editandoParticipante()) renderParticipants();
+            }, 0);
+        });
+
+        if (modoAtual === 'mestre') document.getElementById('btn-limpar-versus').hidden = false;
+
+        db.ref('dice/participantes').on('value', snap => {
+            const dados = snap.val();
+            if (!dados || typeof dados !== 'object') {
+                // Primeiro acesso: cria a dupla padrão para a mesa
+                db.ref('dice/participantes').set(PARTICIPANTES_PADRAO);
+                return;
+            }
+            state.participants = Object.entries(dados)
+                .map(([id, p]) => normalizarParticipante(id, p))
+                .sort((a, b) => a.ordem - b.ordem)
+                .slice(0, MAX_PARTICIPANTES);
+            agendarRenderParticipantes();
+        });
+
+        db.ref('dice/disputas').on('value', snap => {
+            const dados = snap.val();
+            const lista = (dados && typeof dados === 'object' ? Object.entries(dados) : [])
+                .map(([id, d]) => normalizarDisputa(id, d))
+                .filter(Boolean)
+                .sort((a, b) => b.quando - a.quando);
+            const ultima = lista[0] || null;
+            const nova = !!ultima && ultima.id !== ultimaDisputaId;
+            ultimaDisputaId = ultima ? ultima.id : null;
+
+            ultimosTotais = {};
+            if (ultima) ultima.competidores.forEach(c => { if (c.pid) ultimosTotais[c.pid] = c.total; });
+
+            state.versusHistory = lista.slice(0, MAX_HISTORICO);
+            mostrarResultado(ultima, nova && carregouDisputas);
+            renderVersusHistory();
+            agendarRenderParticipantes();
+            carregouDisputas = true;
+        });
+
+        function clearHistory(type) {
+            if (type === 'solo') {
+                state.soloHistory = [];
+                renderSoloHistory();
+            } else {
+                // O histórico de disputas é compartilhado: só o Mestre apaga (regra no banco)
+                if (modoAtual !== 'mestre') return;
+                if (!confirm('Apagar o registro de disputas de toda a mesa?')) return;
+                db.ref('dice/disputas').remove();
+            }
+        }
+
+        window.onload = function() {
+            updateFormulaDisplay();
+        };
+    </script>
+</body>
+</html>

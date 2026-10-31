@@ -11,6 +11,16 @@ Ferramentas web para a mesa de RPG (tema Persona 5): combate, mapas, confidentes
 Requisitos: Node 18+ e Java 11+.
 
 ```bash
+node emulador/iniciar.js             # sobe os emuladores e cria as contas de teste (Ctrl+C encerra)
+node emulador/iniciar.js --abrir     # idem, e abre o site no navegador
+node emulador/iniciar.js --limpo     # começa do zero e não salva os dados ao sair
+```
+
+No Windows, também dá para abrir o `iniciar.cmd` com dois cliques. O site fica em http://127.0.0.1:5000 e o painel dos emuladores em http://127.0.0.1:4000. Os dados ficam em `emulador/dados/` entre uma execução e outra. Se o Java não estiver no PATH, o script procura o `JAVA_HOME` e o Java que vem com as IDEs JetBrains.
+
+Passo a passo manual, se preferir:
+
+```bash
 npx firebase-tools emulators:start   # site em http://127.0.0.1:5000, painel em http://127.0.0.1:4000
 node emulador/seed.js                # em outro terminal: cria as contas de teste
 ```
