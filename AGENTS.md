@@ -89,6 +89,12 @@ Em `localhost`/`127.0.0.1`, o `js/sessao.js` conecta automaticamente aos emulado
 Requisitos: Node 18+ e Java 11+ no PATH.
 
 ```bash
+node emulador/iniciar.js               # tudo num comando: emuladores + seed; dados em emulador/dados/ (--limpo, --abrir)
+```
+
+Equivalente manual (o `iniciar.js` faz isto, e também procura Java em `JAVA_HOME` e no JBR das IDEs JetBrains):
+
+```bash
 npx firebase-tools emulators:start     # site em http://127.0.0.1:5000, painel em http://127.0.0.1:4000
 node emulador/seed.js                  # em outro terminal: cria as contas e os papéis (pode repetir)
 ```
