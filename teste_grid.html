@@ -1,7 +1,10 @@
 <!DOCTYPE html>
-<html lang="pt-PT">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grimório dos Corações - Editor & Visualizador de Grid</title>
+
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://www.gstatic.com https://*.firebaseio.com https://*.firebasedatabase.app http://127.0.0.1:9000; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://*.firebaseio.com wss://*.firebaseio.com https://*.firebasedatabase.app wss://*.firebasedatabase.app https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com http://127.0.0.1:9099 http://127.0.0.1:9000 ws://127.0.0.1:9000; frame-src https://*.firebaseapp.com https://*.firebaseio.com https://erpg.app http://127.0.0.1:9000; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <!-- Favicons -->
@@ -11,12 +14,6 @@
     <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon/apple-touch-icon.png">
     <meta name="apple-mobile-web-app-title" content="Fonte Negra">
     <link rel="manifest" href="assets/favicon/site.webmanifest">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editor de Grid | Fonte Negra</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&display=swap" rel="stylesheet">
 
     <!-- Firebase SDK Compat -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" integrity="sha384-4gq9w/AGf72FXdNQ3Kn3EqWP7633NbCMjpYHt8YCZyXf23o2opcuAr4cif41tLrC" crossorigin="anonymous"></script>
@@ -26,381 +23,970 @@
     <script src="js/sessao.js" data-exigir-login></script>
     <script src="js/topo.js" defer></script>
 
-    <link rel="stylesheet" href="assets/css/layout.css">
-    <style>
-        /* Layout, topo e controles vêm de assets/css/layout.css */
-        main.conteudo { max-width: 760px; }
+  <!-- Fonte Estilizada P5R Inspired -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Montserrat:ital,wght@0,700;0,900;1,900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
-        .controls { display: flex; gap: 10px; flex-wrap: wrap; }
-        /* Cada ferramenta mantém a cor do tipo de célula na borda esquerda */
-        .controls .btn { border-left-width: 8px; }
-        .controls .btn.active { background: var(--azul); border-color: var(--azul-claro); }
-        .btn-chao { border-left-color: #e0e0e0 !important; }
-        .btn-parede { border-left-color: #444 !important; }
-        .btn-porta { border-left-color: #8B4513 !important; }
-        .btn-armadilha { border-left-color: #d9534f !important; }
-        .btn-tesouro { border-left-color: #f0ad4e !important; }
+  <style>
+    :root {
+      --bg-dark: #050b14;
+      --bg-card: #0a1526;
+      --p5-blue: #0046ff;
+      --p5-cyan: #00d9ff;
+      --p5-cyan-glow: #00f0ff;
+      --p5-dark-blue: #021838;
+      --p5-yellow: #ffe600;
+      --p5-red: #ff2a55;
+      --text-white: #ffffff;
+      --text-muted: #8ab4f8;
+      --cell-size: 42px;
+    }
 
-        .acoes-mapa { margin-top: 12px; }
-        .grid-rolagem { overflow-x: auto; }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(15, 40px);
-            grid-template-rows: repeat(15, 40px);
-            gap: 2px;
-            width: max-content;
-            margin: 0 auto;
-            background-color: var(--azul-escuro);
-            padding: 5px;
-        }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
 
-        .cell {
-            width: 40px;
-            height: 40px;
-            background-color: #e0e0e0;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            user-select: none;
-        }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-white);
+      font-family: 'Montserrat', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 50% 50%, #041f4d 0%, var(--bg-dark) 85%),
+        linear-gradient(rgba(0, 217, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 217, 255, 0.03) 1px, transparent 1px);
+      background-size: 100% 100%, 20px 20px, 20px 20px;
+    }
 
-        .cell.parede { background-color: #444; }
-        .cell.porta { background-color: #8B4513; }
-        .cell.armadilha { background-color: #d9534f; }
-        .cell.tesouro { background-color: #f0ad4e; }
-        .cell.inicio { background-color: #5cb85c; }
-        .cell.fim { background-color: #0275d8; }
+    body::before {
+      content: " ";
+      position: fixed;
+      top: 0; left: 0; bottom: 0; right: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+      background-size: 100% 4px;
+      z-index: 999;
+      pointer-events: none;
+      opacity: 0.6;
+    }
 
-        .xml-container { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
-        .xml-container textarea {
-            height: 180px;
-            color: #75beff;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 13px;
-        }
-    </style>
+    .cabecalho-grid {
+      margin-bottom: 25px;
+      text-align: center;
+      position: relative;
+    }
+
+    .title-banner {
+      background: var(--p5-blue);
+      color: #fff;
+      padding: 10px 40px;
+      font-family: 'Cinzel', serif;
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      transform: skewX(-12deg);
+      box-shadow: -6px 6px 0px var(--p5-cyan), 8px -4px 0px #000;
+      border: 2px solid #fff;
+      display: inline-block;
+      text-shadow: 2px 2px 0 #000;
+    }
+
+    .subtitle {
+      font-size: 12px;
+      color: var(--p5-cyan);
+      letter-spacing: 4px;
+      margin-top: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .main-container {
+      display: flex;
+      gap: 25px;
+      max-width: 1300px;
+      width: 100%;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .side-panel {
+      flex: 1;
+      min-width: 320px;
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 2px solid var(--p5-blue);
+      box-shadow: 5px 5px 0px var(--p5-dark-blue), -2px -2px 0px var(--p5-cyan);
+      padding: 18px;
+      position: relative;
+      transform: skewX(-2deg);
+    }
+
+    .card-title {
+      font-family: 'Cinzel', serif;
+      font-size: 16px;
+      color: var(--p5-cyan);
+      border-bottom: 2px solid var(--p5-blue);
+      padding-bottom: 6px;
+      margin-bottom: 14px;
+      text-transform: uppercase;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .palette-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .btn-p5 {
+      padding: 10px 12px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 12px;
+      font-weight: 900;
+      color: #fff;
+      background: var(--p5-dark-blue);
+      border: 2px solid var(--p5-blue);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transform: skewX(-6deg);
+    }
+
+    .btn-p5:hover {
+      background: var(--p5-cyan);
+      color: #000;
+      border-color: #fff;
+      transform: skewX(-6deg) scale(1.03);
+      box-shadow: 0 0 10px var(--p5-cyan-glow);
+    }
+
+    .btn-p5.active {
+      background: var(--p5-blue);
+      border-color: var(--p5-yellow);
+      color: #fff;
+      box-shadow: -3px 3px 0px var(--p5-yellow);
+    }
+
+    .btn-action {
+      background: #11294d;
+      border-color: var(--p5-cyan);
+    }
+
+    .btn-action:hover {
+      background: var(--p5-yellow);
+      color: #000;
+    }
+
+    .btn-danger {
+      border-color: var(--p5-red);
+    }
+    .btn-danger:hover {
+      background: var(--p5-red);
+      color: #fff;
+    }
+
+    .legend-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 12px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(0, 70, 255, 0.1);
+      padding: 6px 10px;
+      border-left: 3px solid var(--p5-cyan);
+    }
+
+    .legend-badge {
+      font-family: 'Share Tech Mono', monospace;
+      font-weight: bold;
+      background: var(--p5-blue);
+      color: #fff;
+      padding: 2px 8px;
+      font-size: 13px;
+      border-radius: 2px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 90px;
+      background: #030812;
+      color: var(--p5-cyan);
+      border: 1px solid var(--p5-blue);
+      padding: 8px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      resize: vertical;
+      margin-bottom: 8px;
+    }
+
+    #status-hud {
+      background: #02122b;
+      border: 2px solid var(--p5-cyan);
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: bold;
+      color: var(--p5-yellow);
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      box-shadow: inset 0 0 10px rgba(0, 217, 255, 0.2);
+    }
+
+    .somente-jogador .side-panel,
+    .somente-jogador .controls-hint { display: none; }
+
+    .grid-panel {
+      flex: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .grid-frame {
+      background: #020a17;
+      padding: 12px;
+      border: 3px solid var(--p5-blue);
+      box-shadow: 0 0 25px rgba(0, 70, 255, 0.4), 10px 10px 0px #000;
+      position: relative;
+    }
+
+    #grid {
+      display: grid;
+      gap: 2px;
+      background-color: #0b1d3a;
+    }
+
+    .cell {
+      width: var(--cell-size);
+      height: var(--cell-size);
+      background-color: #1a2b4c;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      cursor: pointer;
+      position: relative;
+      transition: background-color 0.1s, transform 0.1s;
+      border: 1px solid rgba(0, 217, 255, 0.05);
+    }
+
+    .cell:hover {
+      filter: brightness(1.25);
+      outline: 2px solid var(--p5-cyan);
+      z-index: 5;
+    }
+
+    .cell.chao { background-color: #16294a; }
+    .cell.parede { background-color: #060e1c; border-color: #000; }
+    .cell.porta { background-color: #4a2810; }
+    .cell.armadilha { background-color: #4d0918; }
+    .cell.tesouro { background-color: #4d3d00; }
+    .cell.fim { background-color: #00384d; }
+    .cell.waypoint { background-color: #1d0f38; outline: 1px dashed var(--p5-yellow); }
+
+    .cell::after {
+      content: attr(data-code);
+      position: absolute;
+      bottom: 1px;
+      right: 3px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px;
+      color: rgba(255, 255, 255, 0.35);
+      pointer-events: none;
+    }
+
+    .token {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      position: absolute;
+      z-index: 20;
+      transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 0 8px #000;
+      border: 2px solid #fff;
+    }
+
+    .token.player {
+      background: linear-gradient(135deg, #00d9ff, #0046ff);
+      box-shadow: 0 0 12px var(--p5-cyan-glow);
+    }
+
+    .token.inimigo {
+      background: linear-gradient(135deg, #ff2a55, #80001a);
+      box-shadow: 0 0 10px var(--p5-red);
+    }
+
+    .token.selected {
+      outline: 3px solid var(--p5-yellow);
+      box-shadow: 0 0 15px var(--p5-yellow);
+      transform: scale(1.15);
+      animation: pulse-select 1s infinite alternate;
+    }
+
+    @keyframes pulse-select {
+      0% { transform: scale(1.1); }
+      100% { transform: scale(1.22); }
+    }
+
+    .controls-hint {
+      margin-top: 12px;
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      gap: 15px;
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    .key-badge {
+      background: var(--p5-blue);
+      color: #fff;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-weight: bold;
+    }
+
+    /* Cabeçalho com o usuário (js/topo.js); mantém o visual da página */
+    .topo {
+      --bg: #020617; --painel: #0f172a; --azul-escuro: #1e3a8a; --azul-claro: #60a5fa;
+      --texto: #f8fafc; --aviso: #f59e0b; --perigo: #ef4444;
+      width: 100%; max-width: 1300px; margin-bottom: 20px;
+      display: flex; flex-wrap: wrap; align-items: center; gap: 14px;
+    }
+    .topo .voltar { color: var(--texto); text-decoration: none; border: 2px solid var(--p5-cyan); padding: 4px 12px; text-transform: uppercase; font-size: 13px; font-weight: 700; }
+    .topo .voltar:hover { background: var(--p5-blue); }
+    .topo .espaco { flex: 1; }
+    .usuario[hidden] { display: none; }
+    .usuario { display: flex; align-items: center; gap: 12px; background: var(--bg); border: 2px solid var(--azul-claro); padding: 6px 6px 6px 16px; transform: skewX(-12deg); }
+    .usuario > * { transform: skewX(12deg); }
+    .usuario-dados { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+    .usuario-nome { font-weight: 700; font-size: 14px; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .usuario-papel { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--azul-claro); }
+    .usuario-papel.mestre { color: var(--aviso); }
+    .usuario .usuario-sair { font: inherit; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; background: var(--painel); color: var(--texto); border: 2px solid var(--azul-escuro); padding: 4px 12px; }
+    .usuario .usuario-sair:hover { background: #7f1d1d; border-color: var(--perigo); }
+  </style>
 </head>
 <body>
 
-<header class="topo">
+  <header class="topo">
     <a class="voltar" href="index.html">‹ Hub</a>
-    <div class="titulo">
-        <h1>Editor de Grid</h1>
-        <p class="tagline">Monte o mapa tático e exporte em XML</p>
-    </div>
     <div class="espaco"></div>
     <div class="usuario" data-usuario hidden></div>
-</header>
+  </header>
 
-<main class="conteudo">
-    <!-- Painel de Ferramentas -->
-    <section class="bloco" id="painel-controles">
-        <h2>Ferramentas</h2>
-        <div class="controls">
-            <button type="button" class="btn sec btn-chao active" onclick="setFerramenta('chao', this)">Chão (Borracha)</button>
-            <button type="button" class="btn sec btn-parede" onclick="setFerramenta('parede', this)">Parede (⬛)</button>
-            <button type="button" class="btn sec btn-porta" onclick="setFerramenta('porta', this)">Porta (🚪)</button>
-            <button type="button" class="btn sec btn-armadilha" onclick="setFerramenta('armadilha', this)">Armadilha (💀)</button>
-            <button type="button" class="btn sec btn-tesouro" onclick="setFerramenta('tesouro', this)">Tesouro (💎)</button>
+  <div class="cabecalho-grid">
+    <div class="title-banner">GRIMÓRIO GRID TÁTICO</div>
+    <div class="subtitle">SISTEMA INTEGRADO DE CRIAÇÃO, INSPEÇÃO & MOVIMENTAÇÃO</div>
+  </div>
+
+  <div class="main-container">
+
+    <!-- PAINEL DE FERRAMENTAS E LEGENDA -->
+    <div class="side-panel">
+
+      <!-- STATUS DO JOGO -->
+      <div class="card">
+        <div class="card-title">STATUS TÁTICO</div>
+        <div id="status-hud">Carregando gerador tático...</div>
+      </div>
+
+      <!-- MODO DE OPERAÇÃO -->
+      <div class="card">
+        <div class="card-title">MODO DE OPERAÇÃO</div>
+        <div class="palette-grid">
+          <button id="btn-modo-edicao" class="btn-p5 active" onclick="alternarModo('edicao')">✏️ Edição</button>
+          <button id="btn-modo-movimento" class="btn-p5" onclick="alternarModo('movimento')">🚶 Movimento</button>
         </div>
-        <div class="controls acoes-mapa">
-            <button type="button" class="btn sec btn-aleatorio" onclick="gerarMapaAleatorio()">🎲 Gerar Labirinto Aleatório</button>
-            <button type="button" class="btn perigo btn-limpar" onclick="limparMapa()">Limpar Tudo</button>
-            <button type="button" class="btn btn-xml" onclick="exportarXML()">📄 Exportar XML</button>
+      </div>
+
+      <!-- FERRAMENTAS DE EDIÇÃO DE GRID -->
+      <div class="card">
+        <div class="card-title">FERRAMENTAS DE PINTURA</div>
+        <div class="palette-grid">
+          <button class="btn-p5 btn-chao active" onclick="setFerramenta('chao', this)">⬜ Chão (0)</button>
+          <button class="btn-p5 btn-parede" onclick="setFerramenta('parede', this)">⬛ Parede (1)</button>
+          <button class="btn-p5 btn-armadilha" onclick="setFerramenta('armadilha', this)">💀 Armadilha (2)</button>
+          <button class="btn-p5 btn-tesouro" onclick="setFerramenta('tesouro', this)">💎 Tesouro (3)</button>
+          <button class="btn-p5 btn-porta" onclick="setFerramenta('porta', this)">🚪 Porta (P)</button>
+          <button class="btn-p5 btn-inicio" onclick="setFerramenta('inicio', this)">🟢 Inicio (I)</button>
+          <button class="btn-p5 btn-fim" onclick="setFerramenta('fim', this)">🏁 Fim (F)</button>
+          <button class="btn-p5 btn-inimigo" onclick="setFerramenta('inimigo', this)">👹 Inimigo (E)</button>
+          <button class="btn-p5 btn-waypoint" style="grid-column: span 2;" onclick="setFerramenta('waypoint', this)">📍 Waypoint (W)</button>
         </div>
-    </section>
+      </div>
 
-    <!-- Grid do Mapa -->
-    <section class="bloco grid-rolagem">
-        <div class="grid" id="grid"></div>
-    </section>
+      <!-- AÇÕES DO MAPA & PATRULHA AUTOMÁTICA -->
+      <div class="card">
+        <div class="card-title">GERAÇÃO & AUTOMAÇÃO</div>
+        <div class="palette-grid" style="margin-bottom: 10px;">
+          <button class="btn-p5 btn-action" onclick="gerarMapaAleatorio()">🎲 Labirinto</button>
+          <button class="btn-p5 btn-danger" onclick="limparMapa()">🗑️ Limpar</button>
+          <button id="btn-patrulha" class="btn-p5 btn-action" onclick="alternarPatrulha()">🔄 Patrulha: OFF</button>
+          <button class="btn-p5 btn-action" onclick="exportarXML()">📄 Gerar XML</button>
+        </div>
+        <textarea id="xmlArea" placeholder="Cole ou exporte o XML aqui..."></textarea>
+        <button class="btn-p5 btn-action" style="width: 100%; justify-content: center;" onclick="copiarXML()">📋 Copiar XML</button>
+      </div>
 
-    <!-- Caixa para exibir e copiar o XML gerado -->
-    <section class="bloco xml-container" id="painel-xml">
-        <h2 id="titulo-xml">XML Gerado</h2>
-        <textarea id="xmlArea" aria-labelledby="titulo-xml" readonly placeholder="Clique em 'Exportar XML' para gerar a estrutura..."></textarea>
-        <button type="button" class="btn btn-xml" onclick="copiarXML()">📋 Copiar XML</button>
-    </section>
-</main>
+      <!-- LEGENDA DOS CÓDIGOS -->
+      <div class="card">
+        <div class="card-title">LEGENDA DO GRIMÓRIO</div>
+        <div class="legend-list">
+          <div class="legend-item"><span>Chão Normal</span><span class="legend-badge">0</span></div>
+          <div class="legend-item"><span>Parede (Bloqueia)</span><span class="legend-badge">1</span></div>
+          <div class="legend-item"><span>Armadilha (Status)</span><span class="legend-badge">2</span></div>
+          <div class="legend-item"><span>Tesouro / Lócus</span><span class="legend-badge">3</span></div>
+          <div class="legend-item"><span>Porta Trancada</span><span class="legend-badge">P</span></div>
+          <div class="legend-item"><span>Início / Player</span><span class="legend-badge">I</span></div>
+          <div class="legend-item"><span>Objetivo / Fim</span><span class="legend-badge">F</span></div>
+          <div class="legend-item"><span>Sombra / Inimigo</span><span class="legend-badge">E</span></div>
+          <div class="legend-item"><span>Ponto de Patrulha</span><span class="legend-badge">W</span></div>
+        </div>
+      </div>
 
-    <script>
-        // Firebase e sessão vêm de js/sessao.js (o acesso ao banco aguarda o login)
-        const db = RPG.db;
+    </div>
 
-        // Gestão de Modo (Mestre vs Jogador)
-        const modoAtual = localStorage.getItem('rpg_modo_sessao') || 'jogador';
+    <!-- PAINEL DO GRID / ARENA -->
+    <div class="grid-panel">
+      <div class="grid-frame">
+        <div id="grid"></div>
+      </div>
+      <div class="controls-hint">
+        <span>TECLADO: <span class="key-badge">W</span> <span class="key-badge">A</span> <span class="key-badge">S</span> <span class="key-badge">D</span> ou <span class="key-badge">Setas</span></span>
+      </div>
+    </div>
 
-        if (modoAtual !== 'mestre') {
-            document.addEventListener("DOMContentLoaded", () => {
-                document.getElementById('painel-controles').style.display = 'none';
-                document.getElementById('painel-xml').style.display = 'none';
+  </div>
+
+  <script>
+    const TAMANHO_GRID = 15;
+    let ferramentaAtual = 'chao';
+    // Só o Mestre vê o painel lateral e edita; o jogador só movimenta tokens (as regras do banco é que protegem os dados)
+    const ehMestre = (localStorage.getItem('rpg_modo_sessao') || 'jogador') === 'mestre';
+    if (!ehMestre) document.body.classList.add('somente-jogador');
+    let modoAtual = ehMestre ? 'edicao' : 'visualizacao';
+    let patrulhaAtiva = false;
+    let intervaloPatrulha = null;
+
+    const TABELA_CODIGOS = {
+      '0': { tipo: 'chao', bloqueado: false, icone: '', nome: 'Chão' },
+      '1': { tipo: 'parede', bloqueado: true, icone: '', nome: 'Parede' },
+      '2': { tipo: 'armadilha', bloqueado: false, icone: '💀', nome: 'Armadilha' },
+      '3': { tipo: 'tesouro', bloqueado: false, icone: '💎', nome: 'Tesouro' },
+      'P': { tipo: 'porta', bloqueado: true, icone: '🚪', nome: 'Porta' },
+      'I': { tipo: 'inicio', bloqueado: false, icone: '🟢', nome: 'Ponto Inicial' },
+      'F': { tipo: 'fim', bloqueado: false, icone: '🏁', nome: 'Objetivo' },
+      'E': { tipo: 'inimigo', bloqueado: false, icone: '👹', nome: 'Sombra Inimiga' },
+      'W': { tipo: 'waypoint', bloqueado: false, icone: '📍', nome: 'Ponto de Patrulha' }
+    };
+
+    const CODIGOS_XML = {
+      chao: '0', parede: '1', armadilha: '2', tesouro: '3',
+      porta: 'P', inicio: 'I', fim: 'F', inimigo: 'E', waypoint: 'W'
+    };
+
+    let mapaMatriz = Array.from({ length: TAMANHO_GRID }, () => Array(TAMANHO_GRID).fill('0'));
+    let tokens = [];
+    let selectedTokenId = null;
+    let nextTokenId = 1;
+
+    function alternarModo(novoModo) {
+      modoAtual = novoModo;
+      document.getElementById('btn-modo-edicao').classList.toggle('active', modoAtual === 'edicao');
+      document.getElementById('btn-modo-movimento').classList.toggle('active', modoAtual === 'movimento');
+      
+      if (modoAtual === 'movimento') {
+        atualizarStatusHUD("Modo Movimento Ativo: Clique em qualquer token para controlá-lo.");
+      } else {
+        atualizarStatusHUD("Modo Edição Ativo: Clique ou arraste para pintar o mapa.");
+      }
+    }
+
+    function gerarHashDaSemente(texto) {
+      let hash = 0;
+      for (let i = 0; i < texto.length; i++) {
+        hash = Math.imul(31, hash) + texto.charCodeAt(i) | 0;
+      }
+      return hash;
+    }
+
+    let randomComSeed;
+    function iniciarSeed(semente) {
+      let a = typeof semente === 'string' ? gerarHashDaSemente(semente) : semente;
+      randomComSeed = function() {
+        var t = a += 0x6D2B79F5;
+        t = Math.imul(t ^ t >>> 15, t | 1);
+        t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      }
+    }
+
+    function gerarLabirintoMatriz(largura, altura, semente) {
+      iniciarSeed(semente);
+      let matriz = Array.from({ length: altura }, () => Array(largura).fill('1'));
+      let caminhos = [[1, 1]];
+      matriz[1][1] = '0';
+      const direcoes = [[0, -2], [2, 0], [0, 2], [-2, 0]];
+
+      while (caminhos.length > 0) {
+        let atual = caminhos[caminhos.length - 1];
+        let x = atual[0], y = atual[1];
+
+        let vizinhosValidos = direcoes
+          .map(dir => [x + dir[0], y + dir[1], dir[0], dir[1]])
+          .filter(viz =>
+            viz[1] > 0 && viz[1] < altura - 1 &&
+            viz[0] > 0 && viz[0] < largura - 1 &&
+            matriz[viz[1]][viz[0]] === '1'
+          )
+          .sort(() => randomComSeed() - 0.5);
+
+        if (vizinhosValidos.length > 0) {
+          let [vizX, vizY, dirX, dirY] = vizinhosValidos[0];
+          matriz[y + (dirY / 2)][x + (dirX / 2)] = '0';
+          matriz[vizY][vizX] = '0';
+          caminhos.push([vizX, vizY]);
+        } else {
+          caminhos.pop();
+        }
+      }
+
+      matriz[1][1] = 'I';
+      matriz[altura - 2][largura - 2] = 'F';
+
+      for (let y = 0; y < altura; y++) {
+        for (let x = 0; x < largura; x++) {
+          if (matriz[y][x] === '0') {
+            const chance = randomComSeed();
+            if (chance < 0.05) matriz[y][x] = '2';
+            else if (chance < 0.08) matriz[y][x] = '3';
+            else if (chance < 0.10) matriz[y][x] = 'P';
+            else if (chance < 0.13) matriz[y][x] = 'E';
+            else if (chance < 0.16) matriz[y][x] = 'W'; // Adiciona Waypoints no labirinto
+          }
+        }
+      }
+      return matriz;
+    }
+
+    function setFerramenta(ferramenta, botao) {
+      ferramentaAtual = ferramenta;
+      document.querySelectorAll('.palette-grid button').forEach(b => {
+        if (!b.id.includes('modo') && b.id !== 'btn-patrulha') b.classList.remove('active');
+      });
+      botao.classList.add('active');
+      atualizarStatusHUD(`Ferramenta de Pintura selecionada: ${ferramenta.toUpperCase()}`);
+    }
+
+    function renderizarGrid() {
+      const container = document.getElementById('grid');
+      container.innerHTML = '';
+      container.style.gridTemplateColumns = `repeat(${TAMANHO_GRID}, var(--cell-size))`;
+      container.style.gridTemplateRows = `repeat(${TAMANHO_GRID}, var(--cell-size))`;
+
+      for (let y = 0; y < TAMANHO_GRID; y++) {
+        for (let x = 0; x < TAMANHO_GRID; x++) {
+          const codigo = mapaMatriz[y][x];
+          const info = TABELA_CODIGOS[codigo] || TABELA_CODIGOS['0'];
+
+          const cell = document.createElement('div');
+          cell.className = `cell ${info.tipo}`;
+          cell.dataset.x = x;
+          cell.dataset.y = y;
+          cell.dataset.code = codigo;
+          if (info.icone) cell.innerText = info.icone;
+
+          cell.addEventListener('mousedown', (e) => {
+            if (e.buttons === 1) interagirComCelula(x, y);
+          });
+          cell.addEventListener('mouseenter', (e) => {
+            if (e.buttons === 1 && modoAtual === 'edicao') interagirComCelula(x, y, true);
+          });
+
+          container.appendChild(cell);
+        }
+      }
+
+      tokens.forEach((token) => {
+        const tokenElem = document.createElement('div');
+        tokenElem.className = `token ${token.tipo} ${token.id === selectedTokenId ? 'selected' : ''}`;
+        tokenElem.innerText = token.tipo === 'player' ? '🟢' : '👹';
+
+        tokenElem.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (ehMestre) selecionarToken(token.id);
+        });
+
+        const cellAlvo = document.querySelector(`.cell[data-x="${token.x}"][data-y="${token.y}"]`);
+        if (cellAlvo) cellAlvo.appendChild(tokenElem);
+      });
+    }
+
+    function interagirComCelula(x, y, isDrag = false) {
+      if (!ehMestre) return; // jogador só visualiza
+      if (modoAtual === 'movimento') {
+        if (!isDrag) {
+          const tokenNoLocal = tokens.find(t => t.x === x && t.y === y);
+          if (tokenNoLocal) {
+            selecionarToken(tokenNoLocal.id);
+          } else {
+            moverTokenPara(x, y);
+          }
+        }
+        return;
+      }
+
+      const codigoNovo = CODIGOS_XML[ferramentaAtual] || '0';
+      if (codigoNovo === 'I' || codigoNovo === 'E') {
+        const tipo = codigoNovo === 'I' ? 'player' : 'inimigo';
+        tokens = tokens.filter(t => !(t.x === x && t.y === y));
+        tokens.push({
+          id: `token-${nextTokenId++}`,
+          tipo: tipo,
+          nome: tipo === 'player' ? 'Usuário (🟢)' : 'Sombra Inimiga (👹)',
+          x: x, y: y,
+          waypoints: [],
+          indiceWaypointAtual: 0
+        });
+        mapaMatriz[y][x] = '0';
+      } else {
+        tokens = tokens.filter(t => !(t.x === x && t.y === y));
+        mapaMatriz[y][x] = codigoNovo;
+      }
+      renderizarGrid();
+    }
+
+    function extrairTokensDaMatriz() {
+      tokens = [];
+      selectedTokenId = null;
+
+      for (let y = 0; y < TAMANHO_GRID; y++) {
+        for (let x = 0; x < TAMANHO_GRID; x++) {
+          const codigo = mapaMatriz[y][x];
+          if (codigo === 'I' || codigo === 'E') {
+            const tipo = codigo === 'I' ? 'player' : 'inimigo';
+            tokens.push({
+              id: `token-${nextTokenId++}`,
+              tipo: tipo,
+              nome: tipo === 'player' ? 'Usuário (🟢)' : 'Sombra Inimiga (👹)',
+              x: x, y: y,
+              waypoints: [],
+              indiceWaypointAtual: 0
             });
+            mapaMatriz[y][x] = '0';
+          }
         }
+      }
 
-        const TAMANHO_GRID = 15; 
-        let ferramentaAtual = 'chao'; 
-        
-        const icones = {
-            chao: '',
-            parede: '⬛',
-            porta: '🚪',
-            armadilha: '💀',
-            tesouro: '💎',
-            inicio: '🟢',
-            fim: '🏁'
-        };
+      const playerToken = tokens.find(t => t.tipo === 'player');
+      if (playerToken) selectedTokenId = playerToken.id;
+      else if (tokens.length > 0) selectedTokenId = tokens[0].id;
+    }
 
-        const CODIGOS_XML = {
-            chao: '0',
-            parede: '1',
-            armadilha: '2',
-            tesouro: '3',
-            porta: 'P',
-            inicio: 'I',
-            fim: 'F'
-        };
+    function obterWaypointsDoMapa() {
+      let lista = [];
+      for (let y = 0; y < TAMANHO_GRID; y++) {
+        for (let x = 0; x < TAMANHO_GRID; x++) {
+          if (mapaMatriz[y][x] === 'W') {
+            lista.push({ x: x, y: y });
+          }
+        }
+      }
+      return lista;
+    }
 
-        function criarGrid() {
-            const gridContainer = document.getElementById('grid');
-            gridContainer.innerHTML = '';
-            
-            gridContainer.style.gridTemplateColumns = `repeat(${TAMANHO_GRID}, 40px)`;
-            gridContainer.style.gridTemplateRows = `repeat(${TAMANHO_GRID}, 40px)`;
-            
-            for (let i = 0; i < TAMANHO_GRID * TAMANHO_GRID; i++) {
-                const cell = document.createElement('div');
-                cell.classList.add('cell');
-                
-                if (modoAtual === 'mestre') {
-                    cell.addEventListener('mousedown', () => {
-                        aplicarElemento(cell);
-                        exportarXML();
-                    });
-                    cell.addEventListener('mouseenter', (e) => {
-                        if (e.buttons === 1) {
-                            aplicarElemento(cell);
-                            exportarXML();
-                        }
-                    });
-                } else {
-                    cell.style.cursor = 'default';
-                }
+    function selecionarToken(id) {
+      selectedTokenId = id;
+      const token = tokens.find(t => t.id === id);
+      if (token) {
+        atualizarStatusHUD(`Token Ativo: ${token.nome} | Posição: (X:${token.x}, Y:${token.y})`);
+      }
+      renderizarGrid();
+    }
 
-                gridContainer.appendChild(cell);
+    function moverTokenPara(novoX, novoY) {
+      if (!selectedTokenId) {
+        atualizarStatusHUD("⚠️ Nenhum token selecionado!");
+        return;
+      }
+
+      const token = tokens.find(t => t.id === selectedTokenId);
+      if (!token) {
+        selectedTokenId = null;
+        atualizarStatusHUD("⚠️ Token ativo inválido.");
+        return;
+      }
+
+      if (novoX < 0 || novoX >= TAMANHO_GRID || novoY < 0 || novoY >= TAMANHO_GRID) return;
+
+      const codigoCel = mapaMatriz[novoY][novoX];
+      const infoCel = TABELA_CODIGOS[codigoCel];
+
+      if (infoCel && infoCel.bloqueado) {
+        atualizarStatusHUD(`⚠️ Movimento bloqueado por ${infoCel.nome}!`);
+        return;
+      }
+
+      token.x = novoX;
+      token.y = novoY;
+
+      let msg = `${token.nome} avançou para (X:${novoX}, Y:${novoY})`;
+      if (codigoCel === '2') msg += ' | ⚠️ PISOU EM UMA ARMADILHA!';
+      if (codigoCel === '3') msg += ' | 💎 ENCONTROU UM TESOURO!';
+      if (codigoCel === 'F') msg += ' | 🏁 ALCANÇOU O OBJETIVO!';
+
+      atualizarStatusHUD(msg);
+      renderizarGrid();
+    }
+
+    // Sistema de Caminho Pré-Determinado (Waypoints Automáticos)
+    function alternarPatrulha() {
+      patrulhaAtiva = !patrulhaAtiva;
+      const btn = document.getElementById('btn-patrulha');
+      btn.classList.toggle('active', patrulhaAtiva);
+      btn.innerText = `🔄 Patrulha: ${patrulhaAtiva ? 'ON' : 'OFF'}`;
+
+      if (patrulhaAtiva) {
+        const waypointsDoMapa = obterWaypointsDoMapa();
+
+        // Atribui os waypoints aos inimigos
+        tokens.forEach(token => {
+          if (token.tipo === 'inimigo') {
+            token.waypoints = waypointsDoMapa.length > 0 
+              ? [...waypointsDoMapa] 
+              : [{ x: token.x, y: token.y }];
+            token.indiceWaypointAtual = 0;
+          }
+        });
+
+        atualizarStatusHUD("🔄 Patrulha em Rota Pré-determinada iniciada!");
+
+        intervaloPatrulha = setInterval(() => {
+          let moveuAlgum = false;
+
+          tokens.forEach(token => {
+            if (token.tipo === 'inimigo' && token.waypoints.length > 0) {
+              let alvo = token.waypoints[token.indiceWaypointAtual];
+
+              // Se alcançou o waypoint atual, seleciona o próximo da sequência
+              if (token.x === alvo.x && token.y === alvo.y) {
+                token.indiceWaypointAtual = (token.indiceWaypointAtual + 1) % token.waypoints.length;
+                alvo = token.waypoints[token.indiceWaypointAtual];
+              }
+
+              let proximoX = token.x;
+              let proximoY = token.y;
+
+              // Calcula deslocamento rumo ao ponto marcado
+              if (token.x < alvo.x) proximoX++;
+              else if (token.x > alvo.x) proximoX--;
+              else if (token.y < alvo.y) proximoY++;
+              else if (token.y > alvo.y) proximoY--;
+
+              let codigoDestino = (proximoX >= 0 && proximoX < TAMANHO_GRID && proximoY >= 0 && proximoY < TAMANHO_GRID) 
+                ? mapaMatriz[proximoY][proximoX] : '1';
+              let infoDestino = TABELA_CODIGOS[codigoDestino];
+
+              if (!infoDestino || !infoDestino.bloqueado) {
+                token.x = proximoX;
+                token.y = proximoY;
+                moveuAlgum = true;
+              }
             }
+          });
+
+          if (moveuAlgum) renderizarGrid();
+        }, 1000); // Avança 1 passo por segundo
+      } else {
+        clearInterval(intervaloPatrulha);
+        atualizarStatusHUD("⏹️ Patrulha automática parada.");
+      }
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (!ehMestre || modoAtual !== 'movimento' || !selectedTokenId) return;
+      if (document.activeElement.tagName === 'TEXTAREA') return;
+
+      const token = tokens.find(t => t.id === selectedTokenId);
+      if (!token) return;
+
+      let targetX = token.x;
+      let targetY = token.y;
+
+      switch (e.key.toLowerCase()) {
+        case 'w': case 'arrowup': targetY -= 1; break;
+        case 's': case 'arrowdown': targetY += 1; break;
+        case 'a': case 'arrowleft': targetX -= 1; break;
+        case 'd': case 'arrowright': targetX += 1; break;
+        default: return;
+      }
+
+      e.preventDefault();
+      moverTokenPara(targetX, targetY);
+    });
+
+    // Atalhos do modo de edição: a tecla entre parênteses seleciona a ferramenta de pintura
+    const ATALHOS_PINTURA = {
+      '0': 'chao', '1': 'parede', '2': 'armadilha', '3': 'tesouro',
+      'p': 'porta', 'i': 'inicio', 'f': 'fim', 'e': 'inimigo', 'w': 'waypoint'
+    };
+
+    // M alterna entre os modos Edição e Movimento
+    window.addEventListener('keydown', (e) => {
+      if (!ehMestre || e.key.toLowerCase() !== 'm') return;
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const alvo = document.activeElement && document.activeElement.tagName;
+      if (alvo === 'TEXTAREA' || alvo === 'INPUT') return;
+      e.preventDefault();
+      alternarModo(modoAtual === 'edicao' ? 'movimento' : 'edicao');
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (!ehMestre || modoAtual !== 'edicao') return;
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const alvo = document.activeElement && document.activeElement.tagName;
+      if (alvo === 'TEXTAREA' || alvo === 'INPUT') return;
+
+      const ferramenta = ATALHOS_PINTURA[e.key.toLowerCase()];
+      if (!ferramenta) return;
+      const botao = document.querySelector(`.btn-${ferramenta}`);
+      if (!botao) return;
+
+      e.preventDefault();
+      setFerramenta(ferramenta, botao);
+    });
+
+    function exportarXML() {
+      let linhasXML = [];
+      for (let y = 0; y < TAMANHO_GRID; y++) {
+        let valoresLinha = [];
+        for (let x = 0; x < TAMANHO_GRID; x++) {
+          const token = tokens.find(t => t.x === x && t.y === y);
+          if (token) {
+            valoresLinha.push(token.tipo === 'player' ? 'I' : 'E');
+          } else {
+            valoresLinha.push(mapaMatriz[y][x]);
+          }
         }
+        linhasXML.push(`    <linha y="${y}">${valoresLinha.join(',')}</linha>`);
+      }
 
-        function setFerramenta(ferramenta, botao) {
-            if (modoAtual !== 'mestre') return;
-            ferramentaAtual = ferramenta;
-            document.querySelectorAll('.controls button').forEach(b => b.classList.remove('active'));
-            botao.classList.add('active');
-        }
-
-        function aplicarElemento(celula, ferramenta = ferramentaAtual) {
-            celula.className = 'cell';
-            if (ferramenta !== 'chao') {
-                celula.classList.add(ferramenta);
-            }
-            celula.innerText = icones[ferramenta] || ''; 
-        }
-
-        function limparMapa() {
-            if (modoAtual !== 'mestre') return;
-            document.querySelectorAll('.cell').forEach(celula => {
-                celula.className = 'cell';
-                celula.innerText = '';
-            });
-            document.getElementById('xmlArea').value = '';
-            exportarXML();
-        }
-
-        function gerarHashDaSemente(texto) {
-            let hash = 0;
-            for (let i = 0; i < texto.length; i++) {
-                hash = Math.imul(31, hash) + texto.charCodeAt(i) | 0;
-            }
-            return hash;
-        }
-
-        let randomComSeed; 
-        function iniciarSeed(semente) {
-            let a = typeof semente === 'string' ? gerarHashDaSemente(semente) : semente;
-            randomComSeed = function() {
-                var t = a += 0x6D2B79F5;
-                t = Math.imul(t ^ t >>> 15, t | 1);
-                t ^= t + Math.imul(t ^ t >>> 7, t | 61);
-                return ((t ^ t >>> 14) >>> 0) / 4294967296;
-            }
-        }
-
-        function gerarLabirinto(largura, altura, semente) {
-            iniciarSeed(semente);
-            let matriz = Array.from({ length: altura }, () => Array(largura).fill('parede'));
-            
-            let caminhos = [[1, 1]];
-            matriz[1][1] = 'chao';
-
-            const direcoes = [[0, -2], [2, 0], [0, 2], [-2, 0]];
-
-            while (caminhos.length > 0) {
-                let atual = caminhos[caminhos.length - 1];
-                let x = atual[0], y = atual[1];
-
-                let vizinhosValidos = direcoes
-                    .map(dir => [x + dir[0], y + dir[1], dir[0], dir[1]])
-                    .filter(viz =>
-                        viz[1] > 0 && viz[1] < altura - 1 &&
-                        viz[0] > 0 && viz[0] < largura - 1 &&
-                        matriz[viz[1]][viz[0]] === 'parede'
-                    )
-                    .sort(() => randomComSeed() - 0.5);
-
-                if (vizinhosValidos.length > 0) {
-                    let [vizX, vizY, dirX, dirY] = vizinhosValidos[0];
-                    matriz[y + (dirY / 2)][x + (dirX / 2)] = 'chao';
-                    matriz[vizY][vizX] = 'chao';
-                    caminhos.push([vizX, vizY]);
-                } else {
-                    caminhos.pop();
-                }
-            }
-
-            matriz[1][1] = 'inicio';
-            matriz[altura - 2][largura - 2] = 'fim';
-
-            return matriz;
-        }
-
-        function gerarMapaAleatorio(sementeInput) {
-            if (modoAtual !== 'mestre') return;
-            const celulas = document.querySelectorAll('.cell');
-            
-            const sementeAtiva = sementeInput || Math.random().toString(36).substring(2, 10);
-            const mapaLogico = gerarLabirinto(TAMANHO_GRID, TAMANHO_GRID, sementeAtiva);
-
-            let indiceDaCelula = 0;
-
-            for (let y = 0; y < TAMANHO_GRID; y++) {
-                for (let x = 0; x < TAMANHO_GRID; x++) {
-                    if (!celulas[indiceDaCelula]) break;
-
-                    let elementoAtual = mapaLogico[y][x];
-
-                    if (elementoAtual === 'chao') {
-                        const chance = randomComSeed();
-                        if (chance < 0.05) elementoAtual = 'armadilha';
-                        else if (chance < 0.08) elementoAtual = 'tesouro';
-                        else if (chance < 0.10) elementoAtual = 'porta';
-                    }
-
-                    aplicarElemento(celulas[indiceDaCelula], elementoAtual);
-                    indiceDaCelula++;
-                }
-            }
-            exportarXML();
-        }
-
-        function exportarXML() {
-            const celulas = document.querySelectorAll('.cell');
-            let linhasXML = [];
-            let indice = 0;
-
-            for (let y = 0; y < TAMANHO_GRID; y++) {
-                let valoresLinha = [];
-
-                for (let x = 0; x < TAMANHO_GRID; x++) {
-                    const celula = celulas[indice];
-                    
-                    let tipoEncontrado = 'chao';
-                    for (let tipo in CODIGOS_XML) {
-                        if (celula.classList.contains(tipo)) {
-                            tipoEncontrado = tipo;
-                            break;
-                        }
-                    }
-
-                    valoresLinha.push(CODIGOS_XML[tipoEncontrado]);
-                    indice++;
-                }
-
-                linhasXML.push(` <linha y="${y}">${valoresLinha.join(',')}</linha>`);
-            }
-
-            const xmlCompleto = `<mapa largura="${TAMANHO_GRID}" altura="${TAMANHO_GRID}">
+      const xmlCompleto = `<mapa largura="${TAMANHO_GRID}" altura="${TAMANHO_GRID}">
   <matriz>
 ${linhasXML.join('\n')}
   </matriz>
 </mapa>`;
 
-            if (modoAtual === 'mestre') {
-                document.getElementById('xmlArea').value = xmlCompleto;
-                db.ref('teste_grid').set({ xml: xmlCompleto });
-            }
-        }
+      document.getElementById('xmlArea').value = xmlCompleto;
+      atualizarStatusHUD("XML exportado com sucesso!");
+    }
 
-        function carregarMapaXML(xmlString) {
-            try {
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(xmlString, "text/xml");
-                const mapaNode = xmlDoc.querySelector("mapa");
-                if (!mapaNode) return;
+    function carregarMapaXML(xmlString) {
+      try {
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlString, "text/xml");
+        const mapaNode = xmlDoc.querySelector("mapa");
+        if (!mapaNode) throw new Error("Tag <mapa> não encontrada.");
 
-                const linhas = xmlDoc.querySelectorAll("matriz linha");
-                const celulas = document.querySelectorAll('.cell');
-                let indice = 0;
+        const linhas = xmlDoc.querySelectorAll("matriz linha");
+        mapaMatriz = Array.from({ length: TAMANHO_GRID }, () => Array(TAMANHO_GRID).fill('0'));
 
-                linhas.forEach((linhaNode) => {
-                    const codigos = linhaNode.textContent.trim().split(",");
-                    codigos.forEach((codigo) => {
-                        codigo = codigo.trim();
-                        let tipo = 'chao';
-                        for (let t in CODIGOS_XML) {
-                            if (CODIGOS_XML[t] === codigo) {
-                                tipo = t;
-                                break;
-                            }
-                        }
-                        if (celulas[indice]) {
-                            aplicarElemento(celulas[indice], tipo);
-                        }
-                        indice++;
-                    });
-                });
-            } catch(e) {}
-        }
-
-        function copiarXML() {
-            const xmlArea = document.getElementById('xmlArea');
-            if (!xmlArea.value) {
-                alert("Gere o XML primeiro clicando no botão 'Exportar XML'!");
-                return;
-            }
-            xmlArea.select();
-            navigator.clipboard.writeText(xmlArea.value);
-            alert("XML copiado para a área de transferência!");
-        }
-
-        // Sincronização em tempo real com Firebase
-        db.ref('teste_grid/xml').on('value', (snapshot) => {
-            const xmlData = snapshot.val();
-            if (xmlData) {
-                carregarMapaXML(xmlData);
-            } else if (modoAtual === 'mestre') {
-                gerarMapaAleatorio();
-            }
+        linhas.forEach((linhaNode) => {
+          const y = parseInt(linhaNode.getAttribute("y"));
+          if (y < TAMANHO_GRID) {
+            const celulas = linhaNode.textContent.trim().split(",");
+            celulas.forEach((codigo, x) => {
+              if (x < TAMANHO_GRID) mapaMatriz[y][x] = codigo.trim();
+            });
+          }
         });
 
-        criarGrid();
-        window.onload = function() {
-            db.ref('teste_grid/xml').once('value', (snapshot) => {
-                if (!snapshot.exists() && modoAtual === 'mestre') {
-                    gerarMapaAleatorio();
-                }
-            });
-        };
-    </script>
+        extrairTokensDaMatriz();
+        renderizarGrid();
+        atualizarStatusHUD("Mapa XML carregado com sucesso!");
+      } catch (err) {
+        alert("Erro ao ler o XML: " + err.message);
+      }
+    }
+
+    function carregarMapaDoInput() {
+      const xml = document.getElementById("xmlArea").value;
+      if (xml.trim()) carregarMapaXML(xml);
+      else alert("Cole um código XML válido!");
+    }
+
+    function copiarXML() {
+      const xmlArea = document.getElementById('xmlArea');
+      if (!xmlArea.value) exportarXML();
+      xmlArea.select();
+      navigator.clipboard.writeText(xmlArea.value);
+      atualizarStatusHUD("📋 XML copiado!");
+    }
+
+    function limparMapa() {
+      if (patrulhaAtiva) alternarPatrulha();
+      mapaMatriz = Array.from({ length: TAMANHO_GRID }, () => Array(TAMANHO_GRID).fill('0'));
+      tokens = [];
+      selectedTokenId = null;
+      document.getElementById('xmlArea').value = '';
+      renderizarGrid();
+      atualizarStatusHUD("Mapa limpo!");
+    }
+
+    function gerarMapaAleatorio() {
+      if (patrulhaAtiva) alternarPatrulha();
+      const seed = Math.random().toString(36).substring(2, 10);
+      mapaMatriz = gerarLabirintoMatriz(TAMANHO_GRID, TAMANHO_GRID, seed);
+      extrairTokensDaMatriz();
+      renderizarGrid();
+      exportarXML();
+      atualizarStatusHUD(`Labirinto gerado com Waypoints (Seed: ${seed})`);
+    }
+
+    function atualizarStatusHUD(texto) {
+      document.getElementById('status-hud').innerText = texto;
+    }
+
+    // Exposição global segura para evitar ReferenceError nos botões HTML
+    window.alternarModo = alternarModo;
+    window.setFerramenta = setFerramenta;
+    window.exportarXML = exportarXML;
+    window.carregarMapaDoInput = carregarMapaDoInput;
+    window.copiarXML = copiarXML;
+    window.limparMapa = limparMapa;
+    window.gerarMapaAleatorio = gerarMapaAleatorio;
+    window.alternarPatrulha = alternarPatrulha;
+
+    gerarMapaAleatorio();
+  </script>
 </body>
 </html>
