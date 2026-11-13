@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://www.gstatic.com https://*.firebaseio.com https://*.firebasedatabase.app http://127.0.0.1:9000; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://*.firebaseio.com wss://*.firebaseio.com https://*.firebasedatabase.app wss://*.firebasedatabase.app https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com http://127.0.0.1:9099 http://127.0.0.1:9000 ws://127.0.0.1:9000; frame-src https://*.firebaseapp.com https://*.firebaseio.com https://erpg.app http://127.0.0.1:9000; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" href="assets/favicon/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/svg+xml" href="assets/favicon/favicon.svg">
+    <link rel="shortcut icon" href="assets/favicon/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-title" content="Fonte Negra">
+    <link rel="manifest" href="assets/favicon/site.webmanifest">
+
+    <!-- Firebase SDK Compat e sessão -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" integrity="sha384-4gq9w/AGf72FXdNQ3Kn3EqWP7633NbCMjpYHt8YCZyXf23o2opcuAr4cif41tLrC" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js" integrity="sha384-5PDE6CZvnNIJI5xu68GIFoOO3U73lAnRLBwPBmmKjWnYnYwKEHWr/ghtGooEOXGb" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" integrity="sha384-xtdq4MQqPj1dB5DQsuw9O7dh4kHhMP/Wp5u8O1jiaWiou13ZfJIgiccjtVK2pBhL" crossorigin="anonymous"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/sessao.js" data-exigir-login></script>
+    <script src="js/topo.js" defer></script>
+
+  <title>Sala de Veludo — O Grimório do Coração</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Tipografia marcante estilo P5R + leitura elegante -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Cinzel:wght@600;800&family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@1.72.0/dist/umd/lucide.min.js" integrity="sha384-LJKEYnLhvei+XTxKjLahwKnS/kWFWfkb3n+v8n7YKWAAS3oamYHQyT4Bwch3XplL" crossorigin="anonymous"></script>
+
+  <style>
+    :root {
+      --velvet-abyss: #060a16;
+      --velvet-navy: #0b132b;
+      --velvet-royal: #1d4ed8;
+      --velvet-bright: #2563eb;
+      --velvet-cyan: #00f0ff;
+      --velvet-gold: #eab308;
+      --velvet-white: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: var(--velvet-abyss);
+      color: var(--velvet-white);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* Tipografias Especiais */
+    .font-p5 {
+      font-family: 'Anton', sans-serif;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .font-opera {
+      font-family: 'Cinzel', serif;
+    }
+
+    .font-mono-tech {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ============================================================
+       CENÁRIO TEATRAL: CORTINAS DE VELUDO E HOLOFOTES
+       ============================================================ */
+    .theater-curtain-left,
+    .theater-curtain-right {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      width: 6vw;
+      min-width: 24px;
+      max-width: 90px;
+      z-index: 30;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        90deg,
+        #040814 0%,
+        #0c1b44 18%,
+        #183582 32%,
+        #081026 50%,
+        #142c6e 68%,
+        #050917 100%
+      );
+      box-shadow: inset -12px 0 25px rgba(0, 0, 0, 0.85), 0 0 30px rgba(0, 0, 0, 0.9);
+    }
+
+    .theater-curtain-left {
+      left: 0;
+      border-right: 2px solid rgba(234, 179, 8, 0.35);
+    }
+
+    .theater-curtain-right {
+      right: 0;
+      border-left: 2px solid rgba(234, 179, 8, 0.35);
+      transform: scaleX(-1);
+    }
+
+    .theater-valance {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 18px;
+      z-index: 35;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        90deg,
+        #070d21 0px,
+        #152f75 40px,
+        #070d21 80px
+      );
+      border-bottom: 2px solid var(--velvet-gold);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.8);
+    }
+
+    .spotlight-beam {
+      position: fixed;
+      top: -15%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 110vw;
+      height: 110vh;
+      background: radial-gradient(
+        ellipse at 50% 0%,
+        rgba(37, 99, 235, 0.22) 0%,
+        rgba(0, 240, 255, 0.06) 35%,
+        rgba(6, 10, 22, 0) 70%
+      );
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ============================================================
+       GEOMETRIA ANGULAR ESTILO PERSONA 5 ROYAL (AZUL VELVET)
+       ============================================================ */
+    .p5-clip-header {
+      clip-path: polygon(0 0, 100% 0, 96% 100%, 2% 100%);
+    }
+
+    .p5-clip-btn {
+      clip-path: polygon(4% 0%, 100% 0%, 96% 100%, 0% 100%);
+      transition: all 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .p5-clip-btn:hover:not(:disabled) {
+      transform: translateY(-2px) scale(1.02);
+      filter: brightness(1.12);
+    }
+
+    .p5-clip-btn:active:not(:disabled) {
+      transform: translateY(1px) scale(0.98);
+    }
+
+    .p5-nav-item {
+      clip-path: polygon(0 6%, 100% 0%, 96% 95%, 2% 100%);
+      transition: all 0.2s ease;
+    }
+
+    .p5-nav-item.active {
+      background: var(--velvet-white);
+      color: var(--velvet-abyss);
+      transform: translateX(6px) rotate(-1deg);
+      box-shadow: -6px 6px 0px var(--velvet-cyan);
+    }
+
+    .p5-nav-item:not(.active):hover {
+      background: rgba(37, 99, 235, 0.35);
+      border-color: var(--velvet-cyan);
+      transform: translateX(4px);
+    }
+
+    .p5-box-shadow {
+      box-shadow: 8px 8px 0px rgba(0, 240, 255, 0.22), 0 12px 30px rgba(0, 0, 0, 0.75);
+    }
+
+    /* Inputs e Selects estilizados */
+    .velvet-input {
+      background: rgba(6, 10, 22, 0.9);
+      border: 2px solid #1e3a8a;
+      color: #ffffff;
+      transition: all 0.2s ease;
+    }
+
+    .velvet-input:focus {
+      outline: none;
+      border-color: var(--velvet-cyan);
+      box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.2);
+    }
+
+    /* Animação de Acidente de Fusão / Guilhotina */
+    @keyframes glitchShake {
+      0% { transform: translate(0, 0) skew(0deg); }
+      20% { transform: translate(-8px, 4px) skew(-4deg); }
+      40% { transform: translate(8px, -4px) skew(4deg); }
+      60% { transform: translate(-6px, -3px) skew(-2deg); }
+      80% { transform: translate(6px, 3px) skew(2deg); }
+      100% { transform: translate(0, 0) skew(0deg); }
+    }
+
+    .accident-shake {
+      animation: glitchShake 0.45s cubic-bezier(.36,.07,.19,.97) both;
+    }
+
+    @keyframes guillotineDrop {
+      0% { transform: translateY(-100%); opacity: 0; }
+      60% { transform: translateY(5%); opacity: 1; }
+      80% { transform: translateY(-3%); }
+      100% { transform: translateY(0%); opacity: 1; }
+    }
+
+    .guillotine-anim {
+      animation: guillotineDrop 0.4s ease-out forwards;
+    }
+
+    /* Scrollbar customizada */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #060a16;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1d4ed8;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #00f0ff;
+    }
+  </style>
+    <style>
+        /* Barra de acesso: único elemento do padrão do hub nesta página (o resto do layout é próprio) */
+        #barra-hub { position: relative; z-index: 60; display: flex; align-items: center; gap: 14px; padding: 8px 16px;
+            background: rgba(2, 6, 23, .92); border-bottom: 2px solid #1d4ed8; font-family: Arial, Helvetica, sans-serif; }
+        #barra-hub .voltar { color: #f8fafc; text-decoration: none; border: 2px solid #60a5fa; padding: 3px 12px; text-transform: uppercase; font-size: .85rem; letter-spacing: 1px; }
+        #barra-hub .voltar:hover { background: #3b82f6; }
+        #barra-hub .espaco { flex: 1; }
+        #barra-hub .usuario[hidden] { display: none; }
+        #barra-hub .usuario { display: flex; align-items: center; gap: 12px; background: #020617; border: 2px solid #60a5fa; padding: 4px 4px 4px 14px; }
+        #barra-hub .usuario-dados { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+        #barra-hub .usuario-nome { font-weight: 700; font-size: .95rem; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        #barra-hub .usuario-papel { font-size: .7rem; text-transform: uppercase; letter-spacing: 1px; color: #60a5fa; }
+        #barra-hub .usuario-papel.mestre { color: #f59e0b; }
+        #barra-hub .usuario-sair { font: inherit; font-size: .8rem; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; background: #0f172a; color: #f8fafc; border: 2px solid #1e3a8a; padding: 3px 10px; }
+        #barra-hub .usuario-sair:hover { background: #7f1d1d; border-color: #ef4444; }
+    </style>
+</head>
+<body class="relative selection:bg-cyan-400 selection:text-slate-950">
+
+<header id="barra-hub">
+    <a class="voltar" href="index.html">‹ Hub</a>
+    <div class="espaco"></div>
+    <div class="usuario" data-usuario hidden></div>
+</header>
+
+  <!-- Canvas de Partículas Etéreas Flutuantes -->
+  <canvas id="velvet-particles" class="fixed inset-0 pointer-events-none z-0"></canvas>
+
+  <!-- Holofotes e Cortinas do Palco da Sala de Veludo -->
+  <div class="spotlight-beam"></div>
+  <div class="theater-valance"></div>
+  <div class="theater-curtain-left hidden sm:block"></div>
+  <div class="theater-curtain-right hidden sm:block"></div>
+
+  <!-- Container de Notificações Toast -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-3 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+
+  <!-- Wrapper Principal -->
+  <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-14 md:px-20 pt-8 pb-16">
+
+    <!-- CABEÇALHO TEATRAL / PALCO DOS SONHOS -->
+    <header class="mb-8">
+      <div class="bg-gradient-to-r from-[#0b132b] via-[#152a68] to-[#0b132b] border-2 border-cyan-400/50 p-5 sm:p-7 p5-clip-header p5-box-shadow relative overflow-hidden">
+        <div class="absolute -right-10 -top-10 w-48 h-48 bg-blue-600/20 rotate-45 pointer-events-none"></div>
+        <div class="absolute right-24 -bottom-12 w-32 h-32 border-4 border-cyan-400/20 rotate-12 pointer-events-none"></div>
+
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 relative z-10">
+          <div>
+            <div class="inline-flex items-center gap-2 bg-blue-950/90 border border-yellow-500/50 px-3 py-1 mb-2 -rotate-1">
+              <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+              <span class="text-xs font-bold tracking-widest uppercase text-yellow-400">O Grimório do Coração • Parte V</span>
+            </div>
+            <h1 class="font-p5 text-4xl sm:text-5xl md:text-6xl tracking-wider text-white drop-shadow-[0_4px_0_#1d4ed8]">
+              SALA DE <span class="text-cyan-400">VELUDO</span>
+            </h1>
+            <p class="font-opera text-xs sm:text-sm text-blue-200 mt-1 tracking-widest uppercase">
+              Palco dos Sonhos • Presidido por <span class="text-yellow-400 font-bold">Igor</span> &amp; seus assistentes <span class="text-cyan-300 font-bold">Robert &amp; Safie</span>
+            </p>
+          </div>
+
+          <!-- Citação Dinâmica de Igor / Robert / Safie -->
+          <div class="bg-[#060a16]/90 border-l-4 border-yellow-400 p-3.5 sm:max-w-md rounded-r-lg shadow-inner">
+            <div class="flex items-center justify-between mb-1">
+              <span id="host-speaker" class="text-xs font-black uppercase tracking-wider text-yellow-400">IGOR</span>
+              <button type="button" onclick="cycleVelvetQuote()" title="Ouvir anfitriões" class="text-xs text-cyan-400 hover:text-white flex items-center gap-1 transition cursor-pointer">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> <span>Invocar</span>
+              </button>
+            </div>
+            <p id="host-quote" class="text-xs sm:text-sm text-slate-200 italic leading-relaxed">
+              "Bem-vindo à Sala de Veludo. Este teatro existe entre o sonho e a realidade, a mente e a matéria..."
+            </p>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- LAYOUT PRINCIPAL: MENU LATERAL P5R + PALCO MODULAR -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+      <!-- NAVEGAÇÃO LATERAL / GUIAS DO PALCO -->
+      <aside class="lg:col-span-3 flex flex-col gap-3">
+        <div class="bg-[#0b132b]/95 border-2 border-blue-700/70 p-4 rounded-lg shadow-xl">
+          <div class="flex items-center justify-between border-b border-blue-800 pb-2 mb-3">
+            <span class="font-p5 text-lg tracking-wider text-cyan-400">ATOS DO PALCO</span>
+            <span class="text-[11px] font-mono-tech text-blue-300 bg-blue-950 px-2 py-0.5 rounded">V.2.1</span>
+          </div>
+
+          <!-- Guias renderizadas dinamicamente por VelvetServices -->
+          <nav id="velvet-nav-menu" aria-label="Atos do Palco" class="nav-tabs flex flex-row lg:flex-col gap-2 overflow-x-auto pb-2 lg:pb-0"></nav>
+        </div>
+
+        <!-- Card de Regras Rápidas da Sala de Veludo -->
+        <div class="hidden lg:block bg-[#0b132b]/90 border border-yellow-500/40 p-4 rounded-lg text-xs text-slate-300 space-y-2">
+          <div class="flex items-center gap-2 text-yellow-400 font-bold uppercase tracking-wider">
+            <i data-lucide="scroll-text" class="w-4 h-4"></i>
+            <span>Leis do Contrato</span>
+          </div>
+          <ul class="space-y-1.5 text-[11px] leading-relaxed text-blue-100/90">
+            <li>• <strong class="text-white">Persona Inicial:</strong> Nunca pode ser fundida, sacrificada ou alojada.</li>
+            <li>• <strong class="text-white">Trava de Nível:</strong> O nível resultante não pode exceder seu <span class="text-cyan-300 font-bold">CNv.</span></li>
+            <li>• <strong class="text-white">Herança:</strong> PH igual à média dos PH (meio-pontos são preservados).</li>
+            <li>• <strong class="text-white">Alojamento:</strong> Indisponível por 2 dias; evolui afinidade em 1 estágio.</li>
+          </ul>
+        </div>
+      </aside>
+
+      <!-- ÁREA PRINCIPAL DO PALCO (CONTEÚDO DOS SERVIÇOS) -->
+      <main id="velvet-stage" class="lg:col-span-9 space-y-6">
+
+        <!-- ============================================================
+             SERVIÇO 1: O BIOMBO — RITUAL DE FUSÃO (DÍADE)
+             ============================================================ -->
+        <section id="service-fusion" class="velvet-section space-y-6">
+          <div class="bg-[#0b132b]/95 border-2 border-blue-600 p-5 sm:p-7 rounded-xl p5-box-shadow relative">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b-2 border-blue-800/80 pb-4 mb-6">
+              <div>
+                <span class="text-xs font-bold uppercase tracking-widest text-cyan-400">Ato I • Ritual de Fusão (Díade)</span>
+                <h2 class="font-p5 text-3xl sm:text-4xl text-white tracking-wide">O BIOMBO</h2>
+                <p class="text-xs text-blue-200/80 mt-0.5">Atrás do biombo cênico, Robert e Safie operam a guilhotina para fundir duas máscaras em uma nova.</p>
+              </div>
+              <div class="bg-blue-950/90 border border-yellow-500/50 px-3 py-1.5 rounded text-xs text-yellow-300 flex items-center gap-2">
+                <i data-lucide="alert-triangle" class="w-4 h-4 text-yellow-400 shrink-0"></i>
+                <span>A <strong>Persona Inicial</strong> não pode passar pelo biombo.</span>
+              </div>
+            </div>
+
+            <!-- Seleção das 2 Personae -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+              <!-- Persona 1 -->
+              <div class="bg-[#060a16]/90 border-2 border-blue-800 p-4 rounded-lg relative group hover:border-cyan-400/70 transition">
+                <div class="flex items-center justify-between mb-3">
+                  <span class="bg-blue-700 text-white font-p5 text-sm px-3 py-0.5 -rotate-2">SACRIFÍCIO I</span>
+                  <span class="text-xs text-blue-300 font-mono-tech">MATERIAL ALFA</span>
+                </div>
+
+                <div class="space-y-3">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label class="block text-xs font-bold uppercase text-blue-200 mb-1">Arcana *</label>
+                      <select id="fusion-arcana-1" onchange="calculateFusion()" class="velvet-input w-full p-2.5 rounded-lg text-sm font-semibold"></select>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-bold uppercase text-blue-200 mb-1">Nome (Opcional)</label>
+                      <input type="text" id="fusion-name-1" oninput="calculateFusion()" placeholder="Ex: Jack Frost" class="velvet-input w-full p-2.5 rounded-lg text-sm" />
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-3 gap-2.5">
+                    <div>
+                      <label class="block text-[11px] font-bold uppercase text-cyan-300 mb-1">Nível (1-99)</label>
+                      <input type="number" id="fusion-lvl-1" min="1" max="99" value="10" oninput="calculateFusion()" class="velvet-input w-full p-2 rounded-lg text-sm font-mono-tech font-bold text-center" />
+                    </div>
+                    <div>
+                      <label class="block text-[11px] font-bold uppercase text-blue-300 mb-1">PM Máx.</label>
+                      <input type="number" id="fusion-pm-1" min="0" max="999" value="15" oninput="calculateFusion()" class="velvet-input w-full p-2 rounded-lg text-sm font-mono-tech font-bold text-center" />
+                    </div>
+                    <div>
+                      <label class="block text-[11px] font-bold uppercase text-yellow-300 mb-1">PH Atual</label>
+                      <input type="number" id="fusion-ph-1" min="0" max="999" step="0.5" value="5" oninput="calculateFusion()" class="velvet-input w-full p-2 rounded-lg text-sm font-mono-tech font-bold text-center" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Persona 2 -->
+              <div class="bg-[#060a16]/90 border-2 border-blue-800 p-4 rounded-lg relative group hover:border-cyan-400/70 transition">
+                <div class="flex items-center justify-between mb-3">
+                  <span class="bg-blue-700 text-white font-p5 text-sm px-3 py-0.5 rotate-1">SACRIFÍCIO II</span>
+                  <span class="text-xs text-blue-300 font-mono-tech">MATERIAL BETA</span>
+                </div>
+
+                <div class="space-y-3">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label class="block text-xs font-bold uppercase text-blue-200 mb-1">Arcana *</label>
+                      <select id="fusion-arcana-2" onchange="calculateFusion()" class="velvet-input w-full p-2.5 rounded-lg text-sm font-semibold"></select>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-bold uppercase text-blue-200 mb-1">Nome (Opcional)</label>
+                      <input type="text" id="fusion-name-2" oninput="calculateFusion()" placeholder="Ex: Pixie" class="velvet-input w-full p-2.5 rounded-lg text-sm" />
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-3 gap-2.5">
+                    <div>
+                      <label class="block text-[11px] font-bold uppercase text-cyan-300 mb-1">Nível (1-99)</label>
+                      <input type="number" id="fusion-lvl-2" min="1" max="99" value="12" oninput="calculateFusion()" class="velvet-input w-full p-2 rounded-lg text-sm font-mono-tech font-bold text-center" />
+                    </div>
+                    <div>
+                      <label class="block text-[11px] font-bold uppercase text-blue-300 mb-1">PM Máx.</label>
+                      <input type="number" id="fusion-pm-2" min="0" max="999" value="17" oninput="calculateFusion()" class="velvet-input w-full p-2 rounded-lg text-sm font-mono-tech font-bold text-center" />
+                    </div>
+                    <div>
+                      <label class="block text-[11px] font-bold uppercase text-yellow-300 mb-1">PH Atual</label>
+                      <input type="number" id="fusion-ph-2" min="0" max="999" step="0.5" value="6" oninput="calculateFusion()" class="velvet-input w-full p-2 rounded-lg text-sm font-mono-tech font-bold text-center" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Parâmetros do Jogador, Confidente e Risco -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 bg-blue-950/40 border border-blue-800/80 p-4 rounded-lg mb-6">
+              <div>
+                <label class="block text-xs font-bold uppercase text-blue-200 mb-1">Nível Jogador (CNv.)</label>
+                <input type="number" id="fusion-player-cnv" min="1" max="99" placeholder="Ex: 15" oninput="calculateFusion()" class="velvet-input w-full p-2.5 rounded-lg text-sm font-mono-tech" />
+                <span class="text-[11px] text-blue-300/80 mt-1 block">Trava máxima de nível.</span>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase text-yellow-300 mb-1">Rank Confidente (0-100)</label>
+                <input type="number" id="fusion-confidant-rank" min="0" max="100" value="0" oninput="calculateFusion()" class="velvet-input w-full p-2.5 rounded-lg text-sm font-mono-tech" />
+                <span class="text-[11px] text-yellow-200/80 mt-1 block">+1 PM a cada 10 ranks.</span>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase text-rose-300 mb-1">Risco de Falha (%)</label>
+                <input type="number" id="fusion-risk-pct" min="1" max="100" value="10" oninput="calculateFusion()" class="velvet-input w-full p-2.5 rounded-lg text-sm font-mono-tech" />
+                <span class="text-[11px] text-rose-200/80 mt-1 block">Falha se 1d100 ≤ Risco.</span>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase text-cyan-300 mb-1">Persona Resultante</label>
+                <input type="text" id="fusion-result-name" placeholder="Ex: Hua Po" oninput="calculateFusion()" class="velvet-input w-full p-2.5 rounded-lg text-sm" />
+                <span class="text-[11px] text-blue-300/80 mt-1 block">Nome para o Caderno.</span>
+              </div>
+            </div>
+
+            <!-- PAINEL DE RESULTADO DA FUSÃO -->
+            <div id="fusion-result-card" class="bg-gradient-to-br from-[#060a16] via-[#0e1b3d] to-[#060a16] border-2 border-cyan-400 p-5 sm:p-6 rounded-xl relative overflow-hidden">
+              <!-- Alerta de Trava de Nível (CNv) -->
+              <div id="fusion-cnv-warning" class="hidden mb-4 bg-red-950/90 border-2 border-red-500 text-red-200 p-3.5 rounded-lg flex items-center gap-3">
+                <i data-lucide="shield-alert" class="w-6 h-6 text-red-400 shrink-0"></i>
+                <div class="text-xs sm:text-sm">
+                  <strong class="uppercase tracking-wider text-red-300 block">Fusão Bloqueada pelo Contrato!</strong>
+                  O nível da Persona resultante (<span id="warn-res-lvl" class="font-bold"></span>) excede o seu Nível de Personagem (<span id="warn-player-cnv" class="font-bold"></span>).
+                </div>
+              </div>
+
+              <!-- Banner de Acidente de Fusão -->
+              <div id="fusion-accident-banner" class="hidden mb-5 bg-amber-950/95 border-2 border-yellow-400 p-4 rounded-lg guillotine-anim">
+                <div class="flex items-start gap-3">
+                  <div class="bg-yellow-400 text-slate-950 p-2 rounded-lg shrink-0">
+                    <i data-lucide="zap" class="w-6 h-6"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-p5 text-xl text-yellow-400 tracking-wide">ACIDENTE NA GUILHOTINA!</h4>
+                    <p id="fusion-accident-details" class="text-xs sm:text-sm text-amber-100 mt-1"></p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div>
+                  <span class="text-xs font-bold uppercase tracking-widest text-blue-300">Manifestação Prevista</span>
+                  <div class="flex items-baseline gap-3 mt-1 flex-wrap">
+                    <h3 id="fusion-out-arcana" class="font-p5 text-4xl sm:text-5xl text-cyan-400 tracking-wide">O Mago</h3>
+                    <span id="fusion-accident-tag" class="hidden bg-yellow-400 text-slate-950 text-xs font-black px-2 py-0.5 rounded uppercase">Mutação 1d20</span>
+                  </div>
+                  <p id="fusion-out-formula" class="text-xs text-blue-200/80 mt-1 font-mono-tech">Cruzamento: O Tolo × O Mago</p>
+                </div>
+
+                <!-- Métricas Oficiais (Nível, PM, PH) -->
+                <div class="grid grid-cols-3 gap-3 sm:gap-4 text-center">
+                  <div class="bg-[#060a16] border border-blue-700 px-3 py-3 rounded-lg min-w-[85px]">
+                    <span class="block text-[10px] font-bold uppercase text-blue-300">Nível</span>
+                    <span id="fusion-out-lvl" class="font-p5 text-3xl text-white">12</span>
+                  </div>
+                  <div class="bg-[#060a16] border border-cyan-500/60 px-3 py-3 rounded-lg min-w-[85px]">
+                    <span class="block text-[10px] font-bold uppercase text-cyan-300">PM Total</span>
+                    <span id="fusion-out-pm" class="font-p5 text-3xl text-cyan-400">17</span>
+                    <span id="fusion-out-pm-bonus" class="block text-[10px] text-yellow-400 font-mono-tech">+0 Conf.</span>
+                  </div>
+                  <div class="bg-[#060a16] border border-yellow-500/60 px-3 py-3 rounded-lg min-w-[85px]">
+                    <span class="block text-[10px] font-bold uppercase text-yellow-300">Herança (PH)</span>
+                    <span id="fusion-out-ph" class="font-p5 text-3xl text-yellow-400">5.5</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Ações da Fusão -->
+              <div class="mt-6 pt-4 border-t border-blue-800/80 flex flex-wrap items-center justify-between gap-3">
+                <div class="flex flex-wrap items-center gap-3">
+                  <button type="button" onclick="rollFusionAccident()" class="p5-clip-btn bg-blue-900 hover:bg-blue-800 border border-cyan-400 text-cyan-300 font-bold text-xs sm:text-sm px-4 py-2.5 flex items-center gap-2 cursor-pointer">
+                    <i data-lucide="dices" class="w-4 h-4"></i>
+                    <span>Testar Risco de Falha (1d100)</span>
+                  </button>
+
+                  <button type="button" id="btn-reset-accident" onclick="resetFusionAccident()" class="hidden text-xs text-slate-300 hover:text-white underline cursor-pointer">
+                    Restaurar Fusão Normal
+                  </button>
+                </div>
+
+                <button type="button" onclick="executeAndLogFusion()" class="p5-clip-btn bg-cyan-400 hover:bg-white text-slate-950 font-p5 text-base sm:text-lg tracking-wider px-6 py-2.5 flex items-center gap-2 shadow-lg cursor-pointer">
+                  <i data-lucide="sparkles" class="w-5 h-5"></i>
+                  <span>EXECUTAR E REGISTRAR</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Painel de Consulta Rápida da Matriz 21x21 -->
+          <div class="bg-[#0b132b]/95 border border-blue-700/80 rounded-xl overflow-hidden">
+            <button type="button" onclick="toggleQuickMatrix()" class="w-full p-4 flex items-center justify-between text-left hover:bg-blue-900/30 transition cursor-pointer">
+              <div class="flex items-center gap-2.5">
+                <i data-lucide="grid" class="w-5 h-5 text-cyan-400"></i>
+                <div>
+                  <span class="font-p5 text-lg tracking-wide text-white block leading-none">ORÁCULO DAS 21 ARCANAS (MATRIZ 21×21)</span>
+                  <span class="text-[11px] text-blue-300">Clique para abrir ou recolher a tabela simétrica de cruzamento</span>
+                </div>
+              </div>
+              <i id="quick-matrix-chevron" data-lucide="chevron-down" class="w-5 h-5 text-cyan-400 transition-transform"></i>
+            </button>
+
+            <div id="quick-matrix-drawer" class="hidden border-t border-blue-800 p-4">
+              <div class="overflow-x-auto border border-blue-800 rounded-lg max-h-[420px]">
+                <table id="arcana-matrix-table" class="w-full text-[11px] text-left border-collapse"></table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================
+             SERVIÇO 2: A COXIA — RITUAL DE SACRIFÍCIO
+             ============================================================ -->
+        <section id="service-sacrifice" class="velvet-section hidden space-y-6">
+          <div class="bg-[#0b132b]/95 border-2 border-blue-600 p-5 sm:p-7 rounded-xl p5-box-shadow">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b-2 border-blue-800/80 pb-4 mb-6">
+              <div>
+                <span class="text-xs font-bold uppercase tracking-widest text-yellow-400">Ato II • Ritual de Sacrifício</span>
+                <h2 class="font-p5 text-3xl sm:text-4xl text-white tracking-wide">A COXIA</h2>
+                <p class="text-xs text-blue-200/80 mt-0.5">Nos bastidores ocultos da coxia, uma Persona sai definitivamente de cena para fortalecer o elenco.</p>
+              </div>
+              <div class="bg-blue-950/90 border border-yellow-500/50 px-3 py-1.5 rounded text-xs text-yellow-300 flex items-center gap-2">
+                <i data-lucide="flame" class="w-4 h-4 text-yellow-400 shrink-0"></i>
+                <span>A <strong>Persona Inicial</strong> não pode ser sacrificada.</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-xs font-bold uppercase text-blue-200 mb-1">Arcana da Persona Sacrificada</label>
+                  <select id="sac-arcana" onchange="calculateSacrifice()" class="velvet-input w-full p-2.5 rounded-lg text-sm font-semibold"></select>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3">
+                  <div class="col-span-2">
+                    <label class="block text-xs font-bold uppercase text-blue-200 mb-1">Nome da Persona (Opcional)</label>
+                    <input type="text" id="sac-name" oninput="calculateSacrifice()" placeholder="Ex: Slime" class="velvet-input w-full p-2.5 rounded-lg text-sm" />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold uppercase text-cyan-300 mb-1">Nível (1-99)</label>
+                    <input type="number" id="sac-lvl" min="1" max="99" value="14" oninput="calculateSacrifice()" class="velvet-input w-full p-2.5 rounded-lg text-sm font-mono-tech font-bold text-center" />
+                  </div>
+                </div>
+
+                <label class="flex items-center gap-3 bg-[#060a16] border border-blue-800 p-3.5 rounded-lg cursor-pointer hover:border-yellow-400 transition">
+                  <input type="checkbox" id="sac-has-confidant" onchange="calculateSacrifice()" class="w-5 h-5 accent-cyan-400 rounded" />
+                  <div>
+                    <span class="block text-sm font-bold text-white">O grupo possui o Confidente desta Arcana?</span>
+                    <span class="text-xs text-blue-300">Concede 1 Carta de Magia aleatória da Persona sacrificada.</span>
+                  </div>
+                </label>
+              </div>
+
+              <!-- Resultado do Sacrifício -->
+              <div class="bg-gradient-to-br from-[#060a16] via-[#0e1b3d] to-[#060a16] border-2 border-yellow-400/80 p-5 rounded-xl flex flex-col justify-between">
+                <div>
+                  <span class="text-xs font-bold uppercase tracking-widest text-yellow-400">Essência Extraída</span>
+                  <div class="mt-3 flex items-baseline gap-3">
+                    <span id="sac-out-pm" class="font-p5 text-5xl text-cyan-400">+7 PM</span>
+                    <span class="text-xs text-blue-200">para distribuir no seu deck</span>
+                  </div>
+                  <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+                    Os Pontos de Magia obtidos podem ser distribuídos livremente entre quaisquer outras Personae no seu deck (exceto acima do limite normal de cada uma).
+                  </p>
+
+                  <div id="sac-card-reward" class="hidden mt-4 bg-yellow-950/60 border border-yellow-400 p-3 rounded-lg flex items-center gap-3">
+                    <i data-lucide="sparkles" class="w-5 h-5 text-yellow-400 shrink-0"></i>
+                    <div class="text-xs text-yellow-100">
+                      <strong class="text-yellow-300 uppercase block">Carta de Magia Concedida!</strong>
+                      <span>Role 1 dado para sortear uma habilidade aleatória conhecida pela Persona sacrificada.</span>
+                    </div>
+                  </div>
+                </div>
+
+                <button type="button" onclick="executeAndLogSacrifice()" class="mt-6 w-full p5-clip-btn bg-yellow-400 hover:bg-white text-slate-950 font-p5 text-lg tracking-wider py-2.5 flex items-center justify-center gap-2 cursor-pointer">
+                  <i data-lucide="flame" class="w-5 h-5"></i>
+                  <span>CONSUMAR SACRIFÍCIO</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================
+             SERVIÇO 3: O CAMARIM — RITUAL DE ALOJAMENTO
+             ============================================================ -->
+        <section id="service-lockdown" class="velvet-section hidden space-y-6">
+          <div class="bg-[#0b132b]/95 border-2 border-blue-600 p-5 sm:p-7 rounded-xl p5-box-shadow">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b-2 border-blue-800/80 pb-4 mb-6">
+              <div>
+                <span class="text-xs font-bold uppercase tracking-widest text-cyan-400">Ato III • Ritual de Alojamento</span>
+                <h2 class="font-p5 text-3xl sm:text-4xl text-white tracking-wide">O CAMARIM</h2>
+                <p class="text-xs text-blue-200/80 mt-0.5">No camarim de preparação, a Persona ensaia em isolamento e refina suas resistências ao longo de 2 dias.</p>
+              </div>
+              <div class="bg-blue-950/90 border border-cyan-400/50 px-3 py-1.5 rounded text-xs text-cyan-300 flex items-center gap-2">
+                <i data-lucide="clock" class="w-4 h-4 text-cyan-400 shrink-0"></i>
+                <span>Duração: <strong>2 dias</strong> de indisponibilidade.</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-xs font-bold uppercase text-blue-200 mb-1">Arcana da Persona</label>
+                    <select id="lock-arcana" onchange="calculateLockdown()" class="velvet-input w-full p-2.5 rounded-lg text-sm font-semibold"></select>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold uppercase text-blue-200 mb-1">Nome da Persona</label>
+                    <input type="text" id="lock-name" oninput="calculateLockdown()" placeholder="Ex: Ame-no-Uzume" class="velvet-input w-full p-2.5 rounded-lg text-sm" />
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold uppercase text-cyan-300 mb-1">Tipo Alvo do Treinamento</label>
+                  <select id="lock-element" onchange="calculateLockdown()" class="velvet-input w-full p-2.5 rounded-lg text-sm font-semibold">
+                    <option value="Físico">Físico (Physical)</option>
+                    <option value="Fogo">Fogo (Fire)</option>
+                    <option value="Gelo">Gelo (Ice)</option>
+                    <option value="Vento">Vento (Wind)</option>
+                    <option value="Raio">Raio (Elec)</option>
+                    <option value="Nuclear">Nuclear (Nuke)</option>
+                    <option value="PSY">PSY (Psíquico)</option>
+                    <option value="Luz">Luz (Bless)</option>
+                    <option value="Trevas">Trevas (Curse)</option>
+                    <option value="Status">Status (Ailment)</option>
+                    <option value="Intel">Intel (Suporte/Info)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold uppercase text-yellow-300 mb-1">Afinidade Atual com o Tipo</label>
+                  <select id="lock-affinity" onchange="calculateLockdown()" class="velvet-input w-full p-2.5 rounded-lg text-sm font-semibold">
+                    <option value="Neutro">Neutro (Sem afinidade / Padrão)</option>
+                    <option value="Resistir">Resistir (Resist)</option>
+                    <option value="Anular">Anular (Null)</option>
+                    <option value="Refletir">Refletir (Repel)</option>
+                    <option value="Drenar">Drenar (Drain - Máximo)</option>
+                    <option value="Fraco">Fraco (Weak - Proibido pela regra)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Resultado do Alojamento -->
+              <div class="bg-gradient-to-br from-[#060a16] via-[#0e1b3d] to-[#060a16] border-2 border-cyan-400 p-5 rounded-xl flex flex-col justify-between">
+                <div id="lock-valid-box">
+                  <span class="text-xs font-bold uppercase tracking-widest text-cyan-400">Resultado Após 2 Dias</span>
+
+                  <div class="mt-4 bg-[#060a16] border border-blue-700 p-4 rounded-lg">
+                    <span class="text-xs text-blue-300 block mb-1">Evolução de Afinidade (<span id="lock-out-elem" class="text-white font-bold">Físico</span>):</span>
+                    <div class="flex items-center gap-3 flex-wrap">
+                      <span id="lock-out-from" class="font-p5 text-2xl text-slate-400">NEUTRO</span>
+                      <i data-lucide="arrow-right" class="w-5 h-5 text-cyan-400"></i>
+                      <span id="lock-out-to" class="font-p5 text-3xl text-cyan-400">RESISTIR</span>
+                    </div>
+                  </div>
+
+                  <ul class="mt-4 space-y-1.5 text-xs text-blue-100">
+                    <li class="flex items-center gap-2">
+                      <i data-lucide="check-circle-2" class="w-4 h-4 text-cyan-400 shrink-0"></i>
+                      <span>A Persona adquire o Tipo <strong id="lock-out-elem-2" class="text-white">Físico</strong> em sua ficha.</span>
+                    </li>
+                    <li class="flex items-center gap-2">
+                      <i data-lucide="alert-circle" class="w-4 h-4 text-yellow-400 shrink-0"></i>
+                      <span>Indisponível para combate ou invocação por <strong>2 dias</strong>.</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- Aviso quando Fraco ou Máximo -->
+                <div id="lock-blocked-box" class="hidden bg-red-950/90 border-2 border-red-500 p-4 rounded-lg text-red-100 space-y-2">
+                  <div class="flex items-center gap-2 text-red-300 font-bold uppercase text-xs">
+                    <i data-lucide="ban" class="w-5 h-5"></i>
+                    <span>Alojamento Inválido</span>
+                  </div>
+                  <p id="lock-blocked-reason" class="text-xs leading-relaxed"></p>
+                </div>
+
+                <button type="button" id="btn-log-lockdown" onclick="executeAndLogLockdown()" class="mt-6 w-full p5-clip-btn bg-cyan-400 hover:bg-white text-slate-950 font-p5 text-lg tracking-wider py-2.5 flex items-center justify-center gap-2 cursor-pointer">
+                  <i data-lucide="door-closed" class="w-5 h-5"></i>
+                  <span>INICIAR ALOJAMENTO</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================
+             SERVIÇO 4: CADERNO DE CENA — REGISTROS DE ROBERT & SAFIE
+             ============================================================ -->
+        <section id="service-history" class="velvet-section hidden space-y-6">
+          <div class="bg-[#0b132b]/95 border-2 border-blue-600 p-5 sm:p-7 rounded-xl p5-box-shadow">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b-2 border-blue-800/80 pb-4 mb-6">
+              <div>
+                <span class="text-xs font-bold uppercase tracking-widest text-yellow-400">Ato IV • Caderno de Cena</span>
+                <h2 class="font-p5 text-3xl sm:text-4xl text-white tracking-wide">CADERNO DE CENA — ROBERT &amp; SAFIE</h2>
+                <p class="text-xs text-blue-200/80 mt-0.5">Ata oficial de todos os rituais conduzidos no palco para exportação no Discord, Roll20 ou Foundry VTT.</p>
+              </div>
+
+              <div class="flex flex-wrap items-center gap-2">
+                <button type="button" onclick="copyAllHistoryToVTT()" class="p5-clip-btn bg-cyan-400 hover:bg-white text-slate-950 font-bold text-xs px-4 py-2 flex items-center gap-1.5 cursor-pointer">
+                  <i data-lucide="copy" class="w-4 h-4"></i>
+                  <span>Copiar Tudo (VTT)</span>
+                </button>
+                <button type="button" onclick="clearHistory()" class="p5-clip-btn bg-blue-950 hover:bg-red-900 border border-blue-700 hover:border-red-400 text-blue-200 hover:text-white font-bold text-xs px-3 py-2 flex items-center gap-1.5 cursor-pointer">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  <span>Limpar</span>
+                </button>
+              </div>
+            </div>
+
+            <div id="history-list" class="space-y-3"></div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       SCRIPT PRINCIPAL: DADOS OFICIAIS, MATRIZ 21x21 E ARQUITETURA MODULAR
+       ===================================================================== -->
+  <script>
+    /**
+     * =====================================================================
+     * 1. AS 21 ARCANAS MAIORES E MATRIZ SIMÉTRICA OFICIAL (21x21)
+     * =====================================================================
+     */
+    const ARCANAS = [
+      "O Tolo",          // 0
+      "O Mago",          // 1
+      "A Sacerdotisa",   // 2
+      "A Imperatriz",    // 3
+      "O Imperador",     // 4
+      "O Hierofante",    // 5
+      "Os Enamorados",   // 6
+      "O Carro",         // 7
+      "A Justiça",       // 8
+      "O Eremita",       // 9
+      "A Fortuna",       // 10
+      "A Força",         // 11
+      "O Enforcado",     // 12
+      "A Morte",         // 13
+      "A Temperança",    // 14
+      "O Diabo",         // 15
+      "A Torre",         // 16
+      "A Estrela",       // 17
+      "A Lua",           // 18
+      "O Sol",           // 19
+      "O Julgamento"     // 20
+    ];
+
+    // Triângulo superior da Matriz Simétrica de Fusão (índice i <= j, offset = j - i)
+    const FUSION_UPPER_TRIANGLE = [
+      // 0. O Tolo (0..20)
+      ["O Tolo", "O Mago", "A Sacerdotisa", "A Imperatriz", "O Imperador", "O Hierofante", "Os Enamorados", "O Carro", "A Justiça", "O Eremita", "A Fortuna", "A Força", "O Enforcado", "A Morte", "A Temperança", "O Diabo", "A Torre", "A Estrela", "A Lua", "O Sol", "O Julgamento"],
+      // 1. O Mago (1..20)
+      ["O Mago", "A Temperança", "A Justiça", "O Enforcado", "A Morte", "O Diabo", "A Sacerdotisa", "O Imperador", "Os Enamorados", "A Justiça", "O Tolo", "A Imperatriz", "O Eremita", "O Carro", "O Hierofante", "A Temperança", "A Sacerdotisa", "Os Enamorados", "O Hierofante", "A Força"],
+      // 2. A Sacerdotisa (2..20)
+      ["A Sacerdotisa", "A Imperatriz", "A Imperatriz", "O Mago", "A Fortuna", "O Hierofante", "A Morte", "A Temperança", "O Mago", "O Diabo", "A Morte", "O Mago", "O Diabo", "A Lua", "O Enforcado", "O Eremita", "O Hierofante", "O Carro", "A Justiça"],
+      // 3. A Imperatriz (3..20)
+      ["A Imperatriz", "A Justiça", "O Tolo", "O Julgamento", "A Estrela", "Os Enamorados", "A Força", "O Eremita", "O Carro", "A Sacerdotisa", "O Tolo", "A Sacerdotisa", "O Sol", "O Imperador", "Os Enamorados", "A Fortuna", "A Torre", "O Imperador"],
+      // 4. O Imperador (4..20)
+      ["O Imperador", "A Fortuna", "O Tolo", "A Força", "O Carro", "O Hierofante", "O Sol", "A Torre", "O Diabo", "O Eremita", "O Diabo", "A Justiça", "A Estrela", "Os Enamorados", "A Torre", "O Julgamento", "A Sacerdotisa"],
+      // 5. O Hierofante (5..20)
+      ["O Hierofante", "A Força", "A Estrela", "O Enforcado", "A Fortuna", "A Justiça", "O Tolo", "O Sol", "O Carro", "A Morte", "O Enforcado", "O Julgamento", "A Torre", "A Sacerdotisa", "A Temperança", "A Imperatriz"],
+      // 6. Os Enamorados (6..20)
+      ["Os Enamorados", "A Temperança", "O Julgamento", "O Carro", "A Força", "A Morte", "O Sol", "A Temperança", "A Força", "A Lua", "A Imperatriz", "O Carro", "O Mago", "A Imperatriz", "O Enforcado"],
+      // 7. O Carro (7..20)
+      ["O Carro", "A Lua", "O Diabo", "A Sacerdotisa", "A Justiça", "O Tolo", "O Diabo", "A Força", "A Temperança", "A Fortuna", "A Lua", "Os Enamorados", "A Sacerdotisa", "O Enforcado"],
+      // 8. A Justiça (8..20)
+      ["A Justiça", "O Mago", "O Imperador", "O Hierofante", "Os Enamorados", "O Tolo", "O Imperador", "O Tolo", "O Sol", "A Imperatriz", "O Enforcado", "O Enforcado", "O Enforcado"],
+      // 9. O Eremita (9..20)
+      ["O Eremita", "A Estrela", "O Hierofante", "A Estrela", "A Força", "A Força", "A Sacerdotisa", "O Julgamento", "A Força", "A Sacerdotisa", "O Diabo", "O Imperador"],
+      // 10. A Fortuna (10..20)
+      ["A Fortuna", "O Julgamento", "O Imperador", "A Estrela", "A Imperatriz", "O Hierofante", "O Enforcado", "O Diabo", "O Sol", "A Estrela", "A Torre"],
+      // 11. A Força (11..20)
+      ["A Força", "A Temperança", "O Hierofante", "O Carro", "A Morte", "O Carro", "A Lua", "O Mago", "A Lua", "O Enforcado"],
+      // 12. O Enforcado (12..20)
+      ["O Enforcado", "A Lua", "A Morte", "A Fortuna", "O Eremita", "A Justiça", "A Força", "O Hierofante", "A Estrela"],
+      // 13. A Morte (13..20)
+      ["A Morte", "O Enforcado", "O Carro", "O Sol", "O Diabo", "O Eremita", "A Sacerdotisa", "O Sol"],
+      // 14. A Temperança (14..20)
+      ["A Temperança", "O Tolo", "A Fortuna", "O Sol", "A Fortuna", "O Mago", "O Eremita"],
+      // 15. O Diabo (15..20)
+      ["O Diabo", "O Mago", "A Força", "O Carro", "O Eremita", "Os Enamorados"],
+      // 16. A Torre (16..20)
+      ["A Torre", "A Morte", "O Eremita", "O Imperador", "A Lua"],
+      // 17. A Estrela (17..20)
+      ["A Estrela", "A Temperança", "O Julgamento", "A Fortuna"],
+      // 18. A Lua (18..20)
+      ["A Lua", "A Imperatriz", "O Tolo"],
+      // 19. O Sol (19..20)
+      ["O Sol", "A Morte"],
+      // 20. O Julgamento (20)
+      ["O Julgamento"]
+    ];
+
+    function getFusionArcana(indexA, indexB) {
+      const minIdx = Math.min(indexA, indexB);
+      const maxIdx = Math.max(indexA, indexB);
+      const offset = maxIdx - minIdx;
+      return FUSION_UPPER_TRIANGLE[minIdx]?.[offset] || "O Tolo";
+    }
+
+    /**
+     * =====================================================================
+     * 2. REGISTRO MODULAR DE SERVIÇOS DA SALA DE VELUDO (VelvetServices)
+     * =====================================================================
+     */
+    const VelvetServices = {
+      fusion: {
+        id: 'fusion',
+        sectionId: 'service-fusion',
+        label: 'O Biombo',
+        sublabel: 'Fusão (Díade)',
+        icon: 'git-merge',
+        badge: 'ATO I',
+        onActivate: () => calculateFusion()
+      },
+      sacrifice: {
+        id: 'sacrifice',
+        sectionId: 'service-sacrifice',
+        label: 'A Coxia',
+        sublabel: 'Sacrifício & PM',
+        icon: 'flame',
+        badge: 'ATO II',
+        onActivate: () => calculateSacrifice()
+      },
+      lockdown: {
+        id: 'lockdown',
+        sectionId: 'service-lockdown',
+        label: 'O Camarim',
+        sublabel: 'Alojamento (2d)',
+        icon: 'door-closed',
+        badge: 'ATO III',
+        onActivate: () => calculateLockdown()
+      },
+      history: {
+        id: 'history',
+        sectionId: 'service-history',
+        label: 'Caderno de Cena',
+        sublabel: 'Robert & Safie',
+        icon: 'book-open',
+        badge: 'ATO IV',
+        onActivate: () => renderHistory()
+      }
+    };
+
+    /**
+     * Citações teatrais de Igor, Robert e Safie
+     */
+    const VELVET_QUOTES = [
+      { speaker: "IGOR", text: "Bem-vindo à Sala de Veludo. Este teatro existe entre o sonho e a realidade, a mente e a matéria..." },
+      { speaker: "ROBERT", text: "Tudo pronto atrás do biombo, Mestre Igor! Basta indicar quais máscaras entrarão em cena." },
+      { speaker: "SAFIE", text: "Anotarei cada detalhe no Caderno de Cena. Nenhuma evolução passará despercebida neste palco." },
+      { speaker: "IGOR", text: "Atrás do biombo, a guilhotina não destrói; ela liberta o potencial latente para que uma nova forma ascenda." },
+      { speaker: "SAFIE", text: "Na coxia, o sacrifício de um ator fortalece todo o restante do elenco. Escolha com sabedoria." },
+      { speaker: "ROBERT", text: "O camarim já está preparado! Dois dias de ensaio solitário e qualquer afinidade subirá um degrau." }
+    ];
+    let currentQuoteIndex = 0;
+
+    function cycleVelvetQuote() {
+      currentQuoteIndex = (currentQuoteIndex + 1) % VELVET_QUOTES.length;
+      const q = VELVET_QUOTES[currentQuoteIndex];
+      document.getElementById('host-speaker').textContent = q.speaker;
+      document.getElementById('host-quote').textContent = `"${q.text}"`;
+    }
+
+    /**
+     * Gera número inteiro aleatório criptograficamente seguro entre 1 e max (inclusive)
+     */
+    function secureDieRoll(max) {
+      const array = new Uint32Array(1);
+      window.crypto.getRandomValues(array);
+      return (array[0] % max) + 1;
+    }
+
+    /**
+     * =====================================================================
+     * 3. ESTADO DA SESSÃO E SISTEMA DE NOTIFICAÇÃO (TOAST)
+     * =====================================================================
+     */
+    let currentFusionState = {
+      arcana1: 0,
+      arcana2: 1,
+      name1: '',
+      name2: '',
+      lvl1: 10,
+      lvl2: 12,
+      pm1: 15,
+      pm2: 17,
+      ph1: 5,
+      ph2: 6,
+      playerCnv: null,
+      confidantRank: 0,
+      riskPct: 10,
+      resultName: '',
+      normalArcana: 'O Mago',
+      activeArcana: 'O Mago',
+      resultLvl: 12,
+      resultPm: 17,
+      confidantBonus: 0,
+      resultPh: 5.5,
+      isAccident: false,
+      accidentRollD100: null,
+      accidentRollD20: null,
+      blockedByCnv: false
+    };
+
+    function showToast(title, message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const colors = {
+        info: 'border-cyan-400 bg-[#0b132b] text-white',
+        success: 'border-emerald-400 bg-[#071c18] text-emerald-100',
+        warning: 'border-yellow-400 bg-[#1f1705] text-yellow-100',
+        danger: 'border-red-500 bg-[#21070a] text-red-100'
+      };
+
+      toast.className = `pointer-events-auto border-l-4 ${colors[type] || colors.info} p-3.5 rounded-r-lg shadow-2xl transition-all duration-300 transform translate-y-2 opacity-0`;
+      toast.innerHTML = `
+        <div class="font-p5 text-sm tracking-wider uppercase">${title}</div>
+        <div class="text-xs opacity-90 mt-0.5">${message}</div>
+      `;
+
+      container.appendChild(toast);
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3600);
+    }
+
+    /**
+     * =====================================================================
+     * 4. LÓGICA DO BIOMBO — RITUAL DE FUSÃO (DÍADE)
+     * =====================================================================
+     */
+    function calculateFusion() {
+      const a1 = parseInt(document.getElementById('fusion-arcana-1').value, 10) || 0;
+      const a2 = parseInt(document.getElementById('fusion-arcana-2').value, 10) || 0;
+      const name1 = document.getElementById('fusion-name-1').value.trim();
+      const name2 = document.getElementById('fusion-name-2').value.trim();
+
+      let lvl1 = parseInt(document.getElementById('fusion-lvl-1').value, 10);
+      let lvl2 = parseInt(document.getElementById('fusion-lvl-2').value, 10);
+      lvl1 = isNaN(lvl1) ? 1 : Math.min(99, Math.max(1, lvl1));
+      lvl2 = isNaN(lvl2) ? 1 : Math.min(99, Math.max(1, lvl2));
+
+      let pm1 = parseInt(document.getElementById('fusion-pm-1').value, 10);
+      let pm2 = parseInt(document.getElementById('fusion-pm-2').value, 10);
+      pm1 = isNaN(pm1) ? 0 : Math.max(0, pm1);
+      pm2 = isNaN(pm2) ? 0 : Math.max(0, pm2);
+
+      let ph1 = parseFloat(document.getElementById('fusion-ph-1').value);
+      let ph2 = parseFloat(document.getElementById('fusion-ph-2').value);
+      ph1 = isNaN(ph1) ? 0 : Math.max(0, ph1);
+      ph2 = isNaN(ph2) ? 0 : Math.max(0, ph2);
+
+      const rawCnv = document.getElementById('fusion-player-cnv').value.trim();
+      const playerCnv = rawCnv === '' ? null : Math.min(99, Math.max(1, parseInt(rawCnv, 10)));
+
+      let confidantRank = parseInt(document.getElementById('fusion-confidant-rank').value, 10);
+      confidantRank = isNaN(confidantRank) ? 0 : Math.min(100, Math.max(0, confidantRank));
+
+      let riskPct = parseInt(document.getElementById('fusion-risk-pct').value, 10);
+      riskPct = isNaN(riskPct) ? 10 : Math.min(100, Math.max(1, riskPct));
+
+      const resultName = document.getElementById('fusion-result-name').value.trim();
+
+      // Regras de Cálculo da Fusão:
+      const normalArcana = getFusionArcana(a1, a2);
+      const resultLvl = Math.ceil((lvl1 + lvl2) / 2) + 1;
+
+      const activeArcana = currentFusionState.isAccident ? currentFusionState.activeArcana : normalArcana;
+      const confidantBonus = currentFusionState.isAccident ? 0 : Math.floor(confidantRank / 10);
+      const resultPm = Math.max(pm1, pm2) + confidantBonus;
+
+      // Pontos de Herança (PH): média exata preservando .5 sem arredondar
+      const resultPh = (ph1 + ph2) / 2;
+
+      // Validação da Trava de Nível do Jogador (CNv.)
+      const blockedByCnv = playerCnv !== null && resultLvl > playerCnv;
+
+      currentFusionState = {
+        ...currentFusionState,
+        arcana1: a1,
+        arcana2: a2,
+        name1,
+        name2,
+        lvl1,
+        lvl2,
+        pm1,
+        pm2,
+        ph1,
+        ph2,
+        playerCnv,
+        confidantRank,
+        riskPct,
+        resultName,
+        normalArcana,
+        activeArcana,
+        resultLvl,
+        resultPm,
+        confidantBonus,
+        resultPh,
+        blockedByCnv
+      };
+
+      // Atualiza Interface
+      document.getElementById('fusion-out-arcana').textContent = activeArcana;
+      document.getElementById('fusion-out-formula').textContent =
+        `Cruzamento: ${ARCANAS[a1]} (Nv.${lvl1}) × ${ARCANAS[a2]} (Nv.${lvl2})`;
+      document.getElementById('fusion-out-lvl').textContent = resultLvl;
+      document.getElementById('fusion-out-pm').textContent = resultPm;
+      document.getElementById('fusion-out-pm-bonus').textContent =
+        currentFusionState.isAccident ? 'Sem Conf. (Falha)' : `+${confidantBonus} Conf.`;
+      document.getElementById('fusion-out-ph').textContent =
+        Number.isInteger(resultPh) ? resultPh : resultPh.toFixed(1);
+
+      // Alerta de CNv.
+      const cnvWarning = document.getElementById('fusion-cnv-warning');
+      if (blockedByCnv) {
+        cnvWarning.classList.remove('hidden');
+        document.getElementById('warn-res-lvl').textContent = `Nv.${resultLvl}`;
+        document.getElementById('warn-player-cnv').textContent = `Nv.${playerCnv}`;
+      } else {
+        cnvWarning.classList.add('hidden');
+      }
+
+      // Estado Visual de Acidente
+      const accTag = document.getElementById('fusion-accident-tag');
+      const accBanner = document.getElementById('fusion-accident-banner');
+      const resetBtn = document.getElementById('btn-reset-accident');
+
+      if (currentFusionState.isAccident) {
+        accTag.classList.remove('hidden');
+        accBanner.classList.remove('hidden');
+        resetBtn.classList.remove('hidden');
+      } else {
+        accTag.classList.add('hidden');
+        accBanner.classList.add('hidden');
+        resetBtn.classList.add('hidden');
+      }
+    }
+
+    /**
+     * Simulador de Risco de Falha de Fusão:
+     * Rola 1d100 vs Risco (%). Se d100 <= riskPct, ocorre acidente e rola 1d20
+     * para determinar uma nova Arcana aleatória (0. O Tolo até XIX. O Sol).
+     */
+    function rollFusionAccident() {
+      calculateFusion();
+      const risk = currentFusionState.riskPct;
+      const d100 = secureDieRoll(100);
+
+      if (d100 <= risk) {
+        const d20 = secureDieRoll(20);
+        const mutatedArcana = ARCANAS[d20 - 1];
+
+        currentFusionState.isAccident = true;
+        currentFusionState.accidentRollD100 = d100;
+        currentFusionState.accidentRollD20 = d20;
+        currentFusionState.activeArcana = mutatedArcana;
+
+        const card = document.getElementById('fusion-result-card');
+        card.classList.remove('accident-shake');
+        void card.offsetWidth;
+        card.classList.add('accident-shake');
+
+        document.getElementById('fusion-accident-details').innerHTML =
+          `Rolagem <strong>1d100 = ${d100}</strong> (dentro da margem de falha de <strong>${risk}%</strong>)! ` +
+          `O 1d20 de Robert &amp; Safie resultou em <strong>${d20} (${mutatedArcana})</strong>. Bônus de Confidente anulado!`;
+
+        calculateFusion();
+        showToast('ACIDENTE NO BIOMBO!', `1d100 (${d100}) ≤ ${risk}%! Nova Arcana: ${mutatedArcana}.`, 'warning');
+      } else {
+        if (currentFusionState.isAccident) {
+          resetFusionAccident();
+        }
+        showToast(
+          'Biombo Estável',
+          `Rolagem 1d100: ${d100} (Falha ocorreria em ≤ ${risk}%). Nenhum acidente!`,
+          'success'
+        );
+      }
+    }
+
+    function resetFusionAccident() {
+      currentFusionState.isAccident = false;
+      currentFusionState.accidentRollD100 = null;
+      currentFusionState.accidentRollD20 = null;
+      calculateFusion();
+    }
+
+    function executeAndLogFusion() {
+      calculateFusion();
+      const s = currentFusionState;
+
+      if (s.blockedByCnv) {
+        showToast(
+          'Fusão Bloqueada',
+          `O nível resultante (${s.resultLvl}) ultrapassa seu CNv. (${s.playerCnv}).`,
+          'danger'
+        );
+        return;
+      }
+
+      const p1Label = s.name1 ? `${s.name1} (${ARCANAS[s.arcana1]} Nv.${s.lvl1})` : `${ARCANAS[s.arcana1]} Nv.${s.lvl1}`;
+      const p2Label = s.name2 ? `${s.name2} (${ARCANAS[s.arcana2]} Nv.${s.lvl2})` : `${ARCANAS[s.arcana2]} Nv.${s.lvl2}`;
+      const resLabel = s.resultName ? `${s.resultName} (${s.activeArcana})` : s.activeArcana;
+      const phDisplay = Number.isInteger(s.resultPh) ? s.resultPh : s.resultPh.toFixed(1);
+
+      const summary = `[SALA DE VELUDO • BIOMBO (FUSÃO${s.isAccident ? ' - ACIDENTE!' : ''})] ${p1Label} + ${p2Label} ➔ ${resLabel} | Nv.${s.resultLvl} | PM: ${s.resultPm} (+${s.confidantBonus} Conf.) | PH: ${phDisplay} — Reg. Igor, Robert & Safie`;
+
+      addHistoryEntry({
+        type: s.isAccident ? 'O Biombo • Fusão (Acidente)' : 'O Biombo • Fusão (Díade)',
+        title: `${resLabel} — Nv.${s.resultLvl}`,
+        details: `${p1Label} × ${p2Label} • PM: ${s.resultPm} • PH: ${phDisplay}`,
+        vttText: summary
+      });
+
+      showToast('Anotado por Robert & Safie!', `${resLabel} foi registrada no Caderno de Cena.`, 'success');
+    }
+
+    function toggleQuickMatrix() {
+      const drawer = document.getElementById('quick-matrix-drawer');
+      const chevron = document.getElementById('quick-matrix-chevron');
+      const isHidden = drawer.classList.contains('hidden');
+      if (isHidden) {
+        renderMatrixTable();
+        drawer.classList.remove('hidden');
+        chevron.classList.add('rotate-180');
+      } else {
+        drawer.classList.add('hidden');
+        chevron.classList.remove('rotate-180');
+      }
+    }
+
+    /**
+     * =====================================================================
+     * 5. LÓGICA DA COXIA — RITUAL DE SACRIFÍCIO
+     * =====================================================================
+     */
+    function calculateSacrifice() {
+      const arcanaIdx = parseInt(document.getElementById('sac-arcana').value, 10) || 0;
+      const name = document.getElementById('sac-name').value.trim();
+      let lvl = parseInt(document.getElementById('sac-lvl').value, 10);
+      lvl = isNaN(lvl) ? 1 : Math.min(99, Math.max(1, lvl));
+      const hasConfidant = document.getElementById('sac-has-confidant').checked;
+
+      const gainedPm = Math.floor(lvl / 2);
+
+      document.getElementById('sac-out-pm').textContent = `+${gainedPm} PM`;
+      const rewardBox = document.getElementById('sac-card-reward');
+      if (hasConfidant) {
+        rewardBox.classList.remove('hidden');
+      } else {
+        rewardBox.classList.add('hidden');
+      }
+
+      return { arcanaIdx, name, lvl, hasConfidant, gainedPm };
+    }
+
+    function executeAndLogSacrifice() {
+      const s = calculateSacrifice();
+      const personaLabel = s.name ? `${s.name} (${ARCANAS[s.arcanaIdx]} Nv.${s.lvl})` : `${ARCANAS[s.arcanaIdx]} Nv.${s.lvl}`;
+      const cardText = s.hasConfidant ? ' + 1 Carta de Magia Aleatória (Confidente ativo)' : '';
+
+      const summary = `[SALA DE VELUDO • COXIA (SACRIFÍCIO)] ${personaLabel} retirada de cena ➔ +${s.gainedPm} PM para distribuir${cardText} — Reg. Igor, Robert & Safie`;
+
+      addHistoryEntry({
+        type: 'A Coxia • Sacrifício',
+        title: `${personaLabel} ➔ +${s.gainedPm} PM`,
+        details: `Essência extraída na coxia: +${s.gainedPm} PM${s.hasConfidant ? ' • Carta de Magia concedida' : ''}`,
+        vttText: summary
+      });
+
+      showToast('Sacrifício na Coxia!', `+${s.gainedPm} PM registrados por Robert & Safie.`, 'warning');
+    }
+
+    /**
+     * =====================================================================
+     * 6. LÓGICA DO CAMARIM — RITUAL DE ALOJAMENTO
+     * =====================================================================
+     */
+    const AFFINITY_PROGRESSION = {
+      'Neutro': 'Resistir',
+      'Resistir': 'Anular',
+      'Anular': 'Refletir',
+      'Refletir': 'Drenar'
+    };
+
+    function calculateLockdown() {
+      const arcanaIdx = parseInt(document.getElementById('lock-arcana').value, 10) || 0;
+      const name = document.getElementById('lock-name').value.trim();
+      const element = document.getElementById('lock-element').value;
+      const affinity = document.getElementById('lock-affinity').value;
+
+      const validBox = document.getElementById('lock-valid-box');
+      const blockedBox = document.getElementById('lock-blocked-box');
+      const btnLog = document.getElementById('btn-log-lockdown');
+
+      if (affinity === 'Fraco') {
+        validBox.classList.add('hidden');
+        blockedBox.classList.remove('hidden');
+        btnLog.disabled = true;
+        btnLog.classList.add('opacity-40', 'cursor-not-allowed');
+        document.getElementById('lock-blocked-reason').textContent =
+          `Segundo as regras oficiais, não é permitido alojar uma Persona para treinar um Tipo ao qual ela seja Fraca (${element}).`;
+        return { valid: false };
+      }
+
+      if (affinity === 'Drenar') {
+        validBox.classList.add('hidden');
+        blockedBox.classList.remove('hidden');
+        btnLog.disabled = true;
+        btnLog.classList.add('opacity-40', 'cursor-not-allowed');
+        document.getElementById('lock-blocked-reason').textContent =
+          `Esta Persona já atingiu o estágio máximo de afinidade (Drenar) para o Tipo ${element}.`;
+        return { valid: false };
+      }
+
+      const nextAffinity = AFFINITY_PROGRESSION[affinity];
+      validBox.classList.remove('hidden');
+      blockedBox.classList.add('hidden');
+      btnLog.disabled = false;
+      btnLog.classList.remove('opacity-40', 'cursor-not-allowed');
+
+      document.getElementById('lock-out-elem').textContent = element;
+      document.getElementById('lock-out-elem-2').textContent = element;
+      document.getElementById('lock-out-from').textContent = affinity.toUpperCase();
+      document.getElementById('lock-out-to').textContent = nextAffinity.toUpperCase();
+
+      return { valid: true, arcanaIdx, name, element, affinity, nextAffinity };
+    }
+
+    function executeAndLogLockdown() {
+      const s = calculateLockdown();
+      if (!s.valid) return;
+
+      const personaLabel = s.name ? `${s.name} (${ARCANAS[s.arcanaIdx]})` : ARCANAS[s.arcanaIdx];
+      const summary = `[SALA DE VELUDO • CAMARIM (ALOJAMENTO)] ${personaLabel} | Tipo: ${s.element} (${s.affinity} ➔ ${s.nextAffinity}) | Indisponível por 2 dias — Reg. Igor, Robert & Safie`;
+
+      addHistoryEntry({
+        type: 'O Camarim • Alojamento',
+        title: `${personaLabel} • ${s.element}`,
+        details: `Afinidade: ${s.affinity} ➔ ${s.nextAffinity} (2 dias de ensaio no camarim)`,
+        vttText: summary
+      });
+
+      showToast('Alojamento no Camarim!', `${personaLabel} ensaiando ${s.element} por 2 dias.`, 'info');
+    }
+
+    /**
+     * =====================================================================
+     * 7. CADERNO DE CENA (LOCALSTORAGE + EXPORTAÇÃO PARA VTT)
+     * =====================================================================
+     */
+    const STORAGE_KEY = 'velvet_room_grimoire_history_v1';
+
+    function getHistory() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveHistory(items) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      } catch (e) {
+        console.error('Erro ao salvar histórico:', e);
+      }
+    }
+
+    function addHistoryEntry({ type, title, details, vttText }) {
+      const list = getHistory();
+      const now = new Date();
+      const timestamp = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+      list.unshift({
+        id: Date.now(),
+        type,
+        title,
+        details,
+        vttText,
+        timestamp
+      });
+
+      saveHistory(list.slice(0, 50));
+      renderHistory();
+    }
+
+    function deleteHistoryItem(id) {
+      const updated = getHistory().filter(item => item.id !== id);
+      saveHistory(updated);
+      renderHistory();
+    }
+
+    function clearHistory() {
+      saveHistory([]);
+      renderHistory();
+      showToast('Caderno de Cena Limpo', 'Robert & Safie apagaram os registros da sessão.', 'info');
+    }
+
+    function copyTextToClipboard(text) {
+      const temp = document.createElement('textarea');
+      temp.value = text;
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand('copy');
+      document.body.removeChild(temp);
+    }
+
+    function copySingleVTT(id) {
+      const item = getHistory().find(i => i.id === id);
+      if (!item) return;
+      copyTextToClipboard(item.vttText);
+      showToast('Copiado para VTT!', 'Resumo pronto para colar no Discord, Roll20 ou Foundry.', 'success');
+    }
+
+    function copyAllHistoryToVTT() {
+      const list = getHistory();
+      if (list.length === 0) {
+        showToast('Caderno Vazio', 'Realize um ritual no palco antes de exportar.', 'warning');
+        return;
+      }
+      const header = `=== CADERNO DE CENA DA SALA DE VELUDO (Igor, Robert & Safie) ===\n`;
+      const block = header + list.map(i => `• [${i.timestamp}] ${i.vttText}`).join('\n');
+      copyTextToClipboard(block);
+      showToast('Caderno Completo Copiado!', `${list.length} registro(s) prontos para o VTT.`, 'success');
+    }
+
+    function renderHistory() {
+      const container = document.getElementById('history-list');
+      const list = getHistory();
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="bg-[#060a16]/80 border border-dashed border-blue-800 p-8 rounded-xl text-center">
+            <p class="font-opera text-base text-blue-300">As páginas do Caderno de Cena de Robert &amp; Safie estão em branco.</p>
+            <p class="text-xs text-slate-400 mt-1">Conduza um ritual no Biombo, na Coxia ou no Camarim para registrar os atos da sessão.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = list.map(item => `
+        <div class="bg-[#060a16]/90 border border-blue-800 hover:border-cyan-400/60 p-4 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="bg-blue-700 text-white text-[10px] font-black uppercase px-2 py-0.5 rounded">${item.type}</span>
+              <span class="text-xs font-mono-tech text-blue-300">${item.timestamp}</span>
+            </div>
+            <h4 class="font-bold text-white text-sm sm:text-base">${item.title}</h4>
+            <p class="text-xs text-slate-300 mt-0.5">${item.details}</p>
+          </div>
+
+          <div class="flex items-center gap-2 self-end sm:self-center">
+            <button type="button" onclick="copySingleVTT(${item.id})" class="bg-blue-900 hover:bg-cyan-400 hover:text-slate-950 text-cyan-300 text-xs font-bold px-3 py-1.5 rounded flex items-center gap-1.5 transition cursor-pointer">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              <span>Copiar VTT</span>
+            </button>
+            <button type="button" onclick="deleteHistoryItem(${item.id})" title="Remover" class="bg-blue-950 hover:bg-red-900 text-slate-400 hover:text-white p-1.5 rounded transition cursor-pointer">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+      `).join('');
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    /**
+     * =====================================================================
+     * 8. RENDERIZAÇÃO DA MATRIZ DE CRUZAMENTO 21x21
+     * =====================================================================
+     */
+    function renderMatrixTable() {
+      const table = document.getElementById('arcana-matrix-table');
+      if (!table || table.dataset.rendered === 'true') return;
+
+      let html = '<thead><tr class="bg-blue-950 text-cyan-300 sticky top-0 z-10">';
+      html += '<th class="p-2 border border-blue-800 font-p5 tracking-wider bg-[#060a16] sticky left-0 z-20">ARCANA</th>';
+      ARCANAS.forEach((arc, idx) => {
+        html += `<th class="p-2 border border-blue-800 whitespace-nowrap font-bold">${idx}. ${arc}</th>`;
+      });
+      html += '</tr></thead><tbody>';
+
+      ARCANAS.forEach((rowArc, rIdx) => {
+        html += `<tr class="hover:bg-blue-900/30">`;
+        html += `<td class="p-2 border border-blue-800 font-bold text-yellow-300 bg-[#0b132b] whitespace-nowrap sticky left-0 z-10">${rIdx}. ${rowArc}</td>`;
+        ARCANAS.forEach((_, cIdx) => {
+          const res = getFusionArcana(rIdx, cIdx);
+          const isSame = rIdx === cIdx;
+          html += `<td class="p-2 border border-blue-900/70 whitespace-nowrap ${isSame ? 'bg-blue-950/80 text-cyan-300 font-bold' : 'text-slate-200'}">${res}</td>`;
+        });
+        html += '</tr>';
+      });
+
+      html += '</tbody>';
+      table.innerHTML = html;
+      table.dataset.rendered = 'true';
+    }
+
+    /**
+     * =====================================================================
+     * 9. INICIALIZAÇÃO DO MENU MODULAR E PARTÍCULAS DE VELUDO
+     * =====================================================================
+     */
+    function initNavigation() {
+      const nav = document.getElementById('velvet-nav-menu');
+      const keys = Object.keys(VelvetServices);
+
+      nav.innerHTML = keys.map((key, idx) => {
+        const srv = VelvetServices[key];
+        return `
+          <button
+            type="button"
+            onclick="switchVelvetService('${srv.id}')"
+            data-service="${srv.id}"
+            class="p5-nav-item ${idx === 0 ? 'active' : ''} shrink-0 lg:w-full text-left px-4 py-3 border border-blue-700/60 bg-[#060a16]/90 text-white flex items-center justify-between gap-3 cursor-pointer"
+          >
+            <div class="flex items-center gap-3">
+              <i data-lucide="${srv.icon}" class="w-5 h-5 shrink-0"></i>
+              <div>
+                <div class="font-p5 text-base sm:text-lg leading-none tracking-wide">${srv.label}</div>
+                <div class="text-[10px] opacity-75 font-semibold uppercase tracking-wider mt-0.5">${srv.sublabel}</div>
+              </div>
+            </div>
+            <span class="hidden sm:inline-block text-[10px] font-mono-tech px-1.5 py-0.5 rounded bg-blue-600/30 border border-current">${srv.badge}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function switchVelvetService(serviceId) {
+      const target = VelvetServices[serviceId];
+      if (!target) return;
+
+      document.querySelectorAll('.p5-nav-item').forEach(btn => {
+        if (btn.dataset.service === serviceId) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+
+      document.querySelectorAll('.velvet-section').forEach(sec => {
+        sec.classList.add('hidden');
+      });
+      const activeSec = document.getElementById(target.sectionId);
+      if (activeSec) activeSec.classList.remove('hidden');
+
+      if (typeof target.onActivate === 'function') {
+        target.onActivate();
+      }
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function populateArcanaSelects() {
+      const selectIds = ['fusion-arcana-1', 'fusion-arcana-2', 'sac-arcana', 'lock-arcana'];
+      const optionsHtml = ARCANAS.map((arc, idx) => `<option value="${idx}">${idx}. ${arc}</option>`).join('');
+
+      selectIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = optionsHtml;
+      });
+
+      document.getElementById('fusion-arcana-1').value = '0';
+      document.getElementById('fusion-arcana-2').value = '1';
+    }
+
+    function initVelvetParticles() {
+      const canvas = document.getElementById('velvet-particles');
+      const ctx = canvas.getContext('2d');
+      let width = canvas.width = window.innerWidth;
+      let height = canvas.height = window.innerHeight;
+
+      window.addEventListener('resize', () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      });
+
+      const particles = Array.from({ length: 42 }, () => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        r: Math.random() * 2.2 + 0.6,
+        vx: (Math.random() - 0.5) * 0.25,
+        vy: -Math.random() * 0.45 - 0.15,
+        alpha: Math.random() * 0.6 + 0.2,
+        isGold: Math.random() > 0.78
+      }));
+
+      function animate() {
+        ctx.clearRect(0, 0, width, height);
+        for (const p of particles) {
+          p.x += p.vx;
+          p.y += p.vy;
+
+          if (p.y < -10) {
+            p.y = height + 10;
+            p.x = Math.random() * width;
+          }
+          if (p.x < -10) p.x = width + 10;
+          if (p.x > width + 10) p.x = -10;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = p.isGold
+            ? `rgba(234, 179, 8, ${p.alpha})`
+            : `rgba(0, 240, 255, ${p.alpha})`;
+          ctx.fill();
+        }
+        requestAnimationFrame(animate);
+      }
+
+      animate();
+    }
+
+    // Boot da Aplicação
+    window.addEventListener('DOMContentLoaded', () => {
+      populateArcanaSelects();
+      initNavigation();
+      calculateFusion();
+      calculateSacrifice();
+      calculateLockdown();
+      renderHistory();
+      initVelvetParticles();
+      if (window.lucide) lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

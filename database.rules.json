@@ -191,6 +191,43 @@
       ".read": "auth != null && (root.child('mestres/' + auth.uid).val() === true || root.child('jogadores/' + auth.uid).val() === true)",
       ".write": "auth != null && root.child('mestres/' + auth.uid).val() === true"
     },
+    "projetor": {
+      "visibilidade": {
+        ".read": "auth != null && (root.child('mestres/' + auth.uid).val() === true || root.child('jogadores/' + auth.uid).val() === true)",
+        ".write": "auth != null && root.child('mestres/' + auth.uid).val() === true",
+        ".validate": "newData.hasChildren(['modo'])",
+        "modo": { ".validate": "newData.val() === 'all' || newData.val() === 'dm' || newData.val() === 'custom'" },
+        "jogadores": {
+          "$uid": { ".validate": "newData.val() === true" }
+        },
+        "$other": { ".validate": false }
+      },
+      "imagem": {
+        ".read": "auth != null && (root.child('mestres/' + auth.uid).val() === true || (root.child('jogadores/' + auth.uid).val() === true && (root.child('projetor/visibilidade/modo').val() === 'all' || (root.child('projetor/visibilidade/modo').val() !== 'dm' && root.child('projetor/visibilidade/modo').val() !== 'custom') || (root.child('projetor/visibilidade/modo').val() === 'custom' && root.child('projetor/visibilidade/jogadores/' + auth.uid).val() === true))))",
+        ".write": "auth != null && root.child('mestres/' + auth.uid).val() === true",
+        ".validate": "newData.hasChildren(['src', 'nome', 'ajuste', 'crt'])",
+        "src": { ".validate": "newData.isString() && newData.val().length <= 1500000 && (newData.val().beginsWith('https://') || newData.val().beginsWith('data:image/'))" },
+        "nome": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 120" },
+        "ajuste": { ".validate": "newData.val() === 'contain' || newData.val() === 'cover'" },
+        "crt": { ".validate": "newData.isBoolean()" },
+        "$other": { ".validate": false }
+      },
+      "overlays": {
+        ".read": "auth != null && (root.child('mestres/' + auth.uid).val() === true || (root.child('jogadores/' + auth.uid).val() === true && (root.child('projetor/visibilidade/modo').val() === 'all' || (root.child('projetor/visibilidade/modo').val() !== 'dm' && root.child('projetor/visibilidade/modo').val() !== 'custom') || (root.child('projetor/visibilidade/modo').val() === 'custom' && root.child('projetor/visibilidade/jogadores/' + auth.uid).val() === true))))",
+        ".write": "auth != null && root.child('mestres/' + auth.uid).val() === true",
+        "$id": {
+          ".validate": "newData.hasChildren(['url', 'titulo', 'x', 'y', 'w', 'h', 'z'])",
+          "url": { ".validate": "newData.isString() && newData.val().length <= 400 && newData.val().beginsWith('https://erpg.app/sheet/overlay')" },
+          "titulo": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 60" },
+          "x": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
+          "y": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
+          "w": { ".validate": "newData.isNumber() && newData.val() >= 5 && newData.val() <= 100" },
+          "h": { ".validate": "newData.isNumber() && newData.val() >= 5 && newData.val() <= 100" },
+          "z": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
     "sistema_de_confidentes": {
       ".read": "auth != null && (root.child('mestres/' + auth.uid).val() === true || root.child('jogadores/' + auth.uid).val() === true)",
       ".write": "auth != null && root.child('mestres/' + auth.uid).val() === true"

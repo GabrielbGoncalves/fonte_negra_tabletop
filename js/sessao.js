@@ -139,6 +139,7 @@
         const real = () => database.ref(caminho);
         return {
             on: (...args) => { pronto.then(() => real().on(...args)); },
+            off: (...args) => { pronto.then(() => real().off(...args)); },
             once: (...args) => pronto.then(() => real().once(...args)),
             set: (valor) => pronto.then(() => real().set(valor)).catch(registrarErro),
             remove: () => pronto.then(() => real().remove()).catch(registrarErro)

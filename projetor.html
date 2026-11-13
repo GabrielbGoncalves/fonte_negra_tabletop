@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projetor | Fonte Negra</title>
+
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://www.gstatic.com https://*.firebaseio.com https://*.firebasedatabase.app http://127.0.0.1:9000; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://*.firebaseio.com wss://*.firebaseio.com https://*.firebasedatabase.app wss://*.firebasedatabase.app https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com http://127.0.0.1:9099 http://127.0.0.1:9000 ws://127.0.0.1:9000; frame-src https://*.firebaseapp.com https://*.firebaseio.com https://erpg.app http://127.0.0.1:9000; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" href="assets/favicon/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/svg+xml" href="assets/favicon/favicon.svg">
+    <link rel="shortcut icon" href="assets/favicon/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-title" content="Fonte Negra">
+    <link rel="manifest" href="assets/favicon/site.webmanifest">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&family=Montserrat:ital,wght@0,700;0,800;0,900;1,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous" referrerpolicy="no-referrer">
+
+    <!-- Firebase SDK Compat -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" integrity="sha384-4gq9w/AGf72FXdNQ3Kn3EqWP7633NbCMjpYHt8YCZyXf23o2opcuAr4cif41tLrC" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js" integrity="sha384-5PDE6CZvnNIJI5xu68GIFoOO3U73lAnRLBwPBmmKjWnYnYwKEHWr/ghtGooEOXGb" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" integrity="sha384-xtdq4MQqPj1dB5DQsuw9O7dh4kHhMP/Wp5u8O1jiaWiou13ZfJIgiccjtVK2pBhL" crossorigin="anonymous"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/sessao.js" data-exigir-login></script>
+    <script src="js/topo.js" defer></script>
+
+    <link rel="stylesheet" href="assets/css/layout.css">
+    <!-- Tailwind Play CDN (sem SRI: o CDN não envia CORS) -->
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        p5: {
+                            blue: '#0046FF',
+                            cyan: '#00D4FF',
+                            dark: '#0A1128',
+                            navy: '#121B3B',
+                            slate: '#1E295D',
+                            yellow: '#FFE600'
+                        }
+                    },
+                    fontFamily: {
+                        p5: ['"Montserrat"', 'sans-serif'],
+                        p5sub: ['"Titillium Web"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Topo, controles e fundo vêm de assets/css/layout.css; aqui fica só o visual do projetor. */
+        body { overflow-x: hidden; }
+        #mainWorkspace { font-family: 'Montserrat', sans-serif; user-select: none; }
+
+        /* Efeito de linhas de CRT */
+        .scanlines { position: relative; }
+        .scanlines::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%);
+            background-size: 100% 4px;
+            z-index: 15;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        .p5-skew-left { transform: skew(-6deg); }
+        .p5-skew-right { transform: skew(6deg); }
+        .p5-unskew { transform: skew(6deg); }
+        .p5-unskew-right { transform: skew(-6deg); }
+
+        .p5-box-shadow { box-shadow: 8px 8px 0px #000000, 13px 13px 0px #0046FF; }
+        .p5-box-shadow-cyan { box-shadow: -8px 8px 0px #000000, -13px 13px 0px #00D4FF; }
+
+        .drag-over {
+            border-color: #00D4FF !important;
+            background-color: rgba(0, 70, 255, 0.35) !important;
+            box-shadow: 0 0 30px #00D4FF !important;
+            transform: scale(1.01);
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0A1128; }
+        ::-webkit-scrollbar-thumb { background: #0046FF; }
+        ::-webkit-scrollbar-thumb:hover { background: #00D4FF; }
+
+        .p5-btn {
+            transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+        }
+        .p5-btn:hover { transform: scale(1.04) rotate(-1.5deg); box-shadow: -5px 5px 0px #000000; }
+        .p5-btn:active { transform: scale(0.97); }
+
+        @keyframes p5-pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.08); }
+        }
+        .pulse-live { animation: p5-pulse 1.5s infinite; }
+
+        .p5-checkbox {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            padding: 0;
+            background: #0A1128;
+            border: 3px solid #0046FF;
+            transform: skew(-10deg);
+            cursor: pointer;
+            position: relative;
+            flex-shrink: 0;
+        }
+        .p5-checkbox:checked { background: #00D4FF; border-color: #ffffff; }
+        .p5-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            color: #0A1128;
+            font-weight: 900;
+            font-size: 14px;
+            top: -4px;
+            left: 2px;
+            transform: skew(10deg);
+        }
+
+        /* Cartões de overlay (iframe do eRPG) dentro da projeção. A camada cancela a inclinação do
+           quadro, então os cartões ficam retos e os movimentos do mouse valem 1:1. */
+        #overlaysLayer {
+            position: absolute; top: 0; bottom: 0; left: 26px; right: 26px;
+            transform: skewX(6deg); z-index: 30; pointer-events: none;
+        }
+        .ov-card {
+            position: absolute; display: flex; flex-direction: column;
+            background: #000; border: 2px solid #00D4FF;
+            box-shadow: -4px 4px 0 #000, -7px 7px 0 #0046FF;
+        }
+        .ov-card.mestre { pointer-events: auto; }
+        .ov-card.mestre.travado { border-color: rgba(0, 70, 255, 0.6); box-shadow: -3px 3px 0 #000; }
+        .ov-head {
+            display: flex; align-items: center; justify-content: space-between; gap: 6px;
+            background: #121B3B; border-bottom: 2px solid #0046FF; padding: 2px 8px;
+            font-size: 11px; font-weight: 700; color: #fff; text-transform: uppercase; font-style: italic;
+            cursor: move; flex: none; user-select: none;
+        }
+        .ov-card.travado .ov-head { cursor: default; }
+        .ov-titulo { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .ov-fechar { color: #94a3b8; cursor: pointer; padding: 0 4px; }
+        .ov-fechar:hover { color: #ef4444; }
+        .ov-frame { flex: 1; width: 100%; min-height: 0; border: 0; background: #000; }
+        .ov-card:not(.mestre) .ov-frame { pointer-events: none; }
+        .ov-resize { position: absolute; width: 12px; height: 12px; background: #00D4FF; border: 2px solid #000; z-index: 2; }
+        .ov-card.travado .ov-resize { display: none; }
+        .ov-resize.se { right: -6px; bottom: -6px; cursor: se-resize; }
+        .ov-resize.sw { left: -6px; bottom: -6px; cursor: sw-resize; }
+        .ov-resize.ne { right: -6px; top: -6px; cursor: ne-resize; }
+        .ov-resize.nw { left: -6px; top: -6px; cursor: nw-resize; }
+        /* Cobre os iframes durante o arraste, para eles não "engolirem" o mouse */
+        .ov-shield { position: absolute; inset: 0; z-index: 100; pointer-events: auto; cursor: move; }
+        .ov-shield[hidden] { display: none; }
+
+        /* Modo OBS: só a projeção, em tela cheia e sem moldura, sobre fundo transparente */
+        body.obs-clean { background: transparent !important; background-image: none !important; }
+        body.obs-clean #mainHeader,
+        body.obs-clean #barraMestre,
+        body.obs-clean #viewportHeader,
+        body.obs-clean #acoesMestre,
+        body.obs-clean #molduraDeco,
+        body.obs-clean #dropZonePlaceholder,
+        body.obs-clean .ov-head,
+        body.obs-clean .ov-resize { display: none !important; }
+        body.obs-clean #quadroProj {
+            position: fixed; inset: 0; z-index: 30; transform: none;
+            padding: 0; box-shadow: none; background: transparent;
+        }
+        body.obs-clean #dropZone { height: 100vh !important; border: 0; background: transparent; }
+        body.obs-clean #overlaysLayer { left: 0; right: 0; transform: none; }
+        body.obs-clean .ov-card { border-color: transparent; box-shadow: none; }
+
+        #exitObsFloatingBtn { display: none; }
+        body.obs-clean #exitObsFloatingBtn { display: flex; opacity: 0.15; transition: opacity 0.2s; }
+        body.obs-clean #exitObsFloatingBtn:hover { opacity: 1; }
+    </style>
+</head>
+<body>
+
+    <!-- Botão flutuante para sair do modo OBS -->
+    <button id="exitObsFloatingBtn" type="button" data-so-mestre class="fixed top-3 right-3 z-[100000] bg-p5-yellow text-black font-black italic px-4 py-2 border-2 border-black shadow-lg text-xs uppercase items-center gap-2 cursor-pointer">
+        <i class="fa-solid fa-rotate-left"></i>
+        <span>SAIR DO MODO OBS (ESC)</span>
+    </button>
+
+    <header class="topo" id="mainHeader">
+        <a class="voltar" href="index.html">‹ Hub</a>
+        <div class="titulo">
+            <h1>Projetor</h1>
+            <p class="tagline">Imagens da cena e overlays de ficha para a mesa</p>
+        </div>
+        <div class="espaco"></div>
+        <button id="btnObsMode" type="button" data-so-mestre class="btn" title="Esconde o painel e deixa só os overlays, para captura no OBS">
+            <i class="fa-solid fa-video"></i> Modo OBS
+        </button>
+        <div class="selo skew-tag" id="statusBadge" role="status">
+            <span class="unskew" style="display:inline-flex;align-items:center;gap:10px;font-size:.95rem">
+                <span id="statusDot" class="w-3 h-3 rounded-full bg-gray-500 inline-block"></span>
+                <span id="statusText">AGUARDANDO IMAGEM</span>
+            </span>
+        </div>
+        <div class="usuario" data-usuario hidden></div>
+    </header>
+
+    <main class="conteudo" style="max-width:1280px">
+        <div id="mainWorkspace" class="w-full grid grid-cols-1 lg:grid-cols-12 gap-7 items-start relative z-10">
+
+            <!-- COLUNA DA PROJEÇÃO (todos veem; só o Mestre controla) -->
+            <section id="colProjecao" class="lg:col-span-7 flex flex-col gap-4">
+
+                <div id="viewportHeader" class="flex flex-wrap justify-between items-center gap-2 bg-p5-dark p-3 border-2 border-p5-blue p5-skew-left">
+                    <div class="p5-unskew flex items-center gap-2">
+                        <span class="bg-p5-cyan text-p5-dark font-black px-2 py-0.5 text-xs uppercase">Projetor</span>
+                        <span class="text-xs font-bold text-gray-200 truncate max-w-[260px]" id="imageName">Nenhuma Imagem</span>
+                    </div>
+                    <div class="p5-unskew flex items-center gap-1.5" data-so-mestre>
+                        <button id="btnContain" type="button" class="px-2.5 py-1 text-xs font-bold bg-p5-blue text-white hover:bg-p5-cyan hover:text-black transition uppercase">
+                            <i class="fa-solid fa-compress me-1"></i> Ajustar
+                        </button>
+                        <button id="btnCover" type="button" class="px-2.5 py-1 text-xs font-bold bg-p5-navy text-gray-300 hover:bg-p5-cyan hover:text-black transition uppercase">
+                            <i class="fa-solid fa-expand me-1"></i> Preencher
+                        </button>
+                        <button id="btnCRT" type="button" class="px-2.5 py-1 text-xs font-bold bg-p5-navy text-p5-cyan border border-p5-cyan/40 hover:bg-p5-cyan hover:text-black transition uppercase">
+                            <i class="fa-solid fa-tv me-1"></i> CRT: ON
+                        </button>
+                    </div>
+                </div>
+
+                <div id="quadroProj" class="relative bg-black p-3 p5-skew-left p5-box-shadow transition-all duration-300">
+                    <div id="dropZone" class="scanlines relative w-full h-[380px] md:h-[440px] bg-p5-dark border-4 border-dashed border-p5-blue/60 flex flex-col items-center justify-center transition-all duration-200 overflow-hidden group">
+                        <input type="file" id="fileInput" class="hidden" accept="image/*">
+                        <img id="projectedImage" src="" alt="Imagem projetada" class="hidden w-full h-full object-contain transition-all duration-300 relative z-10">
+
+                        <div id="dropZonePlaceholder" class="p5-unskew flex flex-col items-center text-center p-6">
+                            <div class="w-16 h-16 mb-3 bg-p5-blue/20 rounded-full flex items-center justify-center border-2 border-p5-cyan shadow-[0_0_20px_rgba(0,212,255,0.4)]">
+                                <i id="phIcone" class="fa-solid fa-cloud-arrow-up text-3xl text-p5-cyan"></i>
+                            </div>
+                            <h3 id="phTitulo" class="text-xl font-black italic text-white uppercase mb-1 tracking-wide">Nenhuma imagem projetada</h3>
+                            <p id="phSub" class="text-xs font-bold text-p5-cyan mb-3 uppercase tracking-wider">Aguarde o Mestre projetar algo</p>
+                            <span id="phChip" data-so-mestre class="inline-block px-3 py-1 bg-p5-blue text-white font-bold text-[10px] uppercase tracking-widest">
+                                PNG, JPG, WEBP (GIF vira imagem estática)
+                            </span>
+                        </div>
+                        <div id="molduraDeco" class="absolute inset-0 border-8 border-p5-blue/20 pointer-events-none z-20"></div>
+                        <!-- Cartões de overlay do eRPG (iframes) -->
+                        <div id="overlaysLayer"><div id="ovShield" class="ov-shield" hidden></div></div>
+                    </div>
+                </div>
+
+                <!-- Cenários rápidos e ações (Mestre) -->
+                <div id="acoesMestre" class="grid grid-cols-1 md:grid-cols-2 gap-4" data-so-mestre>
+                    <div class="bg-p5-navy/90 p-3.5 border-l-4 border-p5-cyan p5-skew-left">
+                        <div class="p5-unskew">
+                            <span class="text-[11px] font-black uppercase text-p5-cyan tracking-widest block mb-2">
+                                <i class="fa-solid fa-bolt me-1"></i> Cenários Rápidos
+                            </span>
+                            <div class="flex flex-wrap gap-2">
+                                <button type="button" data-url="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1000&q=80" data-title="Castelo Assombrado" class="preset-btn px-2.5 py-1 bg-p5-dark hover:bg-p5-blue border border-p5-blue text-xs font-bold text-white transition">
+                                    <i class="fa-solid fa-chess-rook me-1"></i> Castelo
+                                </button>
+                                <button type="button" data-url="https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1000&q=80" data-title="Dragão Místico" class="preset-btn px-2.5 py-1 bg-p5-dark hover:bg-p5-blue border border-p5-blue text-xs font-bold text-white transition">
+                                    <i class="fa-solid fa-dragon me-1"></i> Dragão
+                                </button>
+                                <button type="button" data-url="https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=1000&q=80" data-title="Mapa da Masmorra" class="preset-btn px-2.5 py-1 bg-p5-dark hover:bg-p5-blue border border-p5-blue text-xs font-bold text-white transition">
+                                    <i class="fa-solid fa-map me-1"></i> Mapa
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-p5-navy/90 p-3.5 border-r-4 border-p5-blue p5-skew-right flex flex-col justify-center gap-2">
+                        <div class="p5-unskew-right flex gap-2">
+                            <button id="btnChangeImg" type="button" class="p5-btn flex-1 py-2 px-3 bg-p5-blue hover:bg-p5-cyan hover:text-black text-white font-black text-xs uppercase border border-black flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-folder-open"></i> Trocar
+                            </button>
+                            <button id="btnRemoveImg" type="button" class="p5-btn flex-1 py-2 px-3 bg-red-600 hover:bg-red-500 text-white font-black text-xs uppercase border border-black flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-trash-can"></i> Remover
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- BARRA LATERAL (só o Mestre) -->
+            <aside id="barraMestre" data-so-mestre class="lg:col-span-5 flex flex-col gap-5">
+
+                <!-- Overlays eRPG -->
+                <div class="bg-black p-3 p5-skew-right p5-box-shadow-cyan">
+                    <div class="bg-p5-navy p-4 border-2 border-p5-cyan">
+                    <div class="p5-unskew-right flex flex-col gap-3">
+                        <div class="flex items-center justify-between border-b-2 border-p5-cyan pb-1.5">
+                            <h2 class="text-lg font-black italic text-white uppercase flex items-center gap-2">
+                                <i class="fa-solid fa-layer-group text-p5-cyan"></i>
+                                <span>Overlays eRPG (Fichas)</span>
+                            </h2>
+                            <span id="overlayCountBadge" class="bg-p5-cyan text-black font-black text-xs px-2 py-0.5">0 ATIVOS</span>
+                        </div>
+
+                        <div class="bg-p5-dark/90 border border-p5-blue p-2.5 text-[11px] text-gray-300 leading-snug">
+                            <span class="text-p5-yellow font-bold uppercase block mb-0.5">
+                                <i class="fa-solid fa-shield-halved me-1"></i> Overlay dentro da projeção
+                            </span>
+                            O overlay do eRPG vira um <strong>cartão dentro da projeção</strong>. Arraste pelo cabeçalho e redimensione pelos cantos. Quem pode ver a projeção vê os mesmos cartões. Para o OBS, use o <strong>Modo OBS</strong>, que deixa só a projeção em tela cheia.
+                        </div>
+
+                        <form id="overlayAddForm" class="flex flex-col gap-2.5 mt-1">
+                            <div>
+                                <label for="erpgLinkInput" class="block text-[10px] font-black text-p5-cyan uppercase tracking-wider mb-1">Link do overlay eRPG ou UUID da ficha:</label>
+                                <input type="text" id="erpgLinkInput" required placeholder="https://erpg.app/sheet/overlay?id=..." class="w-full font-mono text-xs">
+                            </div>
+                            <div>
+                                <label for="erpgNameInput" class="block text-[10px] font-black text-gray-300 uppercase mb-1">Nome / Jogador:</label>
+                                <input type="text" id="erpgNameInput" maxlength="60" placeholder="Ex: Joker / Morgana" class="w-full text-xs">
+                            </div>
+                            <div class="flex gap-2 pt-1">
+                                <button type="submit" class="p5-btn flex-1 py-2.5 px-3 bg-p5-cyan hover:bg-white text-black font-black italic text-xs uppercase border-2 border-black flex items-center justify-center gap-1.5">
+                                    <i class="fa-solid fa-plus"></i> Adicionar Overlay
+                                </button>
+                                <button id="btnAddDemoOverlay" type="button" class="p5-btn py-2.5 px-3 bg-p5-blue hover:bg-p5-cyan hover:text-black text-white font-black italic text-xs uppercase border-2 border-black" title="Testar com o link padrão do eRPG">
+                                    <i class="fa-solid fa-vial"></i> Demo
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-p5-blue/40">
+                            <button id="btnToggleLock" type="button" class="px-3 py-1.5 bg-p5-dark border border-p5-cyan text-p5-cyan hover:bg-p5-cyan hover:text-black text-xs font-bold uppercase transition flex items-center gap-1.5">
+                                <i id="lockIcon" class="fa-solid fa-lock-open"></i>
+                                <span id="lockText">Destravado</span>
+                            </button>
+                            <button id="btnClearAllOverlays" type="button" class="px-3 py-1.5 bg-red-900/80 hover:bg-red-600 text-white text-xs font-bold uppercase transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-trash"></i> Limpar
+                            </button>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+
+                <!-- Quem pode ver a projeção -->
+                <div class="bg-black p-3 p5-skew-left p5-box-shadow">
+                    <div class="bg-p5-dark p-4 border-2 border-p5-blue">
+                    <div class="p5-unskew flex flex-col gap-3">
+                        <div class="flex items-center justify-between border-b-2 border-p5-blue pb-1.5">
+                            <h2 class="text-base font-black italic text-white uppercase">Quem pode ver a Projeção?</h2>
+                            <i class="fa-solid fa-users-viewfinder text-p5-cyan"></i>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-1.5">
+                            <label class="flex items-center gap-2 p-2 bg-p5-navy border border-p5-blue/50 cursor-pointer hover:border-p5-cyan" style="margin:0">
+                                <input type="radio" name="visibilityScope" value="all" checked class="p5-checkbox visibility-radio">
+                                <span class="font-bold text-[11px] text-white uppercase">Todos</span>
+                            </label>
+                            <label class="flex items-center gap-2 p-2 bg-p5-navy border border-p5-blue/50 cursor-pointer hover:border-p5-cyan" style="margin:0">
+                                <input type="radio" name="visibilityScope" value="dm" class="p5-checkbox visibility-radio">
+                                <span class="font-bold text-[11px] text-amber-300 uppercase">Mestre</span>
+                            </label>
+                            <label class="flex items-center gap-2 p-2 bg-p5-navy border border-p5-blue/50 cursor-pointer hover:border-p5-cyan" style="margin:0">
+                                <input type="radio" name="visibilityScope" value="custom" class="p5-checkbox visibility-radio">
+                                <span class="font-bold text-[11px] text-p5-cyan uppercase">Seletivo</span>
+                            </label>
+                        </div>
+
+                        <!-- Jogadores cadastrados (lidos de /usuarios) -->
+                        <div id="playersListContainer" class="pt-2 border-t border-p5-blue/30 grid grid-cols-2 gap-1.5 opacity-40 pointer-events-none">
+                            <p class="col-span-2 text-[11px] text-gray-400">Carregando jogadores…</p>
+                        </div>
+                        <p class="text-[10px] text-gray-400 leading-snug">No modo Seletivo, quem não estiver marcado vê um aviso de projeção indisponível no lugar da imagem.</p>
+                    </div>
+                    </div>
+                </div>
+
+                <!-- Log -->
+                <div class="bg-black/85 p-3 border-l-4 border-p5-blue text-xs text-gray-300 font-mono">
+                    <span class="font-bold text-p5-cyan uppercase block mb-1 text-[10px]">Log do Sistema:</span>
+                    <div id="systemLog" class="h-14 overflow-y-auto space-y-0.5 text-[10px]">
+                        <div>[SIS] Projetor pronto.</div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <!-- Avisos -->
+    <div id="toastContainer" class="fixed bottom-4 right-4 z-[99999] flex flex-col gap-2 pointer-events-none"></div>
+
+    <script>
+        (function () {
+            const db = RPG.db;
+            const esc = RPG.escaparHtml;
+            const modoAtual = localStorage.getItem('rpg_modo_sessao') || 'jogador';
+            const ehMestre = modoAtual === 'mestre';
+
+            const DEMO_URL = 'https://erpg.app/sheet/overlay?id=2ab8b8a6-de83-440d-887b-d8046237cf87';
+            const LIMITE_IMAGEM = 1400000; // caracteres do data URL; as regras aceitam até 1.500.000
+
+            // ---------- Papel: o que só o Mestre vê ----------
+            // Isto é só interface; quem impede um jogador de escrever são as regras do banco.
+            if (!ehMestre) {
+                document.querySelectorAll('[data-so-mestre]').forEach((el) => el.remove());
+                const col = document.getElementById('colProjecao');
+                col.classList.replace('lg:col-span-7', 'lg:col-span-12');
+                document.getElementById('dropZone').classList.remove('cursor-pointer');
+                document.getElementById('phIcone').className = 'fa-solid fa-tv text-3xl text-p5-cyan';
+                // A projeção ocupa todo o espaço que sobra na janela (abaixo do cabeçalho até o rodapé).
+                const zona = document.getElementById('dropZone');
+                zona.classList.remove('h-[380px]', 'md:h-[440px]');
+                const ajustarAltura = () => {
+                    const topo = zona.getBoundingClientRect().top + window.scrollY;
+                    zona.style.height = Math.max(320, window.innerHeight - topo - 50) + 'px';
+                };
+                ajustarAltura();
+                window.addEventListener('resize', ajustarAltura);
+                // O jogador só vê a página depois de confirmado que pode acessá-la.
+                document.getElementById('mainWorkspace').style.visibility = 'hidden';
+            } else {
+                document.getElementById('dropZone').classList.add('cursor-pointer');
+                document.getElementById('phTitulo').textContent = 'Arraste e solte uma imagem aqui';
+                document.getElementById('phSub').textContent = 'Ou clique na moldura para selecionar';
+            }
+
+            // ---------- Estado ----------
+            let uid = null;
+            let hasImage = false;
+            let imagemAtual = null;          // última imagem vinda do banco
+            let ajusteAtual = 'contain';
+            let crtAtivo = true;
+            let visModo = 'all';             // all | dm | custom
+            let visJogadores = {};           // { uid: true }
+            let jogadoresCadastrados = [];   // [{ uid, nome }]
+
+            let isLocked = false;
+            let isObsClean = false;
+            let overlaysDb = {};             // id -> overlay validado
+            const cartoes = {};              // id -> elemento do cartão
+            let arrastandoId = null;
+
+            // ---------- DOM ----------
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('fileInput');
+            const projectedImage = document.getElementById('projectedImage');
+            const dropZonePlaceholder = document.getElementById('dropZonePlaceholder');
+            const imageNameLabel = document.getElementById('imageName');
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            const playersListContainer = document.getElementById('playersListContainer');
+            const systemLog = document.getElementById('systemLog');
+            const overlaysLayer = document.getElementById('overlaysLayer');
+            const ovShield = document.getElementById('ovShield');
+
+            // ================= SINCRONIZAÇÃO (Firebase) =================
+            RPG.sessao.then((sessao) => {
+                if (!sessao) return;
+                uid = sessao.user.uid;
+
+                db.ref('projetor/visibilidade').on('value', (snap) => {
+                    const v = snap.val() || {};
+                    visModo = ['all', 'dm', 'custom'].includes(v.modo) ? v.modo : 'all';
+                    visJogadores = (v.jogadores && typeof v.jogadores === 'object') ? v.jogadores : {};
+                    aplicarVisibilidade();
+                }, (err) => {
+                    console.error('Projetor (visibilidade):', err);
+                    if (!ehMestre) mostrarVazioJogador('Não foi possível ler a projeção.');
+                });
+
+                if (ehMestre) {
+                    db.ref('usuarios').on('value', (snap) => {
+                        const todos = snap.val() || {};
+                        jogadoresCadastrados = Object.keys(todos)
+                            .filter((id) => todos[id] && todos[id].papel === 'jogador')
+                            .map((id) => ({ uid: id, nome: String(todos[id].nome || todos[id].email || id) }))
+                            .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+                        renderListaJogadores();
+                        updateStatusBadge();
+                    }, (err) => console.error('Projetor (usuarios):', err));
+                }
+            });
+
+            function jogadorPodeVer() {
+                if (visModo === 'all') return true;
+                if (visModo === 'custom') return !!uid && visJogadores[uid] === true;
+                return false;
+            }
+
+            function aplicarVisibilidade() {
+                if (ehMestre) {
+                    ouvirProjecao(true);
+                    sincronizarUiVisibilidade();
+                    updateStatusBadge();
+                    return;
+                }
+                document.getElementById('mainWorkspace').style.visibility = 'visible';
+                // Sem acesso (modo Mestre, ou Seletivo sem este jogador): mostra o aviso no quadro.
+                // Esta função roda a cada mudança de visibilidade, então o acesso volta sozinho
+                // quando o Mestre libera, sem recarregar a página.
+                if (jogadorPodeVer()) {
+                    ouvirProjecao(true);
+                } else {
+                    ouvirProjecao(false);
+                    mostrarIndisponivel();
+                }
+                updateStatusBadge();
+            }
+
+            function mostrarIndisponivel() {
+                mostrarVazioJogador(
+                    'Projeção indisponível',
+                    'O Mestre ainda não abriu o Metaverso para você. Os Ladrões Fantasmas aguardam…',
+                    'fa-solid fa-mask'
+                );
+            }
+
+            const ouvindo = { imagem: false, overlays: false };
+
+            function ouvir(no, ligar, aoReceber) {
+                if (ligar && !ouvindo[no]) {
+                    ouvindo[no] = true;
+                    db.ref('projetor/' + no).on('value', aoReceber, (err) => {
+                        // Leitura negada (ex.: o Mestre restringiu a projeção): o SDK cancela o listener.
+                        ouvindo[no] = false;
+                        console.error('Projetor (' + no + '):', err);
+                        if (!ehMestre) mostrarIndisponivel();
+                    });
+                } else if (!ligar && ouvindo[no]) {
+                    ouvindo[no] = false;
+                    db.ref('projetor/' + no).off('value', aoReceber);
+                }
+            }
+
+            // Imagem e overlays têm a mesma regra de leitura, então ligam e desligam juntos.
+            function ouvirProjecao(ligar) {
+                ouvir('imagem', ligar, aoMudarImagem);
+                ouvir('overlays', ligar, aoMudarOverlays);
+                if (!ligar) limparOverlays();
+            }
+
+            function srcValido(src) {
+                return typeof src === 'string' && src.length <= 1500000 &&
+                    (src.startsWith('https://') || src.startsWith('data:image/'));
+            }
+
+            function aoMudarImagem(snap) {
+                const v = snap.val();
+                if (!v || !srcValido(v.src)) {
+                    imagemAtual = null;
+                    limparImagem();
+                    if (!ehMestre) mostrarVazioJogador('Nenhuma imagem projetada.');
+                    return;
+                }
+                imagemAtual = v;
+                ajusteAtual = v.ajuste === 'cover' ? 'cover' : 'contain';
+                crtAtivo = v.crt !== false;
+                aplicarAjuste();
+                aplicarCRT();
+                projectedImage.src = v.src;
+                projectedImage.classList.remove('hidden');
+                dropZonePlaceholder.classList.add('hidden');
+                imageNameLabel.textContent = String(v.nome || 'Imagem').slice(0, 120);
+                hasImage = true;
+                updateStatusBadge();
+            }
+
+            function limparImagem() {
+                projectedImage.removeAttribute('src');
+                projectedImage.classList.add('hidden');
+                dropZonePlaceholder.classList.remove('hidden');
+                imageNameLabel.textContent = 'Nenhuma Imagem';
+                hasImage = false;
+                updateStatusBadge();
+            }
+
+            function mostrarVazioJogador(texto, sub, icone) {
+                limparImagem();
+                document.getElementById('phTitulo').textContent = texto;
+                document.getElementById('phSub').textContent = sub || 'Aguarde o Mestre projetar algo';
+                document.getElementById('phIcone').className = (icone || 'fa-solid fa-tv') + ' text-3xl text-p5-cyan';
+            }
+
+            function publicarImagem(src, nome) {
+                db.ref('projetor/imagem').set({
+                    src: src,
+                    nome: String(nome || 'Imagem').slice(0, 120),
+                    ajuste: ajusteAtual,
+                    crt: crtAtivo
+                });
+            }
+
+            function escreverVisibilidade(modo, jogadores) {
+                const obj = { modo: modo };
+                if (jogadores && Object.keys(jogadores).length) obj.jogadores = jogadores;
+                db.ref('projetor/visibilidade').set(obj);
+            }
+
+            // ================= EVENTOS DO MESTRE =================
+            if (ehMestre) {
+                dropZone.addEventListener('click', () => fileInput.click());
+                document.getElementById('btnChangeImg').addEventListener('click', () => fileInput.click());
+                document.getElementById('btnRemoveImg').addEventListener('click', removeImage);
+
+                dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+                dropZone.addEventListener('dragleave', (e) => { e.preventDefault(); dropZone.classList.remove('drag-over'); });
+                dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('drag-over');
+                    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) processImageFile(e.dataTransfer.files[0]);
+                });
+                fileInput.addEventListener('change', (e) => {
+                    if (e.target.files && e.target.files.length > 0) processImageFile(e.target.files[0]);
+                    fileInput.value = '';
+                });
+
+                document.getElementById('btnContain').addEventListener('click', () => alterarPreferencia('ajuste', 'contain'));
+                document.getElementById('btnCover').addEventListener('click', () => alterarPreferencia('ajuste', 'cover'));
+                document.getElementById('btnCRT').addEventListener('click', () => alterarPreferencia('crt', !crtAtivo));
+
+                document.querySelectorAll('.preset-btn').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        publicarImagem(btn.dataset.url, btn.dataset.title);
+                        logAction(`Projetando: "${btn.dataset.title}"`);
+                    });
+                });
+
+                document.querySelectorAll('.visibility-radio').forEach((radio) => {
+                    radio.addEventListener('change', (e) => {
+                        escreverVisibilidade(e.target.value, visJogadores);
+                        logAction(`Visibilidade: ${rotuloModo(e.target.value)}`);
+                    });
+                });
+
+                // Delegação: a lista de jogadores é redesenhada quando o banco muda.
+                playersListContainer.addEventListener('change', (e) => {
+                    const cb = e.target.closest('input[data-uid]');
+                    if (!cb) return;
+                    const novo = Object.assign({}, visJogadores);
+                    if (cb.checked) novo[cb.dataset.uid] = true; else delete novo[cb.dataset.uid];
+                    escreverVisibilidade(visModo, novo);
+                    logAction(`Visão [${cb.dataset.nome}]: ${cb.checked ? 'LIBERADA' : 'OCULTA'}`);
+                });
+
+                document.getElementById('overlayAddForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const rawUrl = document.getElementById('erpgLinkInput').value.trim();
+                    const title = document.getElementById('erpgNameInput').value.trim() || 'Ficha eRPG';
+                    if (!rawUrl) return;
+                    const url = formatErpgUrl(rawUrl);
+                    if (!url) {
+                        showToast('Use o link do overlay (https://erpg.app/sheet/overlay?id=…) ou só o UUID da ficha.', 'error');
+                        return;
+                    }
+                    novoOverlay(url, title);
+                    document.getElementById('erpgLinkInput').value = '';
+                    document.getElementById('erpgNameInput').value = '';
+                    showToast(`Overlay "${title}" adicionado!`, 'success');
+                });
+
+                document.getElementById('btnAddDemoOverlay').addEventListener('click', () => {
+                    novoOverlay(DEMO_URL, 'Ficha Demo eRPG');
+                    showToast('Overlay Demo adicionado na projeção!', 'info');
+                });
+
+                document.getElementById('btnToggleLock').addEventListener('click', toggleLock);
+                document.getElementById('btnClearAllOverlays').addEventListener('click', () => {
+                    if (!Object.keys(overlaysDb).length || !confirm('Remover todos os overlays?')) return;
+                    db.ref('projetor/overlays').remove();
+                    logAction('Todos os overlays foram removidos.');
+                });
+
+                document.getElementById('btnObsMode').addEventListener('click', toggleObsCleanMode);
+                document.getElementById('exitObsFloatingBtn').addEventListener('click', toggleObsCleanMode);
+                window.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && isObsClean) toggleObsCleanMode();
+                });
+
+                // Os overlays antigos ficavam só no navegador; agora vivem no banco.
+                try { localStorage.removeItem('p5r_single_tab_state'); } catch (e) { /* sem armazenamento */ }
+            }
+
+            // ================= PROJEÇÃO (Mestre) =================
+            function processImageFile(file) {
+                if (!file.type.startsWith('image/')) {
+                    logAction('Erro: arquivo inválido (apenas imagens).');
+                    showToast('Selecione um arquivo de imagem.', 'error');
+                    return;
+                }
+                reduzirImagem(file).then((src) => {
+                    if (!src) {
+                        showToast('A imagem é grande demais, mesmo reduzida.', 'error');
+                        return;
+                    }
+                    publicarImagem(src, file.name);
+                    logAction(`Projetando: "${file.name}"`);
+                }).catch(() => showToast('Não foi possível ler a imagem.', 'error'));
+            }
+
+            // Reduz a imagem para caber no banco: lado máximo de 1600px, qualidade decrescente até caber.
+            function reduzirImagem(file) {
+                return new Promise((resolve, reject) => {
+                    // Lê como data URL (a CSP libera data: em img-src, mas não blob:).
+                    const leitor = new FileReader();
+                    const img = new Image();
+                    leitor.onerror = () => reject(new Error('leitura'));
+                    leitor.onload = () => { img.src = leitor.result; };
+                    leitor.readAsDataURL(file);
+                    img.onload = () => {
+                        let escala = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight));
+                        for (let tentativa = 0; tentativa < 6; tentativa++) {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = Math.max(1, Math.round(img.naturalWidth * escala));
+                            canvas.height = Math.max(1, Math.round(img.naturalHeight * escala));
+                            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                            let out = canvas.toDataURL('image/webp', 0.85 - tentativa * 0.08);
+                            if (!out.startsWith('data:image/webp')) out = canvas.toDataURL('image/jpeg', 0.85 - tentativa * 0.08);
+                            if (out.length <= LIMITE_IMAGEM) return resolve(out);
+                            escala *= 0.8;
+                        }
+                        resolve(null);
+                    };
+                    img.onerror = () => reject(new Error('imagem'));
+                });
+            }
+
+            function removeImage() {
+                if (!hasImage) return;
+                db.ref('projetor/imagem').remove();
+                logAction('Imagem removida.');
+            }
+
+            function alterarPreferencia(chave, valor) {
+                if (chave === 'ajuste') { ajusteAtual = valor; aplicarAjuste(); } else { crtAtivo = valor; aplicarCRT(); }
+                if (imagemAtual) publicarImagem(imagemAtual.src, imagemAtual.nome);
+            }
+
+            function aplicarAjuste() {
+                const cover = ajusteAtual === 'cover';
+                projectedImage.classList.toggle('object-cover', cover);
+                projectedImage.classList.toggle('object-contain', !cover);
+                const btnContain = document.getElementById('btnContain');
+                const btnCover = document.getElementById('btnCover');
+                if (!btnContain || !btnCover) return;
+                const ativo = 'px-2.5 py-1 text-xs font-bold bg-p5-blue text-white hover:bg-p5-cyan hover:text-black transition uppercase';
+                const inativo = 'px-2.5 py-1 text-xs font-bold bg-p5-navy text-gray-300 hover:bg-p5-cyan hover:text-black transition uppercase';
+                btnContain.className = cover ? inativo : ativo;
+                btnCover.className = cover ? ativo : inativo;
+            }
+
+            function aplicarCRT() {
+                dropZone.classList.toggle('scanlines', crtAtivo);
+                const btn = document.getElementById('btnCRT');
+                if (btn) btn.innerHTML = `<i class="fa-solid fa-tv me-1"></i> CRT: ${crtAtivo ? 'ON' : 'OFF'}`;
+            }
+
+            // ================= VISIBILIDADE (interface do Mestre) =================
+            function rotuloModo(modo) {
+                return modo === 'dm' ? 'apenas Mestre' : modo === 'custom' ? 'seletivo' : 'todos';
+            }
+
+            function sincronizarUiVisibilidade() {
+                document.querySelectorAll('.visibility-radio').forEach((r) => { r.checked = r.value === visModo; });
+                playersListContainer.classList.toggle('opacity-40', visModo !== 'custom');
+                playersListContainer.classList.toggle('pointer-events-none', visModo !== 'custom');
+                renderListaJogadores();
+            }
+
+            function renderListaJogadores() {
+                playersListContainer.textContent = '';
+                if (!jogadoresCadastrados.length) {
+                    const p = document.createElement('p');
+                    p.className = 'col-span-2 text-[11px] text-gray-400';
+                    p.textContent = 'Nenhum jogador cadastrado.';
+                    playersListContainer.appendChild(p);
+                    return;
+                }
+                jogadoresCadastrados.forEach((j) => {
+                    const label = document.createElement('label');
+                    label.className = 'flex items-center justify-between gap-2 p-1.5 bg-p5-navy border-l-2 border-p5-cyan cursor-pointer';
+                    label.style.margin = '0';
+                    const nome = document.createElement('span');
+                    nome.className = 'text-[11px] font-bold text-white uppercase truncate';
+                    nome.textContent = j.nome;
+                    const cb = document.createElement('input');
+                    cb.type = 'checkbox';
+                    cb.className = 'p5-checkbox';
+                    cb.checked = visJogadores[j.uid] === true;
+                    cb.dataset.uid = j.uid;
+                    cb.dataset.nome = j.nome;
+                    label.append(nome, cb);
+                    playersListContainer.appendChild(label);
+                });
+            }
+
+            function updateStatusBadge() {
+                let cor, texto, corTexto = '';
+                if (!hasImage) {
+                    cor = 'bg-gray-500'; texto = 'AGUARDANDO IMAGEM';
+                } else if (visModo === 'dm') {
+                    cor = 'bg-amber-400 pulse-live'; texto = 'OCULTO (APENAS MESTRE)';
+                } else if (visModo === 'all') {
+                    cor = 'bg-emerald-400 pulse-live'; texto = 'PROJETANDO (TODOS)';
+                } else {
+                    const n = jogadoresCadastrados.length
+                        ? jogadoresCadastrados.filter((j) => visJogadores[j.uid] === true).length
+                        : Object.keys(visJogadores).length;
+                    cor = 'bg-cyan-400 pulse-live'; texto = `PROJETANDO (${n} JOGADOR${n === 1 ? '' : 'ES'})`;
+                }
+                if (!ehMestre && hasImage) { texto = 'PROJETANDO'; cor = 'bg-emerald-400 pulse-live'; }
+                statusDot.className = `w-3 h-3 rounded-full inline-block ${cor}`;
+                statusText.textContent = texto;
+            }
+
+            // ================= OVERLAYS (iframe do eRPG dentro da projeção) =================
+            // O Mestre grava em projetor/overlays; quem pode ver a projeção recebe os mesmos cartões.
+            // Posição e tamanho são porcentagens da camada, então escalam com o quadro.
+            function limitar(v, min, max, padrao) {
+                const n = Number(v);
+                return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : padrao;
+            }
+
+            // Só aceita páginas de overlay do eRPG por https (dado do banco ou do formulário).
+            function urlOverlayValida(valor) {
+                try {
+                    const u = new URL(String(valor));
+                    return (u.protocol === 'https:' && u.hostname === 'erpg.app' && u.pathname.startsWith('/sheet/overlay'))
+                        ? u.href : null;
+                } catch (e) { return null; }
+            }
+
+            function formatErpgUrl(entrada) {
+                const t = entrada.trim();
+                if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(t)) {
+                    return 'https://erpg.app/sheet/overlay?id=' + t;
+                }
+                return urlOverlayValida(t);
+            }
+
+            function sanearOverlay(id, o) {
+                if (!o || typeof o !== 'object' || !/^[\w-]{1,30}$/.test(id)) return null;
+                const url = urlOverlayValida(o.url);
+                if (!url) return null;
+                const w = limitar(o.w, 5, 100, 45);
+                const h = limitar(o.h, 5, 100, 60);
+                return {
+                    id: id,
+                    url: url,
+                    titulo: String(o.titulo || 'Ficha eRPG').slice(0, 60),
+                    x: limitar(o.x, 0, 100 - w, 5),
+                    y: limitar(o.y, 0, 100 - h, 5),
+                    w: w,
+                    h: h,
+                    z: limitar(o.z, 0, 100000, 1)
+                };
+            }
+
+            function posicionar(card, o) {
+                card.style.left = o.x + '%';
+                card.style.top = o.y + '%';
+                card.style.width = o.w + '%';
+                card.style.height = o.h + '%';
+                card.style.zIndex = o.z;
+            }
+
+            function aoMudarOverlays(snap) {
+                const todos = snap.val() || {};
+                overlaysDb = {};
+                Object.keys(todos).forEach((id) => {
+                    const o = sanearOverlay(id, todos[id]);
+                    if (o) overlaysDb[id] = o;
+                });
+                Object.keys(cartoes).forEach((id) => {
+                    if (!overlaysDb[id] || cartoes[id].dataset.url !== overlaysDb[id].url) {
+                        cartoes[id].remove();
+                        delete cartoes[id];
+                    }
+                });
+                Object.keys(overlaysDb).forEach((id) => {
+                    if (!cartoes[id]) criarCartao(overlaysDb[id]);
+                    else if (id !== arrastandoId) posicionar(cartoes[id], overlaysDb[id]);
+                });
+                atualizarContador();
+            }
+
+            function limparOverlays() {
+                Object.keys(cartoes).forEach((id) => { cartoes[id].remove(); delete cartoes[id]; });
+                overlaysDb = {};
+                atualizarContador();
+            }
+
+            function atualizarContador() {
+                const badge = document.getElementById('overlayCountBadge');
+                if (!badge) return;
+                const n = Object.keys(overlaysDb).length;
+                badge.textContent = `${n} ATIVO${n !== 1 ? 'S' : ''}`;
+            }
+
+            function criarCartao(o) {
+                const card = document.createElement('div');
+                card.className = 'ov-card' + (ehMestre ? ' mestre' : '') + (ehMestre && isLocked ? ' travado' : '');
+                card.dataset.id = o.id;
+                card.dataset.url = o.url;
+                // Clique no cartão não deve abrir o seletor de arquivo da moldura.
+                card.addEventListener('click', (e) => e.stopPropagation());
+
+                if (ehMestre) {
+                    const head = document.createElement('div');
+                    head.className = 'ov-head';
+                    head.innerHTML = `<span class="ov-titulo">${esc(o.titulo)}</span>
+                        <button type="button" class="ov-fechar" title="Remover overlay"><i class="fa-solid fa-xmark"></i></button>`;
+                    head.addEventListener('mousedown', (e) => {
+                        if (e.target.closest('button')) return;
+                        iniciarArraste(e, o.id, 'mover');
+                    });
+                    head.querySelector('.ov-fechar').addEventListener('click', () => {
+                        if (!confirm(`Remover o overlay "${o.titulo}"?`)) return;
+                        db.ref('projetor/overlays/' + o.id).remove();
+                        logAction(`Overlay [${o.titulo}] removido.`);
+                    });
+                    card.appendChild(head);
+                }
+
+                const frame = document.createElement('iframe');
+                frame.className = 'ov-frame';
+                frame.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+                frame.setAttribute('title', o.titulo);
+                frame.src = o.url;
+                card.appendChild(frame);
+
+                if (ehMestre) {
+                    ['nw', 'ne', 'sw', 'se'].forEach((dir) => {
+                        const h = document.createElement('div');
+                        h.className = 'ov-resize ' + dir;
+                        h.addEventListener('mousedown', (e) => iniciarArraste(e, o.id, dir));
+                        card.appendChild(h);
+                    });
+                }
+
+                posicionar(card, o);
+                overlaysLayer.insertBefore(card, ovShield);
+                cartoes[o.id] = card;
+            }
+
+            function gravarOverlay(o) {
+                const arred = (n) => Math.round(n * 100) / 100;
+                db.ref('projetor/overlays/' + o.id).set({
+                    url: o.url,
+                    titulo: o.titulo,
+                    x: arred(o.x), y: arred(o.y), w: arred(o.w), h: arred(o.h),
+                    z: Math.round(o.z)
+                });
+            }
+
+            function novoOverlay(url, titulo) {
+                const id = 'o' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+                const n = Object.keys(overlaysDb).length;
+                const z = Object.values(overlaysDb).reduce((m, v) => Math.max(m, v.z), 0) + 1;
+                gravarOverlay({
+                    id: id, url: url, titulo: String(titulo).slice(0, 60),
+                    x: Math.min(50, 5 + (n % 6) * 6), y: Math.min(40, 5 + (n % 6) * 6),
+                    w: 45, h: 60, z: z
+                });
+                logAction(`Overlay [${titulo}] ativo.`);
+            }
+
+            // Mover (pelo cabeçalho) ou redimensionar (pelos cantos); grava ao soltar o mouse.
+            function iniciarArraste(e, id, modo) {
+                if (isLocked || e.button !== 0 || !overlaysDb[id]) return;
+                e.preventDefault();
+                e.stopPropagation();
+                const base = overlaysDb[id];
+                const card = cartoes[id];
+                const o = Object.assign({}, base);
+                o.z = Object.values(overlaysDb).reduce((m, v) => Math.max(m, v.z), 0) + 1;
+                const larg = overlaysLayer.clientWidth || 1;
+                const alt = overlaysLayer.clientHeight || 1;
+                const x0 = e.clientX, y0 = e.clientY;
+                arrastandoId = id;
+                ovShield.hidden = false;
+                posicionar(card, o);
+
+                const mover = (ev) => {
+                    const dx = (ev.clientX - x0) / larg * 100;
+                    const dy = (ev.clientY - y0) / alt * 100;
+                    if (modo === 'mover') {
+                        o.x = limitar(base.x + dx, 0, 100 - base.w, base.x);
+                        o.y = limitar(base.y + dy, 0, 100 - base.h, base.y);
+                    } else {
+                        let x = base.x, y = base.y, w = base.w, h = base.h;
+                        if (modo.includes('e')) w = limitar(base.w + dx, 10, 100 - base.x, base.w);
+                        if (modo.includes('s')) h = limitar(base.h + dy, 10, 100 - base.y, base.h);
+                        if (modo.includes('w')) { w = limitar(base.w - dx, 10, base.x + base.w, base.w); x = base.x + base.w - w; }
+                        if (modo.includes('n')) { h = limitar(base.h - dy, 10, base.y + base.h, base.h); y = base.y + base.h - h; }
+                        Object.assign(o, { x: x, y: y, w: w, h: h });
+                    }
+                    posicionar(card, o);
+                };
+                const soltar = () => {
+                    document.removeEventListener('mousemove', mover);
+                    document.removeEventListener('mouseup', soltar);
+                    arrastandoId = null;
+                    ovShield.hidden = true;
+                    overlaysDb[id] = o;
+                    gravarOverlay(o);
+                };
+                document.addEventListener('mousemove', mover);
+                document.addEventListener('mouseup', soltar);
+            }
+
+            function toggleLock() {
+                isLocked = !isLocked;
+                const icon = document.getElementById('lockIcon');
+                const text = document.getElementById('lockText');
+                if (isLocked) {
+                    icon.className = 'fa-solid fa-lock text-red-400';
+                    text.textContent = 'Travado';
+                    showToast('Posição dos overlays travada.', 'info');
+                } else {
+                    icon.className = 'fa-solid fa-lock-open';
+                    text.textContent = 'Destravado';
+                    showToast('Overlays destravados para arrastar.', 'info');
+                }
+                Object.keys(cartoes).forEach((id) => cartoes[id].classList.toggle('travado', isLocked));
+            }
+
+            function toggleObsCleanMode() {
+                isObsClean = !isObsClean;
+                document.body.classList.toggle('obs-clean', isObsClean);
+                showToast(isObsClean
+                    ? 'Modo OBS ativo! Pressione [ESC] ou clique no canto superior direito para sair.'
+                    : 'Painel restaurado.', 'info');
+            }
+
+            // ================= UTILIDADES =================
+            function logAction(msg) {
+                if (!systemLog) return;
+                const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                const div = document.createElement('div');
+                const t = document.createElement('span');
+                t.className = 'text-p5-cyan';
+                t.textContent = `[${time}] `;
+                div.append(t, document.createTextNode(msg));
+                systemLog.appendChild(div);
+                systemLog.scrollTop = systemLog.scrollHeight;
+            }
+
+            function showToast(msg, type = 'info') {
+                const container = document.getElementById('toastContainer');
+                const toast = document.createElement('div');
+                const bg = type === 'success' ? 'bg-p5-cyan text-black' : type === 'error' ? 'bg-red-600 text-white' : 'bg-p5-blue text-white';
+                toast.className = `${bg} font-black italic px-4 py-2 border-2 border-black shadow-lg text-xs uppercase transition-all duration-300`;
+                toast.textContent = msg;
+                container.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+        })();
+    </script>
+</body>
+</html>
