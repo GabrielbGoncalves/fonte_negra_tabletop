@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://www.gstatic.com https://*.firebaseio.com https://*.firebasedatabase.app http://127.0.0.1:9000; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://*.firebaseio.com wss://*.firebaseio.com https://*.firebasedatabase.app wss://*.firebasedatabase.app https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com http://127.0.0.1:9099 http://127.0.0.1:9000 ws://127.0.0.1:9000; frame-src https://*.firebaseapp.com https://*.firebaseio.com http://127.0.0.1:9000; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://www.gstatic.com https://*.firebaseio.com https://*.firebasedatabase.app http://127.0.0.1:9000; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://*.firebaseio.com wss://*.firebaseio.com https://*.firebasedatabase.app wss://*.firebasedatabase.app https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com http://127.0.0.1:9099 http://127.0.0.1:9000 ws://127.0.0.1:9000; frame-src https://*.firebaseapp.com https://*.firebaseio.com https://erpg.app http://127.0.0.1:9000; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <!-- Favicons -->
     <link rel="icon" type="image/png" href="assets/favicon/favicon-96x96.png" sizes="96x96">
@@ -138,15 +138,6 @@
         </div>
 
         <div class="sombra">
-            <a class="card clip-card" href="grim_rio_do_cora_o.html">
-                <span class="tag skew-tag"><span class="unskew">Velvet Room</span></span>
-                <h2 class="nome">Grimório do Coração</h2>
-                <p class="desc txt">Calculadora oficial de fusão de Personae baseada em cruzamento de Arcanas e níveis.</p>
-                <span class="arquivo txt">grim_rio_do_cora_o.html</span>
-            </a>
-        </div>
-
-        <div class="sombra">
             <a class="card clip-card" href="loja.html">
                 <span class="tag skew-tag"><span class="unskew">Comércio</span></span>
                 <h2 class="nome">Loja (Remédios)</h2>
@@ -192,11 +183,29 @@
         </div>
 
         <div class="sombra">
-            <a class="card clip-card" href="velvet_room.html">
-                <span class="tag skew-tag"><span class="unskew">Fusão</span></span>
-                <h2 class="nome">Velvet Room</h2>
-                <p class="desc txt">Painel clássico de cálculo e testes para fusão de Personae.</p>
-                <span class="arquivo txt">velvet_room.html</span>
+            <a class="card clip-card" href="projetor.html">
+                <span class="tag skew-tag"><span class="unskew">Projeção</span></span>
+                <h2 class="nome">Projetor</h2>
+                <p class="desc txt">Imagens de cena projetadas para a mesa e overlays de ficha para o OBS, com controle de quem vê.</p>
+                <span class="arquivo txt">projetor.html</span>
+            </a>
+        </div>
+
+        <div class="sombra">
+            <a class="card clip-card" href="sala_veludo.html">
+                <span class="tag skew-tag"><span class="unskew">Velvet Room</span></span>
+                <h2 class="nome">Sala de Veludo</h2>
+                <p class="desc txt">Sala de Veludo do Grimório do Coração: invocação e fusão de Personae.</p>
+                <span class="arquivo txt">sala_veludo.html</span>
+            </a>
+        </div>
+
+        <div class="sombra">
+            <a class="card clip-card" href="grimorio_coracao.html">
+                <span class="tag skew-tag"><span class="unskew">Bestiário</span></span>
+                <h2 class="nome">Grimório do Coração</h2>
+                <p class="desc txt">Fichas de Sombras e rolagens rápidas do Grimório do Coração.</p>
+                <span class="arquivo txt">grimorio_coracao.html</span>
             </a>
         </div>
 
@@ -211,7 +220,23 @@
         </div>
     </main>
 
+    <div id="aviso" class="erro" role="alert" hidden></div>
+
     <script>
+        // Mensagens de redirecionamento vindas de outras páginas (?aviso=...). Só textos fixos daqui.
+        (function () {
+            const avisos = {
+                projetor: 'Você não foi selecionado para ver a projeção desta sessão.'
+            };
+            const chave = new URLSearchParams(location.search).get('aviso');
+            if (!chave || !Object.prototype.hasOwnProperty.call(avisos, chave)) return;
+            const caixa = document.getElementById('aviso');
+            caixa.textContent = avisos[chave];
+            caixa.hidden = false;
+            history.replaceState(null, '', location.pathname);
+            setTimeout(() => { caixa.hidden = true; }, 8000);
+        })();
+
         // Firebase, login e verificação de papel ficam em js/sessao.js.
         // O papel (Mestre/Jogador) vem do banco, e as Regras do Firebase garantem que só Mestres escrevem.
         // Nome, papel e o botão de sair ficam no topo (js/topo.js); sair volta para esta página.

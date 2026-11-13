@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dados | Fonte Negra</title>
 
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://www.gstatic.com https://*.firebaseio.com https://*.firebasedatabase.app http://127.0.0.1:9000; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://*.firebaseio.com wss://*.firebaseio.com https://*.firebasedatabase.app wss://*.firebasedatabase.app https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com http://127.0.0.1:9099 http://127.0.0.1:9000 ws://127.0.0.1:9000; frame-src https://*.firebaseapp.com https://*.firebaseio.com http://127.0.0.1:9000; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://www.gstatic.com https://*.firebaseio.com https://*.firebasedatabase.app http://127.0.0.1:9000; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://*.firebaseio.com wss://*.firebaseio.com https://*.firebasedatabase.app wss://*.firebasedatabase.app https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com http://127.0.0.1:9099 http://127.0.0.1:9000 ws://127.0.0.1:9000; frame-src https://*.firebaseapp.com https://*.firebaseio.com https://erpg.app http://127.0.0.1:9000; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <!-- Favicons -->
     <link rel="icon" type="image/png" href="assets/favicon/favicon-96x96.png" sizes="96x96">
@@ -50,7 +50,9 @@
                             dark: '#05070e',
                             panel: '#0d1322',
                             yellow: '#0073FF',
-                            accent: '#1e40af'
+                            accent: '#1e40af',
+                            gold: '#ffd700',
+                            crimson: '#e60023'
                         }
                     }
                 }
@@ -79,39 +81,23 @@
         }
 
         /* Clips Poligonais e Angulares P5 */
-        .p5-clip-1 {
-            clip-path: polygon(0% 0%, 100% 2%, 98% 98%, 2% 100%);
-        }
-        .p5-clip-badge {
-            clip-path: polygon(8% 0%, 100% 0%, 92% 100%, 0% 100%);
-        }
-        .p5-clip-btn {
-            clip-path: polygon(5% 0%, 100% 0%, 95% 100%, 0% 100%);
-        }
-        .p5-banner-clip {
-            clip-path: polygon(0 0, 100% 5%, 97% 95%, 2% 100%);
-        }
+        .p5-clip-1 { clip-path: polygon(0% 0%, 100% 2%, 98% 98%, 2% 100%); }
+        .p5-clip-badge { clip-path: polygon(8% 0%, 100% 0%, 92% 100%, 0% 100%); }
+        .p5-clip-btn { clip-path: polygon(5% 0%, 100% 0%, 95% 100%, 0% 100%); }
+        .p5-banner-clip { clip-path: polygon(0 0, 100% 5%, 97% 95%, 2% 100%); }
 
         /* Sombras Duras Estilo Comic/Visual Novel */
-        .p5-shadow {
-            box-shadow: 6px 6px 0px #000000;
-        }
-        .p5-shadow-blue {
-            box-shadow: 6px 6px 0px #00d2ff;
-        }
-        .p5-shadow-yellow {
-            box-shadow: 6px 6px 0px #0073ff;
-        }
+        .p5-shadow { box-shadow: 6px 6px 0px #000000; }
+        .p5-shadow-sm { box-shadow: 3px 3px 0px #000000; }
+        .p5-shadow-blue { box-shadow: 6px 6px 0px #00d2ff; }
+        .p5-shadow-yellow { box-shadow: 6px 6px 0px #0073ff; }
+        .p5-shadow-gold { box-shadow: 6px 6px 0px #ffd700; }
 
-        /* Efeito de inclinação / Skew nos containers */
-        .skew-neg-2 {
-            transform: rotate(-1.8deg) skewX(-1deg);
-        }
-        .skew-pos-2 {
-            transform: rotate(1.8deg) skewX(1deg);
-        }
+        /* Skew nos containers */
+        .skew-neg-2 { transform: rotate(-1.8deg) skewX(-1deg); }
+        .skew-pos-2 { transform: rotate(1.8deg) skewX(1deg); }
 
-        /* Transições Snappy e Explosivas */
+        /* Transições */
         .p5-btn {
             transition: transform 0.1s cubic-bezier(0, 0, 0.2, 1), box-shadow 0.1s ease;
         }
@@ -126,15 +112,26 @@
 
         /* Animação do Dado Rolando P5 Style */
         @keyframes p5-pop-roll {
-            0% { transform: scale(0.6) rotate(-20deg); filter: brightness(2); }
-            30% { transform: scale(1.2) rotate(15deg); }
-            60% { transform: scale(0.9) rotate(-10deg); }
-            80% { transform: scale(1.08) rotate(5deg); }
+            0% { transform: scale(0.5) rotate(-35deg); filter: brightness(2.5); }
+            25% { transform: scale(1.25) rotate(20deg); }
+            50% { transform: scale(0.85) rotate(-15deg); }
+            75% { transform: scale(1.1) rotate(10deg); }
             100% { transform: scale(1) rotate(0deg); filter: brightness(1); }
         }
 
+        @keyframes p5-shake {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            20% { transform: translate(-4px, 4px) rotate(-3deg); }
+            40% { transform: translate(4px, -4px) rotate(3deg); }
+            60% { transform: translate(-3px, -2px) rotate(-2deg); }
+            80% { transform: translate(3px, 2px) rotate(2deg); }
+        }
+
         .p5-rolling {
-            animation: p5-pop-roll 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: p5-pop-roll 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .p5-shaking {
+            animation: p5-shake 0.35s ease-in-out infinite;
         }
 
         /* Faixa inclinada com texto correndo da direita para a esquerda.
@@ -178,19 +175,10 @@
         }
 
         /* Scrollbar customizada */
-        ::-webkit-scrollbar {
-            width: 10px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #05070e;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #0047ab;
-            border: 2px solid #000;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #00d2ff;
-        }
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #05070e; }
+        ::-webkit-scrollbar-thumb { background: #0047ab; border: 2px solid #000; }
+        ::-webkit-scrollbar-thumb:hover { background: #00d2ff; }
     </style>
 </head>
 <body class="text-white font-sans min-h-screen flex flex-col justify-between selection:bg-p5-electric selection:text-black">
@@ -199,7 +187,7 @@
     <a class="voltar" href="index.html">‹ Hub</a>
     <div class="titulo">
         <h1>Rolagem de Dados</h1>
-        <p class="tagline">Rolagens solo e disputas</p>
+        <p class="tagline">Rolagens, atalhos e disputas</p>
     </div>
     <div class="espaco"></div>
     <div class="usuario" data-usuario hidden></div>
@@ -222,23 +210,65 @@
     </div>
 </div>
 
-    <!-- CONTEÚDO PRINCIPAL -->
-    <main class="conteudo w-full flex-grow">
 
-        <!-- Seletor de Modo (Abas P5) -->
-        <div class="flex flex-wrap justify-center gap-4 skew-pos-2 mb-8">
-            <button id="tab-solo-btn" onclick="switchTab('solo')" class="p5-btn p5-clip-btn bg-p5-electric text-black font-p5title text-xl px-6 py-2 border-2 border-black p5-shadow font-bold">
-                <i class="fa-solid fa-dice-d20 mr-2"></i> ROLAGEM SOLO
-            </button>
-            <button id="tab-versus-btn" onclick="switchTab('versus')" class="p5-btn p5-clip-btn bg-black text-white hover:text-p5-electric font-p5title text-xl px-6 py-2 border-2 border-p5-electric p5-shadow font-bold">
-                <i class="fa-solid fa-swords mr-2"></i> DISPUTA / VS
-            </button>
+    <section class="conteudo-largo max-w-7xl mx-auto px-4 pt-6 pb-2 w-full">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+            
+            <!-- Logo Persona Style -->
+            <div class="relative group cursor-pointer skew-neg-2" onclick="playP5Sound('click')">
+                <div class="bg-black text-white px-6 py-3 border-4 border-p5-electric p5-shadow relative z-10">
+                    <h1 class="font-p5title text-4xl sm:text-5xl tracking-widest text-white leading-none">
+                        PHANTOM <span class="bg-p5-electric text-black px-2 inline-block transform rotate-2">DICE</span>
+                    </h1>
+                    <p class="font-p5hand text-p5-yellow text-xs tracking-wider mt-1">DYNAMIC RPG SUITE &bull; GDC EDITION</p>
+                </div>
+                <div class="absolute -bottom-2 -right-2 w-full h-full bg-p5-royal border-2 border-black -z-0"></div>
+            </div>
+
+            <!-- Controles Globais de Som e Seletor de Modo (Abas P5) -->
+            <div class="flex flex-wrap items-center justify-center gap-3 skew-pos-2">
+                <!-- Toggle Audio -->
+                <button id="audio-toggle-btn" onclick="toggleAudio()" class="p5-btn p5-clip-btn bg-black text-p5-electric font-p5title text-lg px-4 py-2 border-2 border-p5-electric p5-shadow flex items-center gap-2">
+                    <i id="audio-icon" class="fa-solid fa-volume-high text-p5-yellow"></i>
+                    <span id="audio-label">SOM: ON</span>
+                </button>
+
+                <button id="tab-solo-btn" onclick="switchTab('solo')" class="p5-btn p5-clip-btn bg-p5-electric text-black font-p5title text-xl px-5 py-2 border-2 border-black p5-shadow font-bold">
+                    <i class="fa-solid fa-dice-d20 mr-1"></i> ROLAGEM SOLO
+                </button>
+                <button id="tab-gdc-btn" onclick="switchTab('gdc')" class="p5-btn p5-clip-btn bg-black text-white hover:text-p5-electric font-p5title text-xl px-5 py-2 border-2 border-p5-electric p5-shadow font-bold">
+                    <i class="fa-solid fa-book-skull mr-1 text-p5-yellow"></i> GDC / PERSONA RPG
+                </button>
+                <button id="tab-versus-btn" onclick="switchTab('versus')" class="p5-btn p5-clip-btn bg-black text-white hover:text-p5-electric font-p5title text-xl px-5 py-2 border-2 border-p5-electric p5-shadow font-bold">
+                    <i class="fa-solid fa-swords mr-1"></i> DISPUTA / VS
+                </button>
+            </div>
         </div>
+    </section>
 
-        <!-- ================= ABA 1: ROLAGEM SOLO ================= -->
+    <!-- BARRA DE ATALHOS RÁPIDOS (FAST ROLL BAR) -->
+    <section class="max-w-7xl mx-auto px-4 pt-4 w-full">
+        <div class="bg-black/90 border-2 border-p5-royal p-3 p5-shadow flex flex-wrap items-center gap-2">
+            <span class="font-p5title text-p5-electric text-lg px-2 border-r-2 border-p5-royal flex items-center gap-1">
+                <i class="fa-solid fa-bolt text-p5-yellow"></i> ATALHOS:
+            </span>
+            <button onclick="quickRoll(1, 20, 0, '1d20 (Padrão D&D/GDC)')" class="p5-btn bg-p5-panel text-white font-p5title px-3 py-1 text-base border border-p5-royal hover:bg-p5-royal hover:text-p5-electric">1d20</button>
+            <button onclick="quickRoll(2, 20, 0, 'Vantagem (2d20kh1)', 'keep-highest', 1)" class="p5-btn bg-p5-panel text-emerald-400 font-p5title px-3 py-1 text-base border border-emerald-500 hover:bg-emerald-950">2d20 Vantagem</button>
+            <button onclick="quickRoll(2, 20, 0, 'Desvantagem (2d20kl1)', 'keep-lowest', 1)" class="p5-btn bg-p5-panel text-rose-400 font-p5title px-3 py-1 text-base border border-rose-500 hover:bg-rose-950">2d20 Desvantagem</button>
+            <button onclick="quickRoll(4, 6, 0, 'Atributos (4d6kh3)', 'keep-highest', 3)" class="p5-btn bg-p5-panel text-p5-yellow font-p5title px-3 py-1 text-base border border-p5-yellow hover:bg-p5-royal">4d6 Drop Lowest</button>
+            <button onclick="quickRoll(1, 100, 0, 'Perícia % (1d100)')" class="p5-btn bg-p5-panel text-p5-electric font-p5title px-3 py-1 text-base border border-p5-electric hover:bg-p5-royal">1d100</button>
+            <button onclick="quickRoll(2, 6, 0, 'Base GDC (2d6)')" class="p5-btn bg-p5-panel text-purple-300 font-p5title px-3 py-1 text-base border border-purple-500 hover:bg-purple-950">2d6 (Base GDC)</button>
+            <button onclick="quickRoll(3, 6, 0, 'Habilidade GDC (3d6)')" class="p5-btn bg-p5-panel text-purple-300 font-p5title px-3 py-1 text-base border border-purple-500 hover:bg-purple-950">3d6 (Habilidade 3)</button>
+        </div>
+    </section>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="max-w-7xl mx-auto px-4 py-6 w-full flex-grow">
+
+        <!-- ================= ABA 1: ROLAGEM SOLO & PRESETS ================= -->
         <div id="tab-solo" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
-            <!-- Painel Esquerdo: Opções de Lançamento -->
+            <!-- Painel Esquerdo: Opções de Lançamento e Presets -->
             <div class="lg:col-span-5 space-y-6">
                 
                 <!-- Seleção dos Dados P5 Style -->
@@ -248,11 +278,11 @@
                     </div>
 
                     <div class="grid grid-cols-4 gap-3" id="dice-selector">
-                        <button onclick="selectDice(2)" class="dice-btn p5-btn bg-black border-2 border-p5-royal text-white hover:bg-p5-royal font-p5title text-xl p-2 flex flex-col items-center p5-shadow" data-faces="2">
+                        <button onclick="selectDice(2)" class="dice-btn p5-btn bg-black border-2 border-p5-royal text-white font-p5title text-xl p-2 flex flex-col items-center p5-shadow" data-faces="2">
                             <span>D2</span>
                             <i class="fa-solid fa-coins text-sm text-p5-electric"></i>
                         </button>
-                        <button onclick="selectDice(4)" class="dice-btn p5-btn bg-black border-2 border-p5-royal text-white hover:bg-p5-royal font-p5title text-xl p-2 flex flex-col items-center p5-shadow" data-faces="4">
+                        <button onclick="selectDice(4)" class="dice-btn p5-btn bg-black border-2 border-p5-royal text-white font-p5title text-xl p-2 flex flex-col items-center p5-shadow" data-faces="4">
                             <span>D4</span>
                             <i class="fa-solid fa-play -rotate-90 text-sm text-p5-electric"></i>
                         </button>
@@ -260,30 +290,30 @@
                             <span>D6</span>
                             <i class="fa-solid fa-dice-d6 text-sm text-black"></i>
                         </button>
-                        <button onclick="selectDice(8)" class="dice-btn p5-btn bg-black border-2 border-p5-royal text-white hover:bg-p5-royal font-p5title text-xl p-2 flex flex-col items-center p5-shadow" data-faces="8">
+                        <button onclick="selectDice(8)" class="dice-btn p5-btn bg-black border-2 border-p5-royal text-white font-p5title text-xl p-2 flex flex-col items-center p5-shadow" data-faces="8">
                             <span>D8</span>
                             <i class="fa-solid fa-gem text-sm text-p5-electric"></i>
                         </button>
-                        <button onclick="selectDice(10)" class="dice-btn p5-btn bg-black border-2 border-p5-royal text-white hover:bg-p5-royal font-p5title text-xl p-2 flex flex-col items-center p5-shadow" data-faces="10">
+                        <button onclick="selectDice(10)" class="dice-btn p5-btn bg-black border-2 border-p5-royal text-white font-p5title text-xl p-2 flex flex-col items-center p5-shadow" data-faces="10">
                             <span>D10</span>
                             <i class="fa-solid fa-shield text-sm text-p5-electric"></i>
                         </button>
-                        <button onclick="selectDice(12)" class="dice-btn p5-btn bg-black border-2 border-p5-royal text-white hover:bg-p5-royal font-p5title text-xl p-2 flex flex-col items-center p5-shadow" data-faces="12">
+                        <button onclick="selectDice(12)" class="dice-btn p5-btn bg-black border-2 border-p5-royal text-white font-p5title text-xl p-2 flex flex-col items-center p5-shadow" data-faces="12">
                             <span>D12</span>
                             <i class="fa-solid fa-certificate text-sm text-p5-electric"></i>
                         </button>
-                        <button onclick="selectDice(20)" class="dice-btn p5-btn bg-black border-2 border-p5-royal text-white hover:bg-p5-royal font-p5title text-xl p-2 flex flex-col items-center p5-shadow" data-faces="20">
+                        <button onclick="selectDice(20)" class="dice-btn p5-btn bg-black border-2 border-p5-royal text-white font-p5title text-xl p-2 flex flex-col items-center p5-shadow" data-faces="20">
                             <span>D20</span>
                             <i class="fa-solid fa-dice-d20 text-sm text-p5-electric"></i>
                         </button>
-                        <button onclick="selectDice(100)" class="dice-btn p5-btn bg-black border-2 border-p5-royal text-white hover:bg-p5-royal font-p5title text-xl p-2 flex flex-col items-center p5-shadow" data-faces="100">
+                        <button onclick="selectDice(100)" class="dice-btn p5-btn bg-black border-2 border-p5-royal text-white font-p5title text-xl p-2 flex flex-col items-center p5-shadow" data-faces="100">
                             <span>D100</span>
                             <i class="fa-solid fa-percent text-sm text-p5-electric"></i>
                         </button>
                     </div>
                 </div>
 
-                <!-- Controles de Quantidade e Modificador -->
+                <!-- Controles de Quantidade, Modificadores e Regras -->
                 <div class="bg-p5-panel border-4 border-black p5-shadow p-5 skew-pos-2 space-y-4">
                     <div class="bg-p5-royal text-white font-p5title text-xl px-4 py-1 border-2 border-black inline-block p5-clip-badge -ml-7 -mt-2 p5-shadow">
                         <i class="fa-solid fa-sliders mr-2"></i> AJUSTE DE PARÂMETROS
@@ -315,9 +345,9 @@
                         </div>
                     </div>
 
-                    <!-- Filtro de Maior / Menor -->
-                    <div class="bg-black border-2 border-p5-royal p-3 p5-shadow">
-                        <label class="font-p5title text-lg text-white block mb-1">REGRA DE SELEÇÃO</label>
+                    <!-- Regra de Filtro + Dados Explosivos -->
+                    <div class="bg-black border-2 border-p5-royal p-3 p5-shadow space-y-2">
+                        <label class="font-p5title text-lg text-white block">REGRA DE SELEÇÃO & ESPECIAS</label>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             <select id="filter-type" onchange="toggleFilterCount()" class="bg-p5-dark border border-p5-royal text-sm text-white px-2 py-1 font-sans focus:outline-none focus:border-p5-electric">
                                 <option value="all">Somar Todos</option>
@@ -328,6 +358,10 @@
                             </select>
                             <input type="number" id="filter-count" value="1" min="1" max="30" class="bg-p5-dark border border-p5-royal px-2 py-1 text-center font-p5title text-xl text-p5-yellow focus:outline-none disabled:opacity-30" disabled>
                         </div>
+                        <div class="flex items-center justify-between pt-1">
+                            <span class="font-p5title text-sm text-gray-300">DADOS EXPLOSIVOS (Re-rolar valor máximo)</span>
+                            <input type="checkbox" id="exploding-dice" class="w-5 h-5 accent-p5-electric cursor-pointer">
+                        </div>
                     </div>
 
                     <!-- BOTÃO DISPARAR ROLAGEM -->
@@ -336,13 +370,28 @@
                     </button>
                 </div>
 
+                <!-- Painel de Presets Customizados do Usuário -->
+                <div class="bg-p5-panel border-4 border-black p5-shadow p-5 skew-neg-2">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="font-p5title text-2xl text-white flex items-center gap-2">
+                            <i class="fa-solid fa-bookmark text-p5-yellow"></i> PRESETS PERSONALIADOS
+                        </span>
+                        <button onclick="openPresetModal()" class="p5-btn bg-p5-yellow text-black font-p5title px-3 py-1 text-sm border border-black font-bold">
+                            + NOVO PRESET
+                        </button>
+                    </div>
+                    <div id="custom-presets-list" class="flex flex-wrap gap-2 max-h-40 overflow-y-auto p-1">
+                        <!-- Gerado via JS -->
+                    </div>
+                </div>
+
             </div>
 
             <!-- Painel Direito: Exibição dos Resultados -->
             <div class="lg:col-span-7 space-y-6">
                 
                 <!-- Display Result Persona Visual -->
-                <div class="bg-p5-panel border-4 border-black p5-shadow p-6 skew-neg-2 relative overflow-hidden">
+                <div id="result-card-box" class="bg-p5-panel border-4 border-black p5-shadow p-6 skew-neg-2 relative overflow-hidden transition-all duration-300">
                     <div class="flex justify-between items-center mb-4 border-b-2 border-p5-royal pb-2">
                         <span class="font-p5title text-2xl text-p5-electric tracking-widest">MESA DE RESULTADO</span>
                         <span id="formula-display" class="bg-p5-yellow text-black font-p5title text-lg px-3 py-0.5 border border-black font-bold transform rotate-1">1d6 + 0</span>
@@ -354,19 +403,19 @@
                         <div id="total-result" class="font-p5title text-7xl sm:text-9xl text-p5-yellow drop-shadow-[4px_4px_0px_#000] leading-none my-2 min-h-[6rem] flex items-center">
                             -
                         </div>
-                        <div id="result-status" class="bg-black text-white border border-p5-electric px-4 py-1 text-xs font-mono mt-1 p5-shadow">
+                        <div id="result-status" class="bg-black text-white border border-p5-electric px-4 py-1 text-xs font-mono mt-1 p5-shadow text-center">
                             AGUARDANDO AÇÃO DO JOGADOR...
                         </div>
                     </div>
 
-                    <!-- Dados Sorteadados -->
+                    <!-- Dados Sorteados -->
                     <div class="mt-6 pt-4 border-t-2 border-p5-royal">
                         <div class="flex justify-between items-center mb-3">
                             <span class="font-p5title text-xl text-white">DADOS SORTEADOS (<span id="dice-count-indicator">0</span>)</span>
-                            <span class="text-[10px] font-mono text-p5-electric">VERDE = MAIOR | VERMELHO = MENOR</span>
+                            <span class="text-[10px] font-mono text-p5-electric">VERDE = DADO ÚTIL | VERMELHO/RISCADO = DESCARTADO</span>
                         </div>
 
-                        <div id="dice-container" class="flex flex-wrap gap-3 min-h-[70px] p-3 bg-black border-2 border-p5-royal justify-center items-center">
+                        <div id="dice-container" class="flex flex-wrap gap-3 min-h-[70px] p-4 bg-black border-2 border-p5-royal justify-center items-center">
                             <span class="font-p5hand text-gray-500 text-sm">Clique em "Lançar Dados" para girar a sorte!</span>
                         </div>
                     </div>
@@ -378,9 +427,14 @@
                         <h3 class="font-p5title text-2xl text-white flex items-center gap-2">
                             <i class="fa-solid fa-history text-p5-electric"></i> HISTÓRICO DE LANÇAMENTOS
                         </h3>
-                        <button onclick="clearHistory('solo')" class="font-p5title text-sm bg-black border border-p5-royal text-p5-electric px-3 py-1 hover:bg-p5-royal hover:text-white transition">
-                            LIMPAR
-                        </button>
+                        <div class="flex gap-2">
+                            <button onclick="exportHistory()" class="font-p5title text-sm bg-black border border-p5-royal text-p5-yellow px-2 py-1 hover:bg-p5-royal hover:text-white transition">
+                                <i class="fa-solid fa-download mr-1"></i> EXPORTAR
+                            </button>
+                            <button onclick="clearHistory('solo')" class="font-p5title text-sm bg-black border border-p5-royal text-p5-electric px-2 py-1 hover:bg-p5-royal hover:text-white transition">
+                                LIMPAR
+                            </button>
+                        </div>
                     </div>
                     <div id="solo-history" class="space-y-2 max-h-56 overflow-y-auto pr-1">
                         <p class="font-p5hand text-xs text-gray-500 text-center py-4">Nenhum registro encontrado no diário.</p>
@@ -390,7 +444,126 @@
             </div>
         </div>
 
-        <!-- ================= ABA 2: DISPUTA / VERSUS ================= -->
+        <!-- ================= ABA 2: GRIMÓRIO DO CORAÇÃO (GDC) SPECIAL ================= -->
+        <div id="tab-gdc" class="hidden space-y-6">
+            <div class="bg-p5-panel border-4 border-black p5-shadow p-6 skew-neg-2">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b-2 border-p5-royal">
+                    <div>
+                        <h2 class="font-p5title text-4xl text-p5-yellow tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-fire text-p5-crimson"></i> MÓDULO GRIMÓRIO DO CORAÇÃO (GDC)
+                        </h2>
+                        <p class="font-p5hand text-xs text-gray-300">Regras oficiais de Acertos, Cargas de Sorte, Mecânica de Arriscar (Risking) e Testes de SOR.</p>
+                    </div>
+                    <div class="bg-black border border-p5-royal px-4 py-2 p5-shadow text-right">
+                        <span class="font-p5title text-xs text-p5-electric block">CATEGORIA DE DADO DE COMBATE (HDC/DDC)</span>
+                        <span id="gdc-category-indicator" class="font-p5title text-2xl text-p5-yellow">D6 (PADRÃO)</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Coluna 1: Teste de Combate / Habilidade -->
+                    <div class="bg-black border-2 border-p5-royal p-4 p5-shadow space-y-4">
+                        <div class="bg-p5-royal text-white font-p5title text-lg px-3 py-0.5 border border-black inline-block p5-shadow">
+                            1. TESTE DE COMBATE / HABILIDADE
+                        </div>
+                        
+                        <div>
+                            <label class="font-p5title text-sm text-gray-300 block mb-1">PONTOS DE HABILIDADE (QTD D6):</label>
+                            <input type="number" id="gdc-skill-pts" value="3" min="1" max="12" class="w-full bg-p5-panel border border-p5-royal px-3 py-1 font-p5title text-2xl text-p5-yellow text-center focus:outline-none">
+                        </div>
+
+                        <!-- Mecânica Arriscar (Risking) -->
+                        <div class="border-t border-p5-royal/50 pt-3">
+                            <label class="font-p5title text-sm text-p5-electric block mb-1">MECÂNICA ARRISCAR (RISKING):</label>
+                            <select id="gdc-risk-die" class="w-full bg-p5-panel border border-p5-royal text-white px-2 py-1.5 font-sans text-sm focus:outline-none">
+                                <option value="none">Não Arriscar (Apenas Habilidade)</option>
+                                <option value="d4">Arriscar com D4 (+1d4 / -1d4)</option>
+                                <option value="d6">Arriscar com D6 (+1d6 / -1d6)</option>
+                            </select>
+                            <p class="text-[10px] text-gray-400 mt-1 italic">Soma uma rolagem e subtrai outra rolagem do mesmo dado.</p>
+                        </div>
+
+                        <!-- Carga de Sorte -->
+                        <div class="border-t border-p5-royal/50 pt-3 flex justify-between items-center">
+                            <div>
+                                <span class="font-p5title text-sm text-p5-yellow block">CARGAS DE SORTE (SOR)</span>
+                                <span class="text-[10px] text-gray-400">+1 ponto fixo por carga gasta</span>
+                            </div>
+                            <input type="number" id="gdc-luck-spend" value="0" min="0" max="10" class="w-16 bg-p5-panel border border-p5-royal px-2 py-1 font-p5title text-xl text-p5-yellow text-center">
+                        </div>
+
+                        <button onclick="rollGdcCombat()" class="p5-btn w-full py-3 bg-p5-electric text-black font-p5title text-2xl border-2 border-black p5-shadow-yellow font-bold">
+                            ROLAR TESTE DE HABILIDADE
+                        </button>
+                    </div>
+
+                    <!-- Coluna 2: Categoria de Dados HDC / DDC -->
+                    <div class="bg-black border-2 border-p5-royal p-4 p5-shadow space-y-4">
+                        <div class="bg-p5-royal text-white font-p5title text-lg px-3 py-0.5 border border-black inline-block p5-shadow">
+                            2. PROGRESSÃO HDC / DDC (DADOS DE ATAQUE/ESQUIVA)
+                        </div>
+
+                        <p class="text-xs text-gray-300 font-sans">Altere o degrau da categoria de dados para buffs ou debuffs:</p>
+
+                        <!-- Escada de Dados -->
+                        <div class="grid grid-cols-4 gap-2 text-center font-p5title">
+                            <button onclick="setGdcCategory('d2')" class="gdc-cat-btn bg-p5-panel border border-p5-royal text-white py-2 hover:bg-p5-royal" data-cat="d2">D2</button>
+                            <button onclick="setGdcCategory('d4')" class="gdc-cat-btn bg-p5-panel border border-p5-royal text-white py-2 hover:bg-p5-royal" data-cat="d4">D4</button>
+                            <button onclick="setGdcCategory('d6')" class="gdc-cat-btn bg-p5-electric text-black font-bold border border-black py-2" data-cat="d6">D6 (BASE)</button>
+                            <button onclick="setGdcCategory('d8')" class="gdc-cat-btn bg-p5-panel border border-p5-royal text-white py-2 hover:bg-p5-royal" data-cat="d8">D8</button>
+                            <button onclick="setGdcCategory('d10')" class="gdc-cat-btn bg-p5-panel border border-p5-royal text-white py-2 hover:bg-p5-royal" data-cat="d10">D10</button>
+                            <button onclick="setGdcCategory('d12')" class="gdc-cat-btn bg-p5-panel border border-p5-royal text-white py-2 hover:bg-p5-royal" data-cat="d12">D12</button>
+                            <button onclick="setGdcCategory('d20')" class="gdc-cat-btn bg-p5-panel border border-p5-royal text-white py-2 hover:bg-p5-royal" data-cat="d20">D20</button>
+                        </div>
+
+                        <!-- Teste de Crítico GDC (Gastar Sorte + 1d10) -->
+                        <div class="border-t border-p5-royal/50 pt-3 space-y-2">
+                            <span class="font-p5title text-sm text-p5-yellow block">TESTE DE GOLPE CRÍTICO GDC</span>
+                            <p class="text-[10px] text-gray-400">Gasta 1 Carga de Sorte e rola 1d10. Resultados 1 ou 2 são Críticos!</p>
+                            <button onclick="rollGdcCritical()" class="p5-btn w-full py-2 bg-p5-yellow text-black font-p5title text-xl border border-black font-bold">
+                                <i class="fa-solid fa-bolt mr-1"></i> TESTAR CRÍTICO (1d10)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Coluna 3: Teste de Resistência a Status & SOR (SORd12 + %) -->
+                    <div class="bg-black border-2 border-p5-royal p-4 p5-shadow space-y-4">
+                        <div class="bg-p5-royal text-white font-p5title text-lg px-3 py-0.5 border border-black inline-block p5-shadow">
+                            3. RESISTÊNCIA DE STATUS (SORd12 + %)
+                        </div>
+
+                        <div>
+                            <label class="font-p5title text-sm text-gray-300 block mb-1">VALOR DO ATRIBUTO SOR:</label>
+                            <input type="number" id="gdc-sor-val" value="2" min="1" max="10" class="w-full bg-p5-panel border border-p5-royal px-3 py-1 font-p5title text-2xl text-p5-electric text-center focus:outline-none">
+                        </div>
+
+                        <p class="text-xs text-gray-400 font-sans">
+                            1. Rola <strong class="text-p5-electric">SORd12</strong>. Se tirar pelo menos um <strong>12</strong>, anula o status!<br>
+                            2. Se não tirar 12, rola <strong>% (d100)</strong> para comparar contra a chance da magia.
+                        </p>
+
+                        <button onclick="rollGdcStatusDefense()" class="p5-btn w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-p5title text-2xl border-2 border-black p5-shadow font-bold">
+                            EXECUTAR TESTE DE STATUS
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Painel de Exibição de Resultado GDC -->
+                <div id="gdc-result-display" class="mt-6 bg-black border-2 border-p5-royal p-6 p5-shadow text-center relative overflow-hidden hidden">
+                    <span id="gdc-result-title" class="bg-p5-yellow text-black font-p5title text-xl px-4 py-0.5 border border-black inline-block mb-2 font-bold transform -rotate-1">
+                        RESULTADO GDC
+                    </span>
+                    <h3 id="gdc-result-total" class="font-p5title text-6xl text-p5-electric drop-shadow-[3px_3px_0px_#000]">
+                        -
+                    </h3>
+                    <p id="gdc-result-details" class="font-p5hand text-sm text-gray-200 mt-2">
+                        -
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= ABA 3: DISPUTA / VERSUS ================= -->
         <div id="tab-versus" class="hidden space-y-6">
             
             <div class="bg-p5-panel border-4 border-black p5-shadow p-6 skew-neg-2">
@@ -449,60 +622,170 @@
 
     </main>
 
-    <div class="faixa-marquee inversa" aria-label="Take your time">
-    <div class="trilha" aria-hidden="true">
-        <div class="grupo">
-            <span>TAKE YOUR TIME </span>
-            <span>TAKE YOUR TIME </span>
-            <span>TAKE YOUR TIME </span>
-            <span>TAKE YOUR TIME </span>
-            <span>TAKE YOUR TIME </span>
-            <span>TAKE YOUR TIME </span>
-            <span>TAKE YOUR TIME </span>
-            <span>TAKE YOUR TIME </span>
-        </div>
-        <div class="grupo">
-            <span>TAKE YOUR TIME </span>
-            <span>TAKE YOUR TIME </span>
-            <span>TAKE YOUR TIME </span>
-            <span>TAKE YOUR TIME </span>
-            <span>TAKE YOUR TIME </span>
-            <span>TAKE YOUR TIME </span>
-            <span>TAKE YOUR TIME </span>
-            <span>TAKE YOUR TIME </span>
+    <!-- MODAL PARA ADICIONAR PRESET CUSTOMIZADO -->
+    <div id="preset-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-p5-panel border-4 border-black p6 p5-shadow-gold max-w-md w-full p-6 skew-neg-2 relative">
+            <div class="flex justify-between items-center mb-4 border-b-2 border-p5-royal pb-2">
+                <h3 class="font-p5title text-3xl text-p5-yellow">CRIAR NOVO PRESET</h3>
+                <button onclick="closePresetModal()" class="text-white hover:text-p5-electric text-xl"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="space-y-4 font-sans text-sm">
+                <div>
+                    <label class="block font-p5title text-base text-gray-200">NOME DO ATALHO (Ex: Ataque Espada):</label>
+                    <input type="text" id="preset-name" placeholder="Ataque Espada Longa" class="w-full bg-black border border-p5-royal px-3 py-2 text-white font-p5title text-xl focus:outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-p5title text-base text-gray-200">QTD DADOS:</label>
+                        <input type="number" id="preset-qty" value="1" min="1" max="30" class="w-full bg-black border border-p5-royal px-3 py-1.5 text-p5-yellow font-p5title text-xl text-center focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-p5title text-base text-gray-200">TIPO DE DADO:</label>
+                        <select id="preset-faces" class="w-full bg-black border border-p5-royal px-3 py-2 text-white font-p5title text-xl focus:outline-none">
+                            <option value="4">D4</option>
+                            <option value="6">D6</option>
+                            <option value="8">D8</option>
+                            <option value="10">D10</option>
+                            <option value="12">D12</option>
+                            <option value="20" selected>D20</option>
+                            <option value="100">D100</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-p5title text-base text-gray-200">MODIFICADOR (+ / -):</label>
+                    <input type="number" id="preset-mod" value="0" class="w-full bg-black border border-p5-royal px-3 py-1.5 text-p5-electric font-p5title text-xl text-center focus:outline-none">
+                </div>
+            </div>
+
+            <div class="flex gap-3 mt-6">
+                <button onclick="savePreset()" class="p5-btn flex-1 bg-p5-electric text-black font-p5title text-2xl py-2 border-2 border-black font-bold">SALVAR PRESET</button>
+                <button onclick="closePresetModal()" class="p5-btn bg-black text-white font-p5title text-xl px-4 py-2 border border-p5-royal">CANCELAR</button>
+            </div>
         </div>
     </div>
-</div>
 
     <!-- FOOTER PERSONA STYLE -->
-    <footer class="bg-black border-t-4 border-p5-royal py-3 text-center text-xs font-mono text-gray-400">
-        <div class="max-w-7xl mx-auto px-4 flex justify-center items-center">
-            <span>Sistema Aleatório Criptográfico Livre de Viés (&ZeroWidthSpace;<code>window.crypto</code>)</span>
+    <footer class="bg-black border-t-4 border-p5-royal py-3 text-center text-xs font-mono text-gray-400 mt-8">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-2">
+            <span class="text-p5-electric font-p5title text-lg">TAKE YOUR TIME &bull; PHANTOM DICE GDC SUITE</span>
+            <span>Sistema Criptográfico Sem Viés (<code>window.crypto</code>)</span>
         </div>
     </footer>
 
-    <!-- LOGICA JAVASCRIPT -->
+    <!-- LÓGICA JAVASCRIPT INTEGRADA -->
     <script>
-        const esc = RPG.escaparHtml;
-
         /**
          * ESTADO GLOBAL DA APLICAÇÃO
          */
+        const esc = RPG.escaparHtml;
         const state = {
+            audioEnabled: true,
             selectedFaces: 6,
             quantity: 1,
             modifier: 0,
+            gdcCategory: 'd6',
             soloHistory: [],
             versusHistory: [],
+            customPresets: [
+                { id: 1, name: 'Ataque D20+5', qty: 1, faces: 20, mod: 5 },
+                { id: 2, name: 'Bola de Fogo (8d6)', qty: 8, faces: 6, mod: 0 },
+                { id: 3, name: 'Cura Divina (2d8+3)', qty: 2, faces: 8, mod: 3 }
+            ],
             participants: []
         };
 
         /**
-         * GERADOR DE ALEATORIEDADE CRIPTOGRÁFICA JUSTA (Fair-Play P5)
+         * SINTETIZADOR DE SOM WEB AUDIO API (ESTILO PERSONA 5 / RETRO)
+         */
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playP5Sound(type) {
+            if (!state.audioEnabled) return;
+            try {
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const now = audioCtx.currentTime;
+
+                if (type === 'roll') {
+                    // Efeito sonoro de dados chacoalhando e rolando
+                    for (let i = 0; i < 4; i++) {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(150 + Math.random() * 200, now + i * 0.06);
+                        osc.frequency.exponentialRampToValueAtTime(40, now + i * 0.06 + 0.05);
+                        
+                        gain.gain.setValueAtTime(0.2, now + i * 0.06);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.06 + 0.05);
+
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        osc.start(now + i * 0.06);
+                        osc.stop(now + i * 0.06 + 0.05);
+                    }
+                } else if (type === 'critical') {
+                    // Fanfarra triunfal de Ataque Total (P5 Critical Hit)
+                    const notes = [523.25, 659.25, 783.99, 1046.50];
+                    notes.forEach((freq, idx) => {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.type = 'square';
+                        osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+                        
+                        gain.gain.setValueAtTime(0.25, now + idx * 0.08);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.25);
+
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        osc.start(now + idx * 0.08);
+                        osc.stop(now + idx * 0.08 + 0.25);
+                    });
+                } else if (type === 'click') {
+                    // Clique sutil da UI
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(800, now);
+                    osc.frequency.exponentialRampToValueAtTime(400, now + 0.04);
+
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.04);
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.04);
+                }
+            } catch (e) {
+                console.log("Audio WebAPI:", e);
+            }
+        }
+
+        function toggleAudio() {
+            state.audioEnabled = !state.audioEnabled;
+            const btn = document.getElementById('audio-toggle-btn');
+            const label = document.getElementById('audio-label');
+            const icon = document.getElementById('audio-icon');
+
+            if (state.audioEnabled) {
+                label.innerText = 'SOM: ON';
+                icon.className = 'fa-solid fa-volume-high text-p5-yellow';
+                playP5Sound('click');
+            } else {
+                label.innerText = 'SOM: OFF';
+                icon.className = 'fa-solid fa-volume-xmark text-gray-500';
+            }
+        }
+
+        /**
+         * GERADOR DE ALEATORIEDADE CRIPTOGRÁFICA JUSTA (window.crypto)
          */
         function rollCryptoDie(faces) {
             const array = new Uint32Array(1);
-            const maxValid = Math.floor(4294967296 / faces) * faces; // Evita viés do operador resto
+            const maxValid = Math.floor(4294967296 / faces) * faces;
             let randomValue;
             
             do {
@@ -514,34 +797,44 @@
         }
 
         /**
-         * TROCA DE ABAS (P5 STYLE)
+         * NAVEGAÇÃO ENTRE ABAS
          */
         function switchTab(tab) {
+            playP5Sound('click');
             const soloTab = document.getElementById('tab-solo');
+            const gdcTab = document.getElementById('tab-gdc');
             const versusTab = document.getElementById('tab-versus');
+
             const soloBtn = document.getElementById('tab-solo-btn');
+            const gdcBtn = document.getElementById('tab-gdc-btn');
             const versusBtn = document.getElementById('tab-versus-btn');
+
+            soloTab.classList.add('hidden');
+            gdcTab.classList.add('hidden');
+            versusTab.classList.add('hidden');
+
+            soloBtn.className = "p5-btn p5-clip-btn bg-black text-white hover:text-p5-electric font-p5title text-xl px-5 py-2 border-2 border-p5-electric p5-shadow font-bold";
+            gdcBtn.className = "p5-btn p5-clip-btn bg-black text-white hover:text-p5-electric font-p5title text-xl px-5 py-2 border-2 border-p5-electric p5-shadow font-bold";
+            versusBtn.className = "p5-btn p5-clip-btn bg-black text-white hover:text-p5-electric font-p5title text-xl px-5 py-2 border-2 border-p5-electric p5-shadow font-bold";
 
             if (tab === 'solo') {
                 soloTab.classList.remove('hidden');
-                versusTab.classList.add('hidden');
-                
-                soloBtn.className = "p5-btn p5-clip-btn bg-p5-electric text-black font-p5title text-xl px-6 py-2 border-2 border-black p5-shadow font-bold";
-                versusBtn.className = "p5-btn p5-clip-btn bg-black text-white hover:text-p5-electric font-p5title text-xl px-6 py-2 border-2 border-p5-electric p5-shadow font-bold";
+                soloBtn.className = "p5-btn p5-clip-btn bg-p5-electric text-black font-p5title text-xl px-5 py-2 border-2 border-black p5-shadow font-bold";
+            } else if (tab === 'gdc') {
+                gdcTab.classList.remove('hidden');
+                gdcBtn.className = "p5-btn p5-clip-btn bg-p5-yellow text-black font-p5title text-xl px-5 py-2 border-2 border-black p5-shadow font-bold";
             } else {
-                soloTab.classList.add('hidden');
                 versusTab.classList.remove('hidden');
-                
-                versusBtn.className = "p5-btn p5-clip-btn bg-p5-electric text-black font-p5title text-xl px-6 py-2 border-2 border-black p5-shadow font-bold";
-                soloBtn.className = "p5-btn p5-clip-btn bg-black text-white hover:text-p5-electric font-p5title text-xl px-6 py-2 border-2 border-p5-electric p5-shadow font-bold";
+                versusBtn.className = "p5-btn p5-clip-btn bg-p5-electric text-black font-p5title text-xl px-5 py-2 border-2 border-black p5-shadow font-bold";
                 renderParticipants();
             }
         }
 
         /**
-         * CONTROLES SOLO
+         * CONTROLES DA ABA SOLO & PARÂMETROS
          */
         function selectDice(faces) {
+            playP5Sound('click');
             state.selectedFaces = faces;
             document.querySelectorAll('#dice-selector .dice-btn').forEach(btn => {
                 const btnFaces = parseInt(btn.getAttribute('data-faces'));
@@ -564,6 +857,7 @@
         }
 
         function adjustQty(delta) {
+            playP5Sound('click');
             const input = document.getElementById('dice-qty');
             let newVal = parseInt(input.value) + delta;
             if (newVal >= 1 && newVal <= 30) {
@@ -580,6 +874,7 @@
         }
 
         function adjustMod(delta) {
+            playP5Sound('click');
             const input = document.getElementById('dice-mod');
             let newVal = (parseInt(input.value) || 0) + delta;
             input.value = newVal;
@@ -606,30 +901,71 @@
             }
         }
 
-        function rollSolo() {
+        /**
+         * FUNÇÃO DE ATALHO RÁPIDO (FAST ROLL BAR)
+         */
+        function quickRoll(qty, faces, mod, label, filterType = 'all', filterCount = 1) {
+            playP5Sound('click');
+            switchTab('solo');
+            state.quantity = qty;
+            state.selectedFaces = faces;
+            state.modifier = mod;
+
+            document.getElementById('dice-qty').value = qty;
+            document.getElementById('qty-val').innerText = qty;
+            document.getElementById('dice-mod').value = mod;
+            updateModDisplay(mod);
+            selectDice(faces);
+
+            document.getElementById('filter-type').value = filterType;
+            document.getElementById('filter-count').value = filterCount;
+            toggleFilterCount();
+
+            rollSolo(label);
+        }
+
+        /**
+         * EXECUTAR ROLAGEM SOLO PRINCIPAL
+         */
+        function rollSolo(customLabel = null) {
+            playP5Sound('roll');
+            const cardBox = document.getElementById('result-card-box');
             const container = document.getElementById('dice-container');
             const totalDisplay = document.getElementById('total-result');
             const statusDisplay = document.getElementById('result-status');
 
-            // Animação de Entrada
+            // Efeito visual 3D shake
+            cardBox.classList.add('p5-shaking');
             container.innerHTML = '';
             totalDisplay.innerText = '??';
             totalDisplay.classList.add('p5-rolling');
-            statusDisplay.innerText = 'SORTIANDO SEQUÊNCIA CRIPTOGRÁFICA...';
+            statusDisplay.innerText = customLabel ? `EXECUTANDO: ${customLabel.toUpperCase()}...` : 'SORTIANDO SEQUÊNCIA CRIPTOGRÁFICA...';
 
             setTimeout(() => {
+                cardBox.classList.remove('p5-shaking');
                 totalDisplay.classList.remove('p5-rolling');
 
-                // Lançar dados
-                const rolls = [];
+                const isExploding = document.getElementById('exploding-dice').checked;
+                let rolls = [];
+
                 for (let i = 0; i < state.quantity; i++) {
-                    rolls.push(rollCryptoDie(state.selectedFaces));
+                    let r = rollCryptoDie(state.selectedFaces);
+                    rolls.push(r);
+
+                    // Re-rolar se for explosivo
+                    if (isExploding && r === state.selectedFaces) {
+                        let extra;
+                        do {
+                            extra = rollCryptoDie(state.selectedFaces);
+                            rolls.push(extra);
+                        } while (extra === state.selectedFaces);
+                    }
                 }
 
                 const maxVal = Math.max(...rolls);
                 const minVal = Math.min(...rolls);
 
-                // Aplicar Filtro de Seleção
+                // Regra de Filtro
                 const filterType = document.getElementById('filter-type').value;
                 const filterCount = parseInt(document.getElementById('filter-count').value) || 1;
 
@@ -662,7 +998,16 @@
                 const finalTotal = sumKept + state.modifier;
                 totalDisplay.innerText = finalTotal;
 
-                // Renderizar Dados na Tela com Estilo Comic/P5
+                // Sons e Efeitos Críticos (Ex: 20 no D20)
+                const isCrit = state.selectedFaces === 20 && rolls.includes(20);
+                if (isCrit) {
+                    playP5Sound('critical');
+                    statusDisplay.innerHTML = `<span class="text-p5-yellow font-bold animate-pulse">★ ALL-OUT ATTACK! CRÍTICO PERFEITO (20 NAT) ★</span>`;
+                } else {
+                    statusDisplay.innerText = `Lançamentos: [${rolls.join(', ')}] ${state.modifier !== 0 ? `| Mod: ${state.modifier >= 0 ? '+' : ''}${state.modifier}` : ''}`;
+                }
+
+                // Renderizar Dados
                 container.innerHTML = '';
                 document.getElementById('dice-count-indicator').innerText = rolls.length;
 
@@ -673,7 +1018,7 @@
 
                     const dieEl = document.createElement('div');
                     
-                    dieEl.className = `w-12 h-12 flex items-center justify-center font-p5title text-2xl border-2 transition-transform transform p5-shadow ${
+                    dieEl.className = `w-12 h-12 flex items-center justify-center font-p5title text-2xl border-2 transition-all transform p5-shadow ${
                         !isKept 
                             ? 'bg-gray-900 border-gray-700 text-gray-600 line-through scale-90 opacity-40' 
                             : isMax && rolls.length > 1
@@ -687,12 +1032,9 @@
                     container.appendChild(dieEl);
                 });
 
-                // Status
-                statusDisplay.innerText = `Lançamentos: [${rolls.join(', ')}] ${state.modifier !== 0 ? `| Mod: ${state.modifier >= 0 ? '+' : ''}${state.modifier}` : ''}`;
-
-                // Salvar Histórico
+                // Registrar Histórico
                 addSoloHistory({
-                    formula: `${state.quantity}D${state.selectedFaces}${state.modifier >= 0 ? '+' : ''}${state.modifier}`,
+                    formula: customLabel || `${state.quantity}D${state.selectedFaces}${state.modifier >= 0 ? '+' : ''}${state.modifier}`,
                     rolls: rolls,
                     total: finalTotal,
                     time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
@@ -701,9 +1043,12 @@
             }, 300);
         }
 
+        /**
+         * HISTÓRICO SOLO & EXPORTAÇÃO
+         */
         function addSoloHistory(item) {
             state.soloHistory.unshift(item);
-            if (state.soloHistory.length > 12) state.soloHistory.pop();
+            if (state.soloHistory.length > 15) state.soloHistory.pop();
             renderSoloHistory();
         }
 
@@ -726,6 +1071,202 @@
                     </div>
                 </div>
             `).join('');
+        }
+
+        function exportHistory() {
+            playP5Sound('click');
+            if (state.soloHistory.length === 0) {
+                alert('Não há dados no histórico para exportar.');
+                return;
+            }
+
+            let text = "=== HISTÓRICO PHANTOM DICE ===\n\n";
+            state.soloHistory.forEach(h => {
+                text += `[${h.time}] Fórmulas: ${h.formula} | Dados: [${h.rolls.join(', ')}] => TOTAL: ${h.total}\n`;
+            });
+
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `PhantomDice_History_${Date.now()}.txt`;
+            a.click();
+        }
+
+        /**
+         * PRESETS CUSTOMIZADOS DO USUÁRIO (localStorage)
+         */
+        function loadCustomPresets() {
+            const saved = localStorage.getItem('phantom_dice_presets');
+            if (saved) {
+                try { state.customPresets = JSON.parse(saved); } catch(e){}
+            }
+            renderPresets();
+        }
+
+        function renderPresets() {
+            const container = document.getElementById('custom-presets-list');
+            if (state.customPresets.length === 0) {
+                container.innerHTML = `<span class="text-xs font-p5hand text-gray-500">Nenhum preset cadastrado.</span>`;
+                return;
+            }
+
+            container.innerHTML = state.customPresets.map(p => `
+                <div class="flex items-center gap-1 bg-black border border-p5-royal p-1 p5-shadow-sm">
+                    <button onclick="quickRoll(${p.qty}, ${p.faces}, ${p.mod}, '${p.name}')" class="font-p5title text-sm text-p5-electric hover:text-p5-yellow px-2 py-0.5">
+                        ${p.name} (${p.qty}d${p.faces}${p.mod >= 0 ? '+' : ''}${p.mod})
+                    </button>
+                    <button onclick="deletePreset(${p.id})" class="text-gray-500 hover:text-red-500 px-1 text-xs">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function openPresetModal() {
+            playP5Sound('click');
+            document.getElementById('preset-modal').classList.remove('hidden');
+        }
+
+        function closePresetModal() {
+            playP5Sound('click');
+            document.getElementById('preset-modal').classList.add('hidden');
+        }
+
+        function savePreset() {
+            const name = document.getElementById('preset-name').value.trim() || 'Preset Custom';
+            const qty = parseInt(document.getElementById('preset-qty').value) || 1;
+            const faces = parseInt(document.getElementById('preset-faces').value) || 20;
+            const mod = parseInt(document.getElementById('preset-mod').value) || 0;
+
+            const newPreset = { id: Date.now(), name, qty, faces, mod };
+            state.customPresets.push(newPreset);
+            localStorage.setItem('phantom_dice_presets', JSON.stringify(state.customPresets));
+            
+            renderPresets();
+            closePresetModal();
+        }
+
+        function deletePreset(id) {
+            playP5Sound('click');
+            state.customPresets = state.customPresets.filter(p => p.id !== id);
+            localStorage.setItem('phantom_dice_presets', JSON.stringify(state.customPresets));
+            renderPresets();
+        }
+
+        /**
+         * MÓDULO GRIMÓRIO DO CORAÇÃO (GDC)
+         */
+        function setGdcCategory(cat) {
+            playP5Sound('click');
+            state.gdcCategory = cat;
+            document.getElementById('gdc-category-indicator').innerText = `${cat.toUpperCase()} (${cat === 'd6' ? 'PADRÃO' : 'MODIFICADO'})`;
+            
+            document.querySelectorAll('.gdc-cat-btn').forEach(btn => {
+                if (btn.getAttribute('data-cat') === cat) {
+                    btn.className = "gdc-cat-btn bg-p5-electric text-black font-bold border border-black py-2";
+                } else {
+                    btn.className = "gdc-cat-btn bg-p5-panel border border-p5-royal text-white py-2 hover:bg-p5-royal";
+                }
+            });
+        }
+
+        function rollGdcCombat() {
+            playP5Sound('roll');
+            const skillPts = parseInt(document.getElementById('gdc-skill-pts').value) || 1;
+            const riskDie = document.getElementById('gdc-risk-die').value;
+            const luckSpend = parseInt(document.getElementById('gdc-luck-spend').value) || 0;
+
+            // Extrair o tamanho do dado de combate da categoria HDC/DDC escolhida
+            const faces = parseInt(state.gdcCategory.replace('d', '')) || 6;
+
+            // Rolagem Base do Teste
+            let rolls = [];
+            for (let i = 0; i < skillPts; i++) {
+                rolls.push(rollCryptoDie(faces));
+            }
+            let baseTotal = rolls.reduce((a, b) => a + b, 0);
+
+            // Mecânica Arriscar (Risking)
+            let riskPos = 0;
+            let riskNeg = 0;
+            let riskText = '';
+
+            if (riskDie !== 'none') {
+                const riskFaces = parseInt(riskDie.replace('d', ''));
+                riskPos = rollCryptoDie(riskFaces);
+                riskNeg = rollCryptoDie(riskFaces);
+                riskText = ` | Arriscou (${riskDie.toUpperCase()}): +${riskPos} / -${riskNeg}`;
+            }
+
+            const finalTotal = baseTotal + (riskPos - riskNeg) + luckSpend;
+
+            // Exibir Resultado GDC
+            const display = document.getElementById('gdc-result-display');
+            const totalEl = document.getElementById('gdc-result-total');
+            const detailsEl = document.getElementById('gdc-result-details');
+
+            display.classList.remove('hidden');
+            totalEl.innerText = finalTotal;
+            detailsEl.innerText = `Dados Base (${skillPts}${state.gdcCategory.toUpperCase()}): [${rolls.join(', ')}] = ${baseTotal}${riskText} | Sorte (+${luckSpend})`;
+        }
+
+        function rollGdcCritical() {
+            playP5Sound('roll');
+            const roll = rollCryptoDie(10);
+            const isCrit = roll === 1 || roll === 2;
+
+            const display = document.getElementById('gdc-result-display');
+            const titleEl = document.getElementById('gdc-result-title');
+            const totalEl = document.getElementById('gdc-result-total');
+            const detailsEl = document.getElementById('gdc-result-details');
+
+            display.classList.remove('hidden');
+            titleEl.innerText = "TESTE DE CRÍTICO GDC (1d10)";
+            
+            if (isCrit) {
+                playP5Sound('critical');
+                totalEl.innerText = `💥 CRÍTICO! (${roll})`;
+                totalEl.className = "font-p5title text-6xl text-p5-yellow drop-shadow-[3px_3px_0px_#000] animate-pulse";
+                detailsEl.innerText = `Você tirou ${roll} no d10 (Necessário 1 ou 2). O DANO É DOBRADO E OS EFEITOS SECUNDÁRIOS SÃO ATIVADOS!`;
+            } else {
+                totalEl.innerText = `NORMAL (${roll})`;
+                totalEl.className = "font-p5title text-6xl text-gray-400 drop-shadow-[3px_3px_0px_#000]";
+                detailsEl.innerText = `Você tirou ${roll} no d10. O ataque atinge normalmente sem multiplicador crítico.`;
+            }
+        }
+
+        function rollGdcStatusDefense() {
+            playP5Sound('roll');
+            const sorVal = parseInt(document.getElementById('gdc-sor-val').value) || 1;
+
+            // Step 1: SORd12
+            let sorRolls = [];
+            for (let i = 0; i < sorVal; i++) {
+                sorRolls.push(rollCryptoDie(12));
+            }
+            const hasTwelve = sorRolls.includes(12);
+
+            // Step 2: Porcentagem % (1d100)
+            const percentRoll = rollCryptoDie(100);
+
+            const display = document.getElementById('gdc-result-display');
+            const titleEl = document.getElementById('gdc-result-title');
+            const totalEl = document.getElementById('gdc-result-total');
+            const detailsEl = document.getElementById('gdc-result-details');
+
+            display.classList.remove('hidden');
+            titleEl.innerText = "TESTE DE RESISTÊNCIA DE STATUS GDC";
+
+            if (hasTwelve) {
+                playP5Sound('critical');
+                totalEl.innerText = "🛡️ NEUTRALIZADO!";
+                totalEl.className = "font-p5title text-5xl text-emerald-400 drop-shadow-[3px_3px_0px_#000]";
+                detailsEl.innerText = `Você tirou um 12 perfeito nos dados SORd12 [${sorRolls.join(', ')}]. O Status Negativo foi anulado instantaneamente!`;
+            } else {
+                totalEl.innerText = `D100 = ${percentRoll}%`;
+                totalEl.className = "font-p5title text-5xl text-purple-400 drop-shadow-[3px_3px_0px_#000]";
+                detailsEl.innerText = `SORd12 [${sorRolls.join(', ')}] não obteve 12. Compare o valor de ${percentRoll}% com a chance da habilidade inimiga.`;
+            }
         }
 
         /**
@@ -810,6 +1351,7 @@
         }
 
         function addParticipant() {
+            playP5Sound('click');
             if (state.participants.length >= MAX_PARTICIPANTES) {
                 alert(`A disputa aceita no máximo ${MAX_PARTICIPANTES} competidores.`);
                 return;
@@ -819,6 +1361,7 @@
         }
 
         function removeParticipant(id) {
+            playP5Sound('click');
             if (state.participants.length <= 2) {
                 alert('A disputa necessita de pelo menos 2 competidores.');
                 return;
@@ -893,6 +1436,7 @@
         }
 
         async function rollVersus() {
+            playP5Sound('roll');
             if (state.participants.length < 2) {
                 alert('A disputa necessita de pelo menos 2 competidores.');
                 return;
@@ -949,6 +1493,7 @@
 
             card.classList.remove('hidden');
             if (animar) {
+                if (d.winners.length === 1) playP5Sound('critical');
                 card.querySelectorAll('.dado-versus').forEach(el => el.classList.add('p5-rolling'));
                 card.classList.remove('p5-rolling');
                 void card.offsetWidth; // reinicia a animação
@@ -1041,8 +1586,12 @@
             }
         }
 
+        /**
+         * INICIALIZAÇÃO DA APLICAÇÃO
+         */
         window.onload = function() {
             updateFormulaDisplay();
+            loadCustomPresets();
         };
     </script>
 </body>

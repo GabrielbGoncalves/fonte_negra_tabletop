@@ -1,0 +1,1872 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://www.gstatic.com https://*.firebaseio.com https://*.firebasedatabase.app http://127.0.0.1:9000; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://*.firebaseio.com wss://*.firebaseio.com https://*.firebasedatabase.app wss://*.firebasedatabase.app https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com http://127.0.0.1:9099 http://127.0.0.1:9000 ws://127.0.0.1:9000; frame-src https://*.firebaseapp.com https://*.firebaseio.com https://erpg.app http://127.0.0.1:9000; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" href="assets/favicon/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/svg+xml" href="assets/favicon/favicon.svg">
+    <link rel="shortcut icon" href="assets/favicon/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-title" content="Fonte Negra">
+    <link rel="manifest" href="assets/favicon/site.webmanifest">
+
+    <!-- Firebase SDK Compat e sessão -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" integrity="sha384-4gq9w/AGf72FXdNQ3Kn3EqWP7633NbCMjpYHt8YCZyXf23o2opcuAr4cif41tLrC" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js" integrity="sha384-5PDE6CZvnNIJI5xu68GIFoOO3U73lAnRLBwPBmmKjWnYnYwKEHWr/ghtGooEOXGb" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" integrity="sha384-xtdq4MQqPj1dB5DQsuw9O7dh4kHhMP/Wp5u8O1jiaWiou13ZfJIgiccjtVK2pBhL" crossorigin="anonymous"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/sessao.js" data-exigir-login></script>
+    <script src="js/topo.js" defer></script>
+
+    <title>Compêndio de Sombras | O Grimório do Coração (GDC)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            950: '#050a18',
+                            900: '#091229',
+                            800: '#0f1d42',
+                            700: '#16295c',
+                        },
+                        royal: {
+                            500: '#2563eb',
+                            600: '#1d4ed8',
+                            700: '#1e40af',
+                        },
+                        electric: {
+                            400: '#22d3ee',
+                            500: '#06b6d4',
+                            600: '#0891b2',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Anton', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Geometria Angular Estilo Persona 5 / Velvet Room */
+        body {
+            background-color: #050a18;
+            color: #ffffff;
+            background-image: 
+                radial-gradient(circle at 15% 20%, rgba(29, 78, 216, 0.18) 0%, transparent 45%),
+                radial-gradient(circle at 85% 80%, rgba(6, 182, 212, 0.14) 0%, transparent 45%),
+                repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.015) 0px, rgba(255, 255, 255, 0.015) 2px, transparent 2px, transparent 12px);
+            overflow-x: hidden;
+        }
+
+        .clip-slash {
+            clip-path: polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
+        }
+
+        .clip-card {
+            clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+        }
+
+        .clip-badge {
+            clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+        }
+
+        .clip-header-ribbon {
+            clip-path: polygon(0 0, 100% 0, calc(100% - 28px) 100%, 0 100%);
+        }
+
+        .velvet-border {
+            position: relative;
+        }
+        .velvet-border::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, #06b6d4, #1d4ed8);
+            clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+            z-index: -1;
+            margin: -2px;
+        }
+
+        .skew-tag {
+            transform: skewX(-12deg);
+        }
+        .skew-tag > * {
+            transform: skewX(12deg);
+        }
+
+        /* Scrollbar Customizada */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #050a18;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1d4ed8;
+            border-radius: 0px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #06b6d4;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(6, 182, 212, 0.25); }
+            50% { box-shadow: 0 0 28px rgba(6, 182, 212, 0.55); }
+        }
+        .glow-active {
+            animation: pulseGlow 3s infinite;
+        }
+    </style>
+    <style>
+        /* Barra de acesso: único elemento do padrão do hub nesta página (o resto do layout é próprio) */
+        #barra-hub { position: relative; z-index: 60; display: flex; align-items: center; gap: 14px; padding: 8px 16px;
+            background: rgba(2, 6, 23, .92); border-bottom: 2px solid #1d4ed8; font-family: Arial, Helvetica, sans-serif; }
+        #barra-hub .voltar { color: #f8fafc; text-decoration: none; border: 2px solid #60a5fa; padding: 3px 12px; text-transform: uppercase; font-size: .85rem; letter-spacing: 1px; }
+        #barra-hub .voltar:hover { background: #3b82f6; }
+        #barra-hub .espaco { flex: 1; }
+        #barra-hub .usuario[hidden] { display: none; }
+        #barra-hub .usuario { display: flex; align-items: center; gap: 12px; background: #020617; border: 2px solid #60a5fa; padding: 4px 4px 4px 14px; }
+        #barra-hub .usuario-dados { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+        #barra-hub .usuario-nome { font-weight: 700; font-size: .95rem; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        #barra-hub .usuario-papel { font-size: .7rem; text-transform: uppercase; letter-spacing: 1px; color: #60a5fa; }
+        #barra-hub .usuario-papel.mestre { color: #f59e0b; }
+        #barra-hub .usuario-sair { font: inherit; font-size: .8rem; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; background: #0f172a; color: #f8fafc; border: 2px solid #1e3a8a; padding: 3px 10px; }
+        #barra-hub .usuario-sair:hover { background: #7f1d1d; border-color: #ef4444; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans antialiased selection:bg-electric-500 selection:text-navy-950">
+
+<header id="barra-hub">
+    <a class="voltar" href="index.html">‹ Hub</a>
+    <div class="espaco"></div>
+    <div class="usuario" data-usuario hidden></div>
+</header>
+
+    <!-- Notificação Toast Customizada (Substitui alert/confirm) -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-3 pointer-events-none max-w-sm w-full px-4 sm:px-0"></div>
+
+    <!-- Modal de Rolagem de Dados Rápida (GDC 2d6 / 1d20) -->
+    <div id="dice-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-navy-950/85 backdrop-blur-sm p-4">
+        <div class="bg-navy-900 border-2 border-electric-500 clip-card max-w-md w-full p-6 shadow-2xl relative">
+            <div class="flex items-center justify-between border-b border-royal-700 pb-3 mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="bg-electric-500 text-navy-950 font-display tracking-wider px-2.5 py-0.5 text-sm clip-badge">VELVET DICE</span>
+                    <h3 id="dice-title" class="font-bold text-lg text-white uppercase tracking-tight">Teste de Combate</h3>
+                </div>
+                <button onclick="closeDiceModal()" class="text-slate-400 hover:text-white p-1">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div id="dice-body" class="space-y-4">
+                <!-- Conteúdo injetado via JS -->
+            </div>
+            <div class="mt-6 flex justify-end gap-3">
+                <button id="reroll-btn" class="bg-royal-600 hover:bg-royal-500 text-white font-bold uppercase text-xs tracking-wider px-4 py-2.5 clip-slash transition">
+                    Rolar Novamente
+                </button>
+                <button onclick="closeDiceModal()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold uppercase text-xs tracking-wider px-4 py-2.5 clip-slash transition">
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação Customizado -->
+    <div id="confirm-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-navy-950/85 backdrop-blur-sm p-4">
+        <div class="bg-navy-900 border-2 border-rose-500 clip-card max-w-md w-full p-6 shadow-2xl">
+            <h3 class="font-display text-2xl tracking-wide text-white uppercase mb-2" id="confirm-title">Confirmar Ação</h3>
+            <p class="text-slate-300 text-sm mb-6" id="confirm-message">Tem certeza que deseja prosseguir?</p>
+            <div class="flex justify-end gap-3">
+                <button onclick="closeConfirmModal()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold uppercase text-xs tracking-wider px-4 py-2.5 clip-slash transition">
+                    Cancelar
+                </button>
+                <button id="confirm-yes-btn" class="bg-rose-600 hover:bg-rose-500 text-white font-bold uppercase text-xs tracking-wider px-5 py-2.5 clip-slash transition">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cabeçalho Principal / Barra de Navegação -->
+    <header class="sticky top-0 z-40 bg-navy-950/95 backdrop-blur-md border-b-2 border-royal-600 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between py-3 gap-3">
+                <!-- Logo / Título -->
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3 cursor-pointer" onclick="switchView('compendium')">
+                        <div class="w-11 h-11 bg-gradient-to-br from-electric-400 to-royal-600 flex items-center justify-center clip-slash shadow-md">
+                            <span class="font-display text-2xl text-navy-950 tracking-tighter">GDC</span>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h1 class="font-display text-2xl sm:text-3xl tracking-wider text-white uppercase leading-none">
+                                    SHADOW <span class="text-electric-400">COMPENDIUM</span>
+                                </h1>
+                            </div>
+                            <p class="text-[11px] font-mono uppercase tracking-widest text-electric-400/90 mt-0.5">
+                                O Grimório do Coração // Registro do Metaverso
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Contador Rápido Mobile -->
+                    <span id="mobile-count" class="md:hidden bg-royal-700/80 border border-electric-500/40 text-electric-300 font-mono text-xs px-2.5 py-1 clip-badge">
+                        0 Sombras
+                    </span>
+                </div>
+
+                <!-- Navegação Principal -->
+                <nav class="flex flex-wrap items-center gap-2">
+                    <button onclick="switchView('compendium')" id="nav-compendium" class="nav-btn active bg-electric-500 text-navy-950 font-extrabold uppercase text-xs tracking-wider px-4 py-2.5 clip-slash transition flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h10"/></svg>
+                        Compêndio
+                    </button>
+                    <button onclick="switchView('sheet')" id="nav-sheet" class="nav-btn bg-navy-800 hover:bg-royal-700 text-white font-bold uppercase text-xs tracking-wider px-4 py-2.5 clip-slash transition flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-width="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        Ficha Ativa
+                    </button>
+                    <button onclick="openEditor()" id="nav-editor" class="nav-btn bg-royal-600 hover:bg-royal-500 text-white font-bold uppercase text-xs tracking-wider px-4 py-2.5 clip-slash transition flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                        Nova Shadow
+                    </button>
+                    
+                    <!-- Ferramentas JSON -->
+                    <div class="flex items-center gap-1.5 ml-auto sm:ml-2 border-l border-navy-700 pl-2">
+                        <button onclick="exportJSON()" title="Exportar Compêndio (JSON)" class="p-2 bg-navy-800 hover:bg-navy-700 text-electric-400 border border-navy-700 clip-badge transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-width="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        </button>
+                        <label title="Importar Compêndio (JSON)" class="p-2 bg-navy-800 hover:bg-navy-700 text-electric-400 border border-navy-700 clip-badge transition cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-width="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                            <input type="file" id="import-json-input" accept=".json" class="hidden" onchange="importJSON(event)">
+                        </label>
+                        <button onclick="confirmResetCompendium()" title="Restaurar Padrão do Livro" class="p-2 bg-navy-800 hover:bg-rose-900/60 text-slate-300 hover:text-rose-300 border border-navy-700 clip-badge transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-width="2.2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        </button>
+                    </div>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- =====================================================================
+             VIEW 1: LISTA / GRID DO COMPÊNDIO
+        ====================================================================== -->
+        <section id="view-compendium" class="space-y-6">
+            <!-- Barra de Filtros e Busca -->
+            <div class="bg-navy-900/90 border border-royal-700/70 p-4 sm:p-5 clip-card shadow-xl">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 items-end">
+                    <!-- Busca por Nome/Título -->
+                    <div class="lg:col-span-4">
+                        <label class="block text-[11px] font-mono uppercase tracking-wider text-electric-400 mb-1.5">Buscar Entidade</label>
+                        <div class="relative">
+                            <input type="text" id="filter-search" oninput="renderCompendium()" placeholder="Nome, epíteto ou habilidade..." class="w-full bg-navy-950 border border-royal-700 focus:border-electric-400 text-white text-sm px-3.5 py-2.5 outline-none transition">
+                            <svg class="w-4 h-4 text-slate-400 absolute right-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        </div>
+                    </div>
+
+                    <!-- Filtro por Arcana -->
+                    <div class="lg:col-span-3">
+                        <label class="block text-[11px] font-mono uppercase tracking-wider text-electric-400 mb-1.5">Arcana Maior</label>
+                        <select id="filter-arcana" onchange="renderCompendium()" class="w-full bg-navy-950 border border-royal-700 focus:border-electric-400 text-white text-sm px-3 py-2.5 outline-none">
+                            <option value="ALL">Todas as Arcanas</option>
+                        </select>
+                    </div>
+
+                    <!-- Filtro por Rank -->
+                    <div class="lg:col-span-2">
+                        <label class="block text-[11px] font-mono uppercase tracking-wider text-electric-400 mb-1.5">Classificação / Rank</label>
+                        <select id="filter-rank" onchange="renderCompendium()" class="w-full bg-navy-950 border border-royal-700 focus:border-electric-400 text-white text-sm px-3 py-2.5 outline-none">
+                            <option value="ALL">Todos os Ranks</option>
+                            <option value="Comum">Comum</option>
+                            <option value="Mini-Chefe">Mini-Chefe</option>
+                            <option value="Chefe">Chefe</option>
+                            <option value="Guardião">Guardião</option>
+                        </select>
+                    </div>
+
+                    <!-- Filtro por Fraqueza -->
+                    <div class="lg:col-span-3">
+                        <label class="block text-[11px] font-mono uppercase tracking-wider text-electric-400 mb-1.5">Vulnerável a (Fraqueza)</label>
+                        <select id="filter-weakness" onchange="renderCompendium()" class="w-full bg-navy-950 border border-royal-700 focus:border-electric-400 text-white text-sm px-3 py-2.5 outline-none">
+                            <option value="ALL">Qualquer Elemento</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Status e Ordenação -->
+                <div class="flex flex-wrap items-center justify-between gap-3 mt-4 pt-3 border-t border-navy-800 text-xs">
+                    <div class="flex items-center gap-2">
+                        <span class="inline-block w-2 h-2 bg-electric-400 rotate-45"></span>
+                        <span id="compendium-stats" class="font-mono text-slate-300">Exibindo 0 sombras registradas</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-slate-400">Ordenar:</span>
+                        <select id="sort-by" onchange="renderCompendium()" class="bg-navy-950 border border-navy-700 text-electric-300 font-mono text-xs px-2.5 py-1 outline-none">
+                            <option value="level-asc">Nível (Menor → Maior)</option>
+                            <option value="level-desc">Nível (Maior → Menor)</option>
+                            <option value="name-asc">Nome (A → Z)</option>
+                            <option value="arcana">Arcana</option>
+                        </select>
+                        <button onclick="clearFilters()" class="text-electric-400 hover:text-white underline ml-2">Limpar filtros</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grid de Sombras -->
+            <div id="shadows-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Cards gerados via JS -->
+            </div>
+        </section>
+
+        <!-- =====================================================================
+             VIEW 2: VISUALIZADOR DE FICHA DE SHADOW (PADRÃO OFICIAL GDC)
+        ====================================================================== -->
+        <section id="view-sheet" class="hidden space-y-6">
+            <!-- Barra Superior de Navegação da Ficha -->
+            <div class="flex flex-wrap items-center justify-between gap-3 bg-navy-900/90 border border-royal-700 px-4 py-3 clip-slash">
+                <button onclick="switchView('compendium')" class="text-electric-400 hover:text-white font-bold uppercase text-xs tracking-wider flex items-center gap-1.5 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                    Voltar ao Compêndio
+                </button>
+                <div class="flex flex-wrap items-center gap-2">
+                    <button onclick="rollShadowInitiative()" class="bg-electric-500 hover:bg-electric-400 text-navy-950 font-extrabold uppercase text-xs tracking-wider px-3.5 py-2 clip-badge transition flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        Rolar Iniciativa
+                    </button>
+                    <button id="sheet-edit-btn" class="bg-royal-600 hover:bg-royal-500 text-white font-bold uppercase text-xs tracking-wider px-3.5 py-2 clip-badge transition flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        Editar Ficha
+                    </button>
+                    <button id="sheet-delete-btn" class="bg-rose-900/80 hover:bg-rose-600 text-white font-bold uppercase text-xs tracking-wider px-3.5 py-2 clip-badge transition flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        Excluir
+                    </button>
+                </div>
+            </div>
+
+            <!-- Container Principal da Ficha Padrão do Livro GDC -->
+            <div id="shadow-sheet-container" class="velvet-border bg-navy-900 clip-card shadow-2xl overflow-hidden">
+                <!-- Ficha renderizada dinamicamente -->
+            </div>
+        </section>
+
+        <!-- =====================================================================
+             VIEW 3: CRIADOR / EDITOR DE SHADOWS
+        ====================================================================== -->
+        <section id="view-editor" class="hidden space-y-6">
+            <div class="bg-navy-900 border-2 border-royal-600 clip-card p-5 sm:p-8 shadow-2xl">
+                <div class="flex flex-wrap items-center justify-between gap-4 border-b-2 border-royal-700 pb-4 mb-6">
+                    <div>
+                        <span class="bg-electric-500 text-navy-950 font-display text-xs tracking-widest px-2.5 py-0.5 uppercase clip-badge">REGISTRO VELVET</span>
+                        <h2 id="editor-heading" class="font-display text-3xl text-white uppercase tracking-wide mt-1">Catalogar Nova Shadow</h2>
+                    </div>
+                    <button type="button" onclick="switchView('compendium')" class="bg-navy-800 hover:bg-navy-700 text-slate-300 font-bold uppercase text-xs px-4 py-2.5 clip-slash transition">
+                        Cancelar
+                    </button>
+                </div>
+
+                <form id="shadow-form" onsubmit="saveShadowForm(event)" class="space-y-8">
+                    <input type="hidden" id="form-id">
+
+                    <!-- Bloco 1: Identificação & Recompensas -->
+                    <div class="space-y-4">
+                        <h3 class="font-display text-xl text-electric-400 uppercase tracking-wider flex items-center gap-2">
+                            <span class="bg-royal-600 text-white text-xs font-mono px-2 py-0.5">01</span> Identificação & Classificação
+                        </h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-mono uppercase text-slate-300 mb-1">Nome da Shadow *</label>
+                                <input type="text" id="form-name" required placeholder="Ex: Jack Frost" class="w-full bg-navy-950 border border-royal-700 focus:border-electric-400 text-white px-3.5 py-2.5 text-sm outline-none">
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-mono uppercase text-slate-300 mb-1">Título / Epíteto *</label>
+                                <input type="text" id="form-title" required placeholder="Ex: O Espírito da Geada Travessa" class="w-full bg-navy-950 border border-royal-700 focus:border-electric-400 text-white px-3.5 py-2.5 text-sm outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-mono uppercase text-slate-300 mb-1">Arcana *</label>
+                                <select id="form-arcana" required class="w-full bg-navy-950 border border-royal-700 focus:border-electric-400 text-white px-3.5 py-2.5 text-sm outline-none"></select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-mono uppercase text-slate-300 mb-1">Nível (Nv.) *</label>
+                                <input type="number" id="form-level" min="1" max="99" value="5" required onchange="autoCalculateVitalsHint()" class="w-full bg-navy-950 border border-royal-700 focus:border-electric-400 text-white font-mono px-3.5 py-2.5 text-sm outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-mono uppercase text-slate-300 mb-1">Rank *</label>
+                                <select id="form-rank" required class="w-full bg-navy-950 border border-royal-700 focus:border-electric-400 text-white px-3.5 py-2.5 text-sm outline-none">
+                                    <option value="Comum">Comum</option>
+                                    <option value="Mini-Chefe">Mini-Chefe</option>
+                                    <option value="Chefe">Chefe</option>
+                                    <option value="Guardião">Guardião</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-mono uppercase text-slate-300 mb-1">Ícone / Símbolo (Emoji/SVG)</label>
+                                <input type="text" id="form-icon" value="❄️" maxlength="4" class="w-full bg-navy-950 border border-royal-700 focus:border-electric-400 text-white text-center text-lg px-3 py-1.5 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-mono uppercase text-slate-300 mb-1">Recompensa EXP *</label>
+                                <input type="number" id="form-exp" min="0" value="45" required class="w-full bg-navy-950 border border-royal-700 focus:border-electric-400 text-white font-mono px-3.5 py-2.5 text-sm outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-mono uppercase text-slate-300 mb-1">Recompensa Yen (¥) *</label>
+                                <input type="number" id="form-yen" min="0" value="320" required class="w-full bg-navy-950 border border-royal-700 focus:border-electric-400 text-white font-mono px-3.5 py-2.5 text-sm outline-none">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bloco 2: Atributos & Status Vitais -->
+                    <div class="space-y-4">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <h3 class="font-display text-xl text-electric-400 uppercase tracking-wider flex items-center gap-2">
+                                <span class="bg-royal-600 text-white text-xs font-mono px-2 py-0.5">02</span> Atributos & Status Vitais
+                            </h3>
+                            <button type="button" onclick="applyGdcFormulas()" class="bg-electric-500/20 hover:bg-electric-500/30 border border-electric-400 text-electric-300 font-mono text-xs px-3 py-1.5 clip-badge transition">
+                                ⚡ Calcular Vitais pela Fórmula GDC
+                            </button>
+                        </div>
+
+                        <!-- 6 Atributos -->
+                        <div class="grid grid-cols-3 sm:grid-cols-6 gap-3 bg-navy-950/80 p-4 border border-royal-800">
+                            <div>
+                                <label class="block text-center text-xs font-display tracking-wider text-electric-400 mb-1">FOR</label>
+                                <input type="number" id="form-for" min="0" max="20" value="3" required class="w-full bg-navy-900 border border-royal-700 text-white font-mono font-bold text-center py-2 text-base outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-center text-xs font-display tracking-wider text-electric-400 mb-1">TEC</label>
+                                <input type="number" id="form-tec" min="0" max="20" value="4" required class="w-full bg-navy-900 border border-royal-700 text-white font-mono font-bold text-center py-2 text-base outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-center text-xs font-display tracking-wider text-electric-400 mb-1">VIT</label>
+                                <input type="number" id="form-vit" min="0" max="20" value="3" required class="w-full bg-navy-900 border border-royal-700 text-white font-mono font-bold text-center py-2 text-base outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-center text-xs font-display tracking-wider text-electric-400 mb-1">MAG</label>
+                                <input type="number" id="form-mag" min="0" max="20" value="6" required class="w-full bg-navy-900 border border-royal-700 text-white font-mono font-bold text-center py-2 text-base outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-center text-xs font-display tracking-wider text-electric-400 mb-1">AGI</label>
+                                <input type="number" id="form-agi" min="0" max="20" value="4" required class="w-full bg-navy-900 border border-royal-700 text-white font-mono font-bold text-center py-2 text-base outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-center text-xs font-display tracking-wider text-electric-400 mb-1">SOR</label>
+                                <input type="number" id="form-sor" min="0" max="20" value="4" required class="w-full bg-navy-900 border border-royal-700 text-white font-mono font-bold text-center py-2 text-base outline-none">
+                            </div>
+                        </div>
+
+                        <!-- Vitais -->
+                        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                            <div>
+                                <label class="block text-xs font-mono uppercase text-slate-300 mb-1">PV (Vida) *</label>
+                                <input type="number" id="form-hp" min="1" value="65" required class="w-full bg-navy-950 border border-royal-700 text-white font-mono px-3 py-2 text-sm outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-mono uppercase text-slate-300 mb-1">Energia *</label>
+                                <input type="number" id="form-energy" min="0" value="5" required class="w-full bg-navy-950 border border-royal-700 text-white font-mono px-3 py-2 text-sm outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-mono uppercase text-slate-300 mb-1">Esquiva (Esq.) *</label>
+                                <input type="number" id="form-evasion" min="0" value="12" required class="w-full bg-navy-950 border border-royal-700 text-white font-mono px-3 py-2 text-sm outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-mono uppercase text-slate-300 mb-1">Redução Dano (RD) *</label>
+                                <input type="number" id="form-dr" min="0" value="2" required class="w-full bg-navy-950 border border-royal-700 text-white font-mono px-3 py-2 text-sm outline-none">
+                            </div>
+                            <div class="col-span-2 sm:col-span-1">
+                                <label class="block text-xs font-mono uppercase text-slate-300 mb-1">Iniciativa *</label>
+                                <input type="text" id="form-initiative" value="+4" required class="w-full bg-navy-950 border border-royal-700 text-white font-mono px-3 py-2 text-sm outline-none">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bloco 3: Afinidades Elementais -->
+                    <div class="space-y-4">
+                        <h3 class="font-display text-xl text-electric-400 uppercase tracking-wider flex items-center gap-2">
+                            <span class="bg-royal-600 text-white text-xs font-mono px-2 py-0.5">03</span> Tabela de Afinidades Elementais
+                        </h3>
+                        <div id="form-affinities-grid" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+                            <!-- Gerado via JS para os 11 elementos do GDC -->
+                        </div>
+                    </div>
+
+                    <!-- Bloco 4: Ataque Básico & Passivas -->
+                    <div class="space-y-4">
+                        <h3 class="font-display text-xl text-electric-400 uppercase tracking-wider flex items-center gap-2">
+                            <span class="bg-royal-600 text-white text-xs font-mono px-2 py-0.5">04</span> Ataque Básico & Habilidades Passivas
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-navy-950/70 p-4 border border-royal-800">
+                            <div>
+                                <label class="block text-xs font-mono uppercase text-slate-300 mb-1">Nome do Ataque Básico *</label>
+                                <input type="text" id="form-basic-name" required placeholder="Ex: Golpe Congelante" class="w-full bg-navy-900 border border-royal-700 text-white px-3 py-2 text-sm outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-mono uppercase text-slate-300 mb-1">Dano & Elemento *</label>
+                                <input type="text" id="form-basic-damage" required placeholder="Ex: 1d8 + FOR (Físico)" class="w-full bg-navy-900 border border-royal-700 text-white font-mono px-3 py-2 text-sm outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-mono uppercase text-slate-300 mb-1">Alcance *</label>
+                                <input type="text" id="form-basic-range" required placeholder="Ex: Corpo a Corpo (1,5m)" class="w-full bg-navy-900 border border-royal-700 text-white px-3 py-2 text-sm outline-none">
+                            </div>
+                        </div>
+
+                        <!-- Lista dinâmica de Passivas -->
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between">
+                                <label class="text-xs font-mono uppercase text-slate-300">Habilidades Passivas / Traços Únicos</label>
+                                <button type="button" onclick="addPassiveRow()" class="text-xs font-bold uppercase text-electric-400 hover:text-white flex items-center gap-1">
+                                    + Adicionar Passiva
+                                </button>
+                            </div>
+                            <div id="form-passives-list" class="space-y-2"></div>
+                        </div>
+                    </div>
+
+                    <!-- Bloco 5: Grimório de Magias / Habilidades Ativas -->
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-display text-xl text-electric-400 uppercase tracking-wider flex items-center gap-2">
+                                <span class="bg-royal-600 text-white text-xs font-mono px-2 py-0.5">05</span> Grimório de Magias & Ativas
+                            </h3>
+                            <button type="button" onclick="addSkillRow()" class="bg-royal-600 hover:bg-royal-500 text-white font-bold uppercase text-xs px-3 py-1.5 clip-badge transition">
+                                + Nova Magia
+                            </button>
+                        </div>
+                        <div id="form-skills-list" class="space-y-3"></div>
+                    </div>
+
+                    <!-- Bloco 6: Comportamento Tático, Negociação & Drops -->
+                    <div class="space-y-4">
+                        <h3 class="font-display text-xl text-electric-400 uppercase tracking-wider flex items-center gap-2">
+                            <span class="bg-royal-600 text-white text-xs font-mono px-2 py-0.5">06</span> Comportamento Tático, Negociação & Drops
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-mono uppercase text-slate-300 mb-1">Personalidade em Combate *</label>
+                                <input type="text" id="form-personality" required placeholder="Ex: Brincalhona / Tática" class="w-full bg-navy-950 border border-royal-700 text-white px-3.5 py-2 text-sm outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-mono uppercase text-slate-300 mb-1">Drops / Materiais de Fusão (separados por vírgula)</label>
+                                <input type="text" id="form-drops" placeholder="Ex: Cristal de Gelo, Máscara Frost, 150¥" class="w-full bg-navy-950 border border-royal-700 text-white px-3.5 py-2 text-sm outline-none">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-mono uppercase text-slate-300 mb-1">Estratégia Tática em Combate *</label>
+                                <textarea id="form-tactics" rows="2" required placeholder="Descreva como a Shadow age nos turnos..." class="w-full bg-navy-950 border border-royal-700 text-white px-3.5 py-2 text-sm outline-none"></textarea>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-mono uppercase text-slate-300 mb-1">Negociação & Falas Características</label>
+                                <textarea id="form-negotiation" rows="2" placeholder="O que ela responde quando encurralada (Hold Up)..." class="w-full bg-navy-950 border border-royal-700 text-white px-3.5 py-2 text-sm outline-none"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botões de Ação -->
+                    <div class="flex flex-wrap justify-end gap-3 pt-4 border-t border-royal-700">
+                        <button type="button" onclick="switchView('compendium')" class="bg-slate-800 hover:bg-slate-700 text-white font-bold uppercase text-xs tracking-wider px-6 py-3 clip-slash transition">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="bg-electric-500 hover:bg-electric-400 text-navy-950 font-extrabold uppercase text-xs tracking-wider px-8 py-3 clip-slash transition shadow-lg">
+                            Salvar no Compêndio
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="bg-navy-950 border-t border-navy-800 py-4 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-400 font-mono">
+            <div>COMPÊNDIO DE SOMBRAS // SISTEMA <span class="text-electric-400">O GRIMÓRIO DO CORAÇÃO (GDC)</span></div>
+            <div>DADOS SALVOS AUTOMATICAMENTE NO ARMAZENAMENTO LOCAL</div>
+        </div>
+    </footer>
+
+    <script>
+        // =========================================================================
+        // CONSTANTES E DEFINIÇÕES DO SISTEMA 'O GRIMÓRIO DO CORAÇÃO' (GDC)
+        // =========================================================================
+        const ARCANAS = [
+            "0 - Louco", "I - Mago", "II - Sacerdotisa", "III - Imperatriz",
+            "IV - Imperador", "V - Hierofante", "VI - Enamorados", "VII - Carro",
+            "VIII - Justiça", "IX - Eremita", "X - Fortuna", "XI - Força",
+            "XII - Enforcado", "XIII - Morte", "XIV - Temperança", "XV - Diabo",
+            "XVI - Torre", "XVII - Estrela", "XVIII - Lua", "XIX - Sol",
+            "XX - Julgamento", "XXI - Mundo"
+        ];
+
+        const ELEMENTS = [
+            { key: "Fisico", label: "Físico", short: "FÍS", icon: "⚔️" },
+            { key: "Fogo", label: "Fogo", short: "FOG", icon: "🔥" },
+            { key: "Gelo", label: "Gelo", short: "GEL", icon: "❄️" },
+            { key: "Vento", label: "Vento", short: "VEN", icon: "🌪️" },
+            { key: "Raio", label: "Raio", short: "RAI", icon: "⚡" },
+            { key: "Nuclear", label: "Nuclear", short: "NUC", icon: "☢️" },
+            { key: "PSY", label: "PSY", short: "PSY", icon: "🌀" },
+            { key: "Luz", label: "Luz", short: "LUZ", icon: "✨" },
+            { key: "Trevas", label: "Trevas", short: "TRV", icon: "💀" },
+            { key: "Status", label: "Status", short: "STS", icon: "☣️" },
+            { key: "Intel", label: "Intel", short: "INT", icon: "👁️" }
+        ];
+
+        const AFFINITY_TYPES = [
+            { code: "-", label: "Normal (-)", badgeClass: "bg-navy-950 text-slate-400 border-navy-700" },
+            { code: "FRQ", label: "Fraqueza (FRQ)", badgeClass: "bg-rose-600 text-white border-rose-400 font-black" },
+            { code: "RES", label: "Resistente (RES)", badgeClass: "bg-royal-600 text-electric-300 border-electric-400 font-bold" },
+            { code: "NUL", label: "Nulo (NUL)", badgeClass: "bg-slate-700 text-white border-slate-400 font-bold" },
+            { code: "ABS", label: "Absorve (ABS)", badgeClass: "bg-emerald-600 text-white border-emerald-300 font-bold" },
+            { code: "RFL", label: "Reflete (RFL)", badgeClass: "bg-amber-500 text-navy-950 border-amber-200 font-black" }
+        ];
+
+        const STORAGE_KEY = "gdc_shadow_compendium_v1";
+
+        // =========================================================================
+        // BANCO DE DADOS INICIAL (8 SOMBRAS ICÔNICAS ADAPTADAS AO GDC)
+        // =========================================================================
+        const DEFAULT_SHADOWS = [
+            {
+                id: "shd-jack-frost",
+                name: "Jack Frost",
+                title: "O Espírito da Geada Travessa",
+                arcana: "I - Mago",
+                level: 6,
+                rank: "Comum",
+                icon: "⛄",
+                exp: 60,
+                yen: 420,
+                vitals: { hp: 73, energy: 6, evasion: 13, dr: 2, initiative: "+4" },
+                stats: { FOR: 2, TEC: 4, VIT: 3, MAG: 6, AGI: 4, SOR: 5 },
+                affinities: {
+                    Fisico: "-", Fogo: "FRQ", Gelo: "ABS", Vento: "-", Raio: "-",
+                    Nuclear: "-", PSY: "-", Luz: "-", Trevas: "-", Status: "-", Intel: "-"
+                },
+                basicAttack: {
+                    name: "Tapinha Congelante",
+                    damage: "1d6 + FOR (Físico/Gelo)",
+                    range: "Corpo a Corpo (1,5m)"
+                },
+                passives: [
+                    { name: "Corpo Invernal", desc: "Imune à condição Congelado. Recebe +1 em testes de resistência contra efeitos climáticos." },
+                    { name: "Hee-Ho! Entusiasmado", desc: "Ao acertar um golpe crítico ou explorar uma Fraqueza (1 More), recupera 1 ponto de Energia." }
+                ],
+                skills: [
+                    { name: "Bufu", element: "Gelo", cost: "2 Energia", range: "Curto (9m)", tier: "I", effect: "Causa 2d6 + MAG de dano de Gelo a 1 alvo. Em crítico ou 10+ no dado, aplica Congelado (1 turno)." },
+                    { name: "Mabufu", element: "Gelo", cost: "4 Energia", range: "Área (Cone 6m)", tier: "II", effect: "Causa 1d8 + MAG de dano de Gelo em até 3 alvos na área." },
+                    { name: "Rakunda", element: "Status", cost: "2 Energia", range: "Médio (12m)", tier: "I", effect: "Reduz a RD (Redução de Dano) de 1 alvo em 2 pontos por 3 turnos." }
+                ],
+                personality: "Brincalhona / Infantil",
+                tactics: "Prioriza conjurar Bufu em inimigos sem resistência a Gelo. Se estiver em grupo, usa Rakunda no alvo com maior armadura antes de atacar.",
+                negotiation: "Responde bem a respostas bem-humoradas e entusiásticas ('Hee-Ho!'). Odeia ser tratado com seriedade excessiva ou ameaçado com fogo.",
+                drops: ["Cristal de Geada", "Chapéu de Bordo", "Garrafa de Água Gelada"]
+            },
+            {
+                id: "shd-pixie",
+                name: "Pixie",
+                title: "A Fada Luminosa da Floresta",
+                arcana: "VI - Enamorados",
+                level: 3,
+                rank: "Comum",
+                icon: "🧚",
+                exp: 30,
+                yen: 210,
+                vitals: { hp: 46, energy: 4, evasion: 14, dr: 1, initiative: "+5" },
+                stats: { FOR: 1, TEC: 3, VIT: 2, MAG: 5, AGI: 5, SOR: 4 },
+                affinities: {
+                    Fisico: "-", Fogo: "-", Gelo: "FRQ", Vento: "RES", Raio: "RES",
+                    Nuclear: "-", PSY: "-", Luz: "-", Trevas: "FRQ", Status: "-", Intel: "-"
+                },
+                basicAttack: {
+                    name: "Pó de Fada",
+                    damage: "1d4 + TEC (Físico)",
+                    range: "Curto (6m)"
+                },
+                passives: [
+                    { name: "Voo Errático", desc: "Concede +1 na Esquiva contra ataques corpo a corpo." }
+                ],
+                skills: [
+                    { name: "Zio", element: "Raio", cost: "2 Energia", range: "Curto (9m)", tier: "I", effect: "Causa 2d6 + MAG de dano de Raio em 1 alvo. Chance de aplicar Choque." },
+                    { name: "Dia", element: "Luz", cost: "2 Energia", range: "Curto (9m)", tier: "I", effect: "Restaura 2d6 + MAG Pontos de Vida de um aliado." },
+                    { name: "Patra", element: "Status", cost: "1 Energia", range: "Curto (9m)", tier: "I", effect: "Remove estados mentais leves (Tontura, Sono, Confusão) de 1 aliado." }
+                ],
+                personality: "Curiosa / Protetora",
+                tactics: "Mantém distância aérea, curando aliados feridos com Dia e disparando Zio contra oponentes de armadura metálica.",
+                negotiation: "Gosta de elogios sinceros sobre sua beleza ou liberdade. Facilmente convencida a entregar itens de cura se poupada.",
+                drops: ["Pó Cintilante", "Gema da Vida", "Pétala Etérea"]
+            },
+            {
+                id: "shd-pyro-jack",
+                name: "Pyro Jack",
+                title: "O Lanterna Errante do Pântano",
+                arcana: "I - Mago",
+                level: 8,
+                rank: "Comum",
+                icon: "🎃",
+                exp: 85,
+                yen: 560,
+                vitals: { hp: 89, energy: 7, evasion: 13, dr: 2, initiative: "+4" },
+                stats: { FOR: 3, TEC: 5, VIT: 3, MAG: 7, AGI: 4, SOR: 5 },
+                affinities: {
+                    Fisico: "-", Fogo: "ABS", Gelo: "FRQ", Vento: "-", Raio: "-",
+                    Nuclear: "-", PSY: "-", Luz: "-", Trevas: "-", Status: "-", Intel: "-"
+                },
+                basicAttack: {
+                    name: "Chama de Lanterna",
+                    damage: "1d6 + MAG (Fogo)",
+                    range: "Curto (6m)"
+                },
+                passives: [
+                    { name: "Fogo-Fátuo", desc: "Ilumina áreas escuras em 9m e concede +1 em testes de Intimidação." }
+                ],
+                skills: [
+                    { name: "Agi", element: "Fogo", cost: "2 Energia", range: "Curto (9m)", tier: "I", effect: "Causa 2d6 + MAG de dano de Fogo em 1 alvo. Pode aplicar Queimadura (1d4/turno)." },
+                    { name: "Maragi", element: "Fogo", cost: "4 Energia", range: "Área (Raio 4,5m)", tier: "II", effect: "Explosão ígnea que causa 1d8 + MAG de dano de Fogo em todos na área." },
+                    { name: "Tarunda", element: "Status", cost: "2 Energia", range: "Médio (12m)", tier: "I", effect: "Reduz o dano causado por 1 alvo em -3 por 3 turnos." }
+                ],
+                personality: "Sarcástica / Agressiva",
+                tactics: "Busca incendiar o campo de batalha logo no primeiro turno com Maragi. Ri maniacamente quando absorve ataques de Fogo.",
+                negotiation: "Aprecia respostas ousadas e sarcásticas. Detesta ser ignorado ou comparado ao seu irmão Jack Frost.",
+                drops: ["Carvão Vivo", "Lanterna Oca", "Essência Ígnea"]
+            },
+            {
+                id: "shd-berith",
+                name: "Berith",
+                title: "O Cavaleiro Escarlate da Guerra",
+                arcana: "V - Hierofante",
+                level: 11,
+                rank: "Mini-Chefe",
+                icon: "🐴",
+                exp: 160,
+                yen: 980,
+                vitals: { hp: 135, energy: 9, evasion: 12, dr: 5, initiative: "+3" },
+                stats: { FOR: 7, TEC: 5, VIT: 6, MAG: 3, AGI: 3, SOR: 3 },
+                affinities: {
+                    Fisico: "RES", Fogo: "NUL", Gelo: "FRQ", Vento: "-", Raio: "-",
+                    Nuclear: "-", PSY: "-", Luz: "-", Trevas: "-", Status: "-", Intel: "-"
+                },
+                basicAttack: {
+                    name: "Investida de Lança",
+                    damage: "1d10 + FOR (Físico)",
+                    range: "Corpo a Corpo (3m - Alcance)"
+                },
+                passives: [
+                    { name: "Armadura do Duque Infernal", desc: "Recebe +2 de RD contra ataques Físicos não-críticos." },
+                    { name: "Postura de Cavalaria", desc: "Se mover pelo menos 3m antes de atacar, ganha +2 no dano físico." }
+                ],
+                skills: [
+                    { name: "Sledgehammer", element: "Fisico", cost: "3 Energia", range: "Corpo a Corpo", tier: "II", effect: "Golpe esmagador que causa 2d8 + FOR de dano Físico e aplica Tontura (1 turno) se falhar em VIT." },
+                    { name: "Double Fangs", element: "Fisico", cost: "3 Energia", range: "Corpo a Corpo", tier: "II", effect: "Realiza dois ataques rápidos de 1d6 + FOR de dano Físico cada." },
+                    { name: "Tarukaja", element: "Status", cost: "2 Energia", range: "Pessoal", tier: "I", effect: "Aumenta seu próprio dano físico e mágico em +3 por 3 turnos." }
+                ],
+                personality: "Honrada / Belicosa",
+                tactics: "Usa Tarukaja no início do combate e avança contra o combatente mais forte do grupo usando Sledgehammer para atordoá-lo.",
+                negotiation: "Respeita demonstrações de coragem, etiqueta marcial e disciplina. Despreza covardia ou trapaças.",
+                drops: ["Placa de Aço Carmesim", "Fragmento de Lança", "Medalhão da Ordem"]
+            },
+            {
+                id: "shd-angel",
+                name: "Angel",
+                title: "A Mensageira da Balança Celeste",
+                arcana: "VIII - Justiça",
+                level: 10,
+                rank: "Comum",
+                icon: "🕊️",
+                exp: 110,
+                yen: 740,
+                vitals: { hp: 105, energy: 8, evasion: 14, dr: 3, initiative: "+5" },
+                stats: { FOR: 3, TEC: 5, VIT: 4, MAG: 7, AGI: 5, SOR: 4 },
+                affinities: {
+                    Fisico: "-", Fogo: "-", Gelo: "-", Vento: "-", Raio: "FRQ",
+                    Nuclear: "-", PSY: "-", Luz: "NUL", Trevas: "FRQ", Status: "RES", Intel: "-"
+                },
+                basicAttack: {
+                    name: "Lâmina Purificadora",
+                    damage: "1d6 + TEC (Físico/Luz)",
+                    range: "Corpo a Corpo (1,5m)"
+                },
+                passives: [
+                    { name: "Aura Serena", desc: "Aliados a até 3m recebem +1 em testes contra Status Negativos." }
+                ],
+                skills: [
+                    { name: "Kouha", element: "Luz", cost: "2 Energia", range: "Médio (12m)", tier: "I", effect: "Dispara um feixe sagrado que causa 2d6 + MAG de dano de Luz." },
+                    { name: "Hama", element: "Luz", cost: "4 Energia", range: "Curto (9m)", tier: "II", effect: "Julgamento divino. Alvo deve passar em teste de SOR/VIT ou sofrer dano massivo de Luz (3d8)." },
+                    { name: "Media", element: "Luz", cost: "4 Energia", range: "Área (Raio 6m)", tier: "II", effect: "Cura 1d8 + MAG Pontos de Vida de todos os aliados próximos." }
+                ],
+                personality: "Severa / Altruísta",
+                tactics: "Atua como suporte tático, usando Media para sustentar aliados e punindo Shadows ou Phantom Thieves com Kouha.",
+                negotiation: "Valoriza respostas justas, virtuosas e altruístas. Rejeita propostas egoístas ou gananciosas.",
+                drops: ["Pena Alva", "Incenso Sagrado", "Anel de Prata Pura"]
+            },
+            {
+                id: "shd-lilim",
+                name: "Lilim",
+                title: "A Seducente Dama dos Sonhos",
+                arcana: "XV - Diabo",
+                level: 15,
+                rank: "Mini-Chefe",
+                icon: "🦇",
+                exp: 240,
+                yen: 1450,
+                vitals: { hp: 160, energy: 12, evasion: 16, dr: 3, initiative: "+6" },
+                stats: { FOR: 3, TEC: 7, VIT: 4, MAG: 8, AGI: 6, SOR: 6 },
+                affinities: {
+                    Fisico: "-", Fogo: "-", Gelo: "RES", Vento: "FRQ", Raio: "-",
+                    Nuclear: "-", PSY: "RES", Luz: "FRQ", Trevas: "NUL", Status: "RES", Intel: "-"
+                },
+                basicAttack: {
+                    name: "Toque Sombrio",
+                    damage: "1d6 + TEC (Trevas)",
+                    range: "Corpo a Corpo (1,5m)"
+                },
+                passives: [
+                    { name: "Fascínio Noturno", desc: "Alvos afetados por Charm ou Sono sofrem -2 na Esquiva contra ataques de Lilim." },
+                    { name: "Dreno Anímico", desc: "Recupera 1d6 PV sempre que um inimigo próximo falha em um teste de Status." }
+                ],
+                skills: [
+                    { name: "Marin Karin", element: "Status", cost: "3 Energia", range: "Médio (12m)", tier: "II", effect: "Tenta encantar 1 alvo (Teste de MAG vs TEC/SOR). Aplica Charm por 2 turnos." },
+                    { name: "Eiga", element: "Trevas", cost: "3 Energia", range: "Médio (12m)", tier: "II", effect: "Causa 2d8 + MAG de dano de Trevas em 1 alvo." },
+                    { name: "Mapsi", element: "PSY", cost: "5 Energia", range: "Área (Raio 4,5m)", tier: "II", effect: "Onda psíquica que causa 2d6 + MAG de dano PSY. Causa +1d6 extra em alvos com Status Negativo (Technical)." }
+                ],
+                personality: "Manipuladora / Sedutora",
+                tactics: "Combo clássico de Technical: aplica Marin Karin primeiro e, no turno seguinte, detona o alvo encantado com Mapsi para dano massivo.",
+                negotiation: "Gosta de jogos mentais, elogios astutos e promessas ambiciosas. Despreza ingenuidade.",
+                drops: ["Asa de Morcego Etérea", "Perfume Hipnótico", "Obsidiana Polida"]
+            },
+            {
+                id: "shd-king-frost",
+                name: "King Frost",
+                title: "O Soberano Absoluto do Zero",
+                arcana: "IV - Imperador",
+                level: 24,
+                rank: "Chefe",
+                icon: "👑",
+                exp: 680,
+                yen: 4200,
+                vitals: { hp: 340, energy: 18, evasion: 12, dr: 7, initiative: "+3" },
+                stats: { FOR: 7, TEC: 6, VIT: 9, MAG: 10, AGI: 3, SOR: 7 },
+                affinities: {
+                    Fisico: "RES", Fogo: "FRQ", Gelo: "RFL", Vento: "-", Raio: "-",
+                    Nuclear: "-", PSY: "-", Luz: "NUL", Trevas: "RES", Status: "RES", Intel: "-"
+                },
+                basicAttack: {
+                    name: "Esmagamento Real",
+                    damage: "2d8 + FOR (Físico/Gelo)",
+                    range: "Corpo a Corpo (3m)"
+                },
+                passives: [
+                    { name: "Majestade Glacial", desc: "No início de cada rodada, todos os inimigos a até 4,5m sofrem 1d4 de dano de Gelo passivo." },
+                    { name: "Invocação da Guarda Frost", desc: "Uma vez por combate ao chegar a 50% de PV, invoca 2 Jack Frosts aliados." }
+                ],
+                skills: [
+                    { name: "Bufula", element: "Gelo", cost: "4 Energia", range: "Médio (15m)", tier: "II", effect: "Causa 3d6 + MAG de dano de Gelo em 1 alvo e aplica Congelado." },
+                    { name: "Mabufula", element: "Gelo", cost: "6 Energia", range: "Área (Raio 6m)", tier: "III", effect: "Tempestade glacial que causa 2d8 + MAG de dano de Gelo em todos na área." },
+                    { name: "King's Order", element: "Gelo", cost: "8 Energia", range: "Campo Todo", tier: "IV", effect: "Habilidade Exclusiva: Dispara uma avalanche real de 3d10 + MAG de dano de Gelo em até 4 alvos." }
+                ],
+                personality: "Arrogante / Tirânica",
+                tactics: "Domina o centro da arena, usando Mabufula para congelar o grupo e punindo alvos congelados com Esmagamento Real (Technical).",
+                negotiation: "Imune à negociação comum por ser um Chefe de Palácio / Mementos, mas pode ser provocado para perder o foco tático.",
+                drops: ["Coroa de Gelo Eterno", "Cetro Hee-Ho", "Núcleo Criogênico"]
+            }
+        ];
+
+        // =========================================================================
+        // ESTADO DA APLICAÇÃO
+        // =========================================================================
+        let shadows = [];
+        let activeShadowId = null;
+
+        // =========================================================================
+        // INICIALIZAÇÃO & LOCALSTORAGE
+        // =========================================================================
+        function initApp() {
+            loadShadowsFromStorage();
+            populateSelectOptions();
+            renderCompendium();
+            if (shadows.length > 0) {
+                activeShadowId = shadows[0].id;
+            }
+        }
+
+        function loadShadowsFromStorage() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        shadows = parsed;
+                        return;
+                    }
+                }
+            } catch (e) {
+                console.error("Erro ao carregar LocalStorage:", e);
+            }
+            shadows = JSON.parse(JSON.stringify(DEFAULT_SHADOWS));
+            saveShadowsToStorage();
+        }
+
+        function saveShadowsToStorage() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(shadows));
+                updateCountBadges();
+            } catch (e) {
+                showToast("Erro ao salvar no navegador (Armazenamento cheio).", "error");
+            }
+        }
+
+        function updateCountBadges() {
+            const mobileEl = document.getElementById("mobile-count");
+            if (mobileEl) mobileEl.textContent = `${shadows.length} Sombras`;
+        }
+
+        function populateSelectOptions() {
+            // Filtros e Form de Arcana
+            const filterArcana = document.getElementById("filter-arcana");
+            const formArcana = document.getElementById("form-arcana");
+            ARCANAS.forEach(arc => {
+                filterArcana.insertAdjacentHTML("beforeend", `<option value="${arc}">${arc}</option>`);
+                formArcana.insertAdjacentHTML("beforeend", `<option value="${arc}">${arc}</option>`);
+            });
+
+            // Filtro de Fraqueza
+            const filterWeakness = document.getElementById("filter-weakness");
+            ELEMENTS.forEach(el => {
+                filterWeakness.insertAdjacentHTML("beforeend", `<option value="${el.key}">${el.icon} ${el.label}</option>`);
+            });
+
+            // Grid de Afinidades no Formulário
+            const affGrid = document.getElementById("form-affinities-grid");
+            affGrid.innerHTML = ELEMENTS.map(el => `
+                <div class="bg-navy-950 border border-royal-800 p-2.5">
+                    <label class="flex items-center justify-between text-xs font-mono text-electric-300 mb-1.5">
+                        <span>${el.icon} ${el.label}</span>
+                        <span class="text-[10px] text-slate-500">${el.short}</span>
+                    </label>
+                    <select id="aff-${el.key}" class="w-full bg-navy-900 border border-royal-700 text-white text-xs font-mono py-1.5 px-2 outline-none">
+                        ${AFFINITY_TYPES.map(t => `<option value="${t.code}">${t.label}</option>`).join("")}
+                    </select>
+                </div>
+            `).join("");
+        }
+
+        // =========================================================================
+        // NAVEGAÇÃO ENTRE TELAS
+        // =========================================================================
+        function switchView(viewName) {
+            const views = ["compendium", "sheet", "editor"];
+            views.forEach(v => {
+                document.getElementById(`view-${v}`).classList.add("hidden");
+            });
+            document.getElementById(`view-${viewName}`).classList.remove("hidden");
+
+            // Atualiza botões da nav
+            document.querySelectorAll(".nav-btn").forEach(btn => {
+                btn.classList.remove("bg-electric-500", "text-navy-950", "font-extrabold");
+                btn.classList.add("bg-navy-800", "text-white", "font-bold");
+            });
+
+            const activeBtn = document.getElementById(`nav-${viewName}`);
+            if (activeBtn) {
+                activeBtn.classList.remove("bg-navy-800", "bg-royal-600", "text-white", "font-bold");
+                activeBtn.classList.add("bg-electric-500", "text-navy-950", "font-extrabold");
+            }
+
+            if (viewName === "sheet") {
+                if (!activeShadowId && shadows.length > 0) activeShadowId = shadows[0].id;
+                renderShadowSheet(activeShadowId);
+            }
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        // =========================================================================
+        // RENDERIZAÇÃO DO COMPÊNDIO (GRID E FILTROS)
+        // =========================================================================
+        function clearFilters() {
+            document.getElementById("filter-search").value = "";
+            document.getElementById("filter-arcana").value = "ALL";
+            document.getElementById("filter-rank").value = "ALL";
+            document.getElementById("filter-weakness").value = "ALL";
+            document.getElementById("sort-by").value = "level-asc";
+            renderCompendium();
+        }
+
+        function getRankBadgeStyle(rank) {
+            switch (rank) {
+                case "Guardião": return "bg-amber-400 text-navy-950 border-amber-200";
+                case "Chefe": return "bg-rose-600 text-white border-rose-400";
+                case "Mini-Chefe": return "bg-electric-500 text-navy-950 border-electric-300";
+                default: return "bg-royal-700 text-electric-200 border-royal-500";
+            }
+        }
+
+        function renderCompendium() {
+            const search = document.getElementById("filter-search").value.toLowerCase().trim();
+            const arcanaFilter = document.getElementById("filter-arcana").value;
+            const rankFilter = document.getElementById("filter-rank").value;
+            const weaknessFilter = document.getElementById("filter-weakness").value;
+            const sortBy = document.getElementById("sort-by").value;
+
+            let filtered = shadows.filter(sh => {
+                const matchesSearch = !search ||
+                    sh.name.toLowerCase().includes(search) ||
+                    sh.title.toLowerCase().includes(search) ||
+                    sh.skills.some(sk => sk.name.toLowerCase().includes(search));
+                const matchesArcana = arcanaFilter === "ALL" || sh.arcana === arcanaFilter;
+                const matchesRank = rankFilter === "ALL" || sh.rank === rankFilter;
+                const matchesWeakness = weaknessFilter === "ALL" || (sh.affinities && sh.affinities[weaknessFilter] === "FRQ");
+                return matchesSearch && matchesArcana && matchesRank && matchesWeakness;
+            });
+
+            // Ordenação
+            filtered.sort((a, b) => {
+                if (sortBy === "level-asc") return a.level - b.level;
+                if (sortBy === "level-desc") return b.level - a.level;
+                if (sortBy === "name-asc") return a.name.localeCompare(b.name);
+                if (sortBy === "arcana") return a.arcana.localeCompare(b.arcana);
+                return 0;
+            });
+
+            document.getElementById("compendium-stats").textContent = `Exibindo ${filtered.length} de ${shadows.length} sombras registradas`;
+            updateCountBadges();
+
+            const grid = document.getElementById("shadows-grid");
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full bg-navy-900/80 border border-dashed border-royal-600 p-12 text-center clip-card">
+                        <p class="font-display text-2xl text-electric-400 uppercase tracking-wide mb-2">Nenhuma Shadow Encontrada</p>
+                        <p class="text-slate-400 text-sm mb-4">Nenhuma entidade corresponde aos parâmetros atuais do radar do Metaverso.</p>
+                        <button onclick="clearFilters()" class="bg-royal-600 hover:bg-royal-500 text-white font-bold uppercase text-xs px-4 py-2.5 clip-slash">Resetar Filtros</button>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(sh => {
+                const weaknesses = ELEMENTS.filter(el => sh.affinities[el.key] === "FRQ");
+                const resists = ELEMENTS.filter(el => ["RES", "NUL", "ABS", "RFL"].includes(sh.affinities[el.key]));
+
+                return `
+                <article onclick="openShadowSheet('${sh.id}')" class="group cursor-pointer bg-navy-900 hover:bg-navy-800/95 border border-royal-700 hover:border-electric-400 clip-card p-5 transition-all duration-200 shadow-lg hover:-translate-y-1 flex flex-col justify-between relative">
+                    <div>
+                        <!-- Topo: Arcana & Nível -->
+                        <div class="flex items-center justify-between gap-2 mb-3">
+                            <span class="bg-navy-950 border border-electric-500/40 text-electric-300 font-mono text-[11px] uppercase px-2.5 py-0.5 clip-badge">
+                                ${sh.arcana}
+                            </span>
+                            <div class="flex items-center gap-1.5">
+                                <span class="border text-[10px] font-extrabold uppercase px-2 py-0.5 clip-badge ${getRankBadgeStyle(sh.rank)}">
+                                    ${sh.rank}
+                                </span>
+                                <span class="bg-white text-navy-950 font-display text-sm px-2.5 py-0.5 clip-badge">
+                                    NV.${sh.level}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Nome e Ícone -->
+                        <div class="flex items-center gap-3.5 mb-3">
+                            <div class="w-14 h-14 shrink-0 bg-gradient-to-br from-royal-700 to-navy-950 border border-electric-400/50 flex items-center justify-center text-3xl clip-slash group-hover:scale-105 transition">
+                                ${sh.icon || "👁️"}
+                            </div>
+                            <div class="min-w-0">
+                                <h3 class="font-display text-2xl text-white uppercase tracking-wide truncate group-hover:text-electric-400 transition">
+                                    ${sh.name}
+                                </h3>
+                                <p class="text-xs text-slate-400 truncate italic">"${sh.title}"</p>
+                            </div>
+                        </div>
+
+                        <!-- Vitais Resumidos -->
+                        <div class="grid grid-cols-3 gap-2 bg-navy-950/90 border border-navy-800 p-2.5 mb-3 text-center font-mono">
+                            <div>
+                                <div class="text-[10px] text-slate-400">PV</div>
+                                <div class="text-sm font-bold text-emerald-400">${sh.vitals.hp}</div>
+                            </div>
+                            <div class="border-x border-navy-800">
+                                <div class="text-[10px] text-slate-400">ENERGIA</div>
+                                <div class="text-sm font-bold text-electric-400">${sh.vitals.energy}</div>
+                            </div>
+                            <div>
+                                <div class="text-[10px] text-slate-400">ESQ / RD</div>
+                                <div class="text-sm font-bold text-white">${sh.vitals.evasion} / ${sh.vitals.dr}</div>
+                            </div>
+                        </div>
+
+                        <!-- Fraquezas & Resistências Rápidas -->
+                        <div class="space-y-1.5 text-xs mb-4">
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <span class="font-mono text-[10px] uppercase text-rose-400 font-bold w-12">FRQ:</span>
+                                ${weaknesses.length > 0
+                                    ? weaknesses.map(w => `<span class="bg-rose-950/90 border border-rose-500/60 text-rose-200 px-1.5 py-0.5 text-[11px] font-mono">${w.icon} ${w.short}</span>`).join("")
+                                    : `<span class="text-slate-500 text-[11px] font-mono">Nenhuma</span>`
+                                }
+                            </div>
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <span class="font-mono text-[10px] uppercase text-electric-400 font-bold w-12">AFIN:</span>
+                                ${resists.length > 0
+                                    ? resists.slice(0, 4).map(r => `<span class="bg-royal-900/90 border border-electric-500/40 text-electric-200 px-1.5 py-0.5 text-[11px] font-mono">${r.short} (${sh.affinities[r.key]})</span>`).join("")
+                                    : `<span class="text-slate-500 text-[11px] font-mono">Nenhuma</span>`
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rodapé do Card -->
+                    <div class="pt-2.5 border-t border-navy-800 flex items-center justify-between text-xs font-mono">
+                        <span class="text-amber-400">${sh.exp} EXP // ¥${sh.yen}</span>
+                        <span class="text-electric-400 font-bold group-hover:translate-x-1 transition-transform">ABRIR FICHA →</span>
+                    </div>
+                </article>
+                `;
+            }).join("");
+        }
+
+        // =========================================================================
+        // RENDERIZAÇÃO DA FICHA COMPLETA NO PADRÃO DO LIVRO (GDC)
+        // =========================================================================
+        function openShadowSheet(id) {
+            activeShadowId = id;
+            switchView("sheet");
+        }
+
+        function renderShadowSheet(id) {
+            const sh = shadows.find(s => s.id === id);
+            const container = document.getElementById("shadow-sheet-container");
+
+            if (!sh) {
+                container.innerHTML = `<div class="p-8 text-center text-slate-400">Selecione uma Shadow no Compêndio para visualizar sua ficha.</div>`;
+                return;
+            }
+
+            // Configura botões de editar e excluir
+            document.getElementById("sheet-edit-btn").onclick = () => openEditor(sh.id);
+            document.getElementById("sheet-delete-btn").onclick = () => confirmDeleteShadow(sh.id, sh.name);
+
+            const statKeys = ["FOR", "TEC", "VIT", "MAG", "AGI", "SOR"];
+            const maxStat = Math.max(10, ...statKeys.map(k => sh.stats[k] || 0));
+
+            container.innerHTML = `
+                <!-- 1. CABEÇALHO DA FICHA (ESTILO LIVRO GDC) -->
+                <div class="bg-gradient-to-r from-royal-700 via-royal-600 to-navy-900 border-b-4 border-electric-400 p-5 sm:p-8 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 bottom-0 w-1/3 bg-electric-500/10 skew-x-[-20deg] translate-x-12 pointer-events-none"></div>
+                    
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+                        <div class="flex items-start sm:items-center gap-4 sm:gap-6">
+                            <div class="w-20 h-20 sm:w-24 sm:h-24 shrink-0 bg-navy-950 border-2 border-electric-400 flex items-center justify-center text-4xl sm:text-5xl clip-card shadow-xl">
+                                ${sh.icon || "👁️"}
+                            </div>
+                            <div>
+                                <div class="flex flex-wrap items-center gap-2 mb-1.5">
+                                    <span class="bg-navy-950 text-electric-400 font-mono font-bold text-xs uppercase px-3 py-1 clip-badge border border-electric-400/50">
+                                        ARCANA: ${sh.arcana}
+                                    </span>
+                                    <span class="font-extrabold text-xs uppercase px-3 py-1 clip-badge border ${getRankBadgeStyle(sh.rank)}">
+                                        ${sh.rank}
+                                    </span>
+                                </div>
+                                <h2 class="font-display text-3xl sm:text-5xl text-white uppercase tracking-wide leading-none drop-shadow">
+                                    ${sh.name}
+                                </h2>
+                                <p class="text-electric-200 text-sm sm:text-base italic mt-1 font-medium">
+                                    "${sh.title}"
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Bloco Nível e Recompensas -->
+                        <div class="flex flex-wrap sm:flex-nowrap items-center gap-3 self-start lg:self-center">
+                            <div class="bg-navy-950 border-2 border-white px-5 py-2.5 clip-slash text-center">
+                                <div class="text-[10px] font-mono uppercase tracking-widest text-electric-400">NÍVEL</div>
+                                <div class="font-display text-3xl sm:text-4xl text-white leading-none">${sh.level}</div>
+                            </div>
+                            <div class="bg-navy-950/90 border border-electric-500/50 px-4 py-2.5 clip-slash font-mono text-xs space-y-1">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-slate-400">EXP:</span>
+                                    <span class="text-amber-400 font-bold">+${sh.exp}</span>
+                                </div>
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-slate-400">YEN:</span>
+                                    <span class="text-emerald-400 font-bold">¥ ${sh.yen}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-5 sm:p-8 space-y-8">
+                    <!-- 2. STATUS VITAIS & 3. ATRIBUTOS DE COMBATE -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <!-- Status Vitais -->
+                        <div class="lg:col-span-5 space-y-3">
+                            <div class="flex items-center gap-2 border-b border-royal-700 pb-1.5">
+                                <span class="bg-electric-500 text-navy-950 font-display text-xs px-2 py-0.5 clip-badge">BLOCO I</span>
+                                <h3 class="font-display text-lg uppercase tracking-wider text-white">Status Vitais</h3>
+                            </div>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-3">
+                                <div class="bg-navy-950 border-l-4 border-emerald-400 p-3">
+                                    <div class="text-[11px] font-mono uppercase text-slate-400">Pontos de Vida (PV)</div>
+                                    <div class="font-display text-3xl text-emerald-400">${sh.vitals.hp}</div>
+                                </div>
+                                <div class="bg-navy-950 border-l-4 border-electric-400 p-3">
+                                    <div class="text-[11px] font-mono uppercase text-slate-400">Energia (PM)</div>
+                                    <div class="font-display text-3xl text-electric-400">${sh.vitals.energy}</div>
+                                </div>
+                                <div class="bg-navy-950 border-l-4 border-royal-500 p-3">
+                                    <div class="text-[11px] font-mono uppercase text-slate-400">Esquiva (Esq.)</div>
+                                    <div class="font-mono text-2xl font-bold text-white">${sh.vitals.evasion}</div>
+                                </div>
+                                <div class="bg-navy-950 border-l-4 border-amber-400 p-3">
+                                    <div class="text-[11px] font-mono uppercase text-slate-400">Redução Dano (RD)</div>
+                                    <div class="font-mono text-2xl font-bold text-amber-300">${sh.vitals.dr}</div>
+                                </div>
+                                <div class="col-span-2 sm:col-span-1 lg:col-span-2 bg-navy-950 border-l-4 border-purple-400 p-3 flex items-center justify-between">
+                                    <div>
+                                        <div class="text-[11px] font-mono uppercase text-slate-400">Iniciativa</div>
+                                        <div class="font-mono text-xl font-bold text-purple-300">${sh.vitals.initiative}</div>
+                                    </div>
+                                    <button onclick="rollShadowInitiative()" class="bg-purple-600/30 hover:bg-purple-600 text-purple-200 hover:text-white border border-purple-400 text-[11px] font-mono uppercase px-2.5 py-1.5 clip-badge transition">
+                                        🎲 Rolar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Atributos de Combate -->
+                        <div class="lg:col-span-7 space-y-3">
+                            <div class="flex items-center justify-between border-b border-royal-700 pb-1.5">
+                                <div class="flex items-center gap-2">
+                                    <span class="bg-electric-500 text-navy-950 font-display text-xs px-2 py-0.5 clip-badge">BLOCO II</span>
+                                    <h3 class="font-display text-lg uppercase tracking-wider text-white">Atributos de Combate</h3>
+                                </div>
+                                <span class="text-[11px] font-mono text-slate-400">Clique no atributo para testar</span>
+                            </div>
+
+                            <div class="bg-navy-950 border border-royal-800 p-4 space-y-3">
+                                ${statKeys.map(stat => {
+                                    const val = sh.stats[stat] || 0;
+                                    const pct = Math.min(100, Math.round((val / maxStat) * 100));
+                                    return `
+                                    <div onclick="rollAttributeCheck('${sh.name}', '${stat}', ${val})" class="group cursor-pointer flex items-center gap-3">
+                                        <div class="w-12 font-display text-lg tracking-wider text-electric-400 group-hover:text-white transition">${stat}</div>
+                                        <div class="w-9 h-8 bg-royal-700 group-hover:bg-electric-500 text-white group-hover:text-navy-950 font-mono font-bold text-sm flex items-center justify-center clip-badge transition">
+                                            ${val}
+                                        </div>
+                                        <div class="flex-1 h-4 bg-navy-900 border border-navy-700 overflow-hidden relative">
+                                            <div class="h-full bg-gradient-to-r from-royal-600 to-electric-400 transition-all duration-500" style="width: ${pct}%"></div>
+                                        </div>
+                                        <span class="text-[10px] font-mono text-slate-500 group-hover:text-electric-400 uppercase hidden sm:inline">Testar 🎲</span>
+                                    </div>
+                                    `;
+                                }).join("")}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. TABELA DE AFINIDADES ELEMENTAIS (11 TIPOS DO GDC) -->
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2 border-b border-royal-700 pb-1.5">
+                            <span class="bg-electric-500 text-navy-950 font-display text-xs px-2 py-0.5 clip-badge">BLOCO III</span>
+                            <h3 class="font-display text-lg uppercase tracking-wider text-white">Afinidades Elementais (Padrão GDC)</h3>
+                        </div>
+                        <div class="grid grid-cols-3 sm:grid-cols-6 lg:grid-cols-11 gap-2">
+                            ${ELEMENTS.map(el => {
+                                const code = (sh.affinities && sh.affinities[el.key]) || "-";
+                                const affMeta = AFFINITY_TYPES.find(a => a.code === code) || AFFINITY_TYPES[0];
+                                return `
+                                <div class="bg-navy-950 border border-royal-800 p-2 text-center flex flex-col items-center justify-between">
+                                    <div class="text-base mb-0.5">${el.icon}</div>
+                                    <div class="text-[10px] font-mono uppercase text-slate-300 tracking-tight mb-1.5">${el.label}</div>
+                                    <span class="w-full py-1 text-xs font-mono border clip-badge ${affMeta.badgeClass}">
+                                        ${code}
+                                    </span>
+                                </div>
+                                `;
+                            }).join("")}
+                        </div>
+                    </div>
+
+                    <!-- 5. ATAQUE BÁSICO & HABILIDADES PASSIVAS -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <!-- Ataque Básico -->
+                        <div class="lg:col-span-5 space-y-3">
+                            <div class="flex items-center gap-2 border-b border-royal-700 pb-1.5">
+                                <span class="bg-electric-500 text-navy-950 font-display text-xs px-2 py-0.5 clip-badge">BLOCO IV</span>
+                                <h3 class="font-display text-lg uppercase tracking-wider text-white">Ataque Básico</h3>
+                            </div>
+                            <div class="bg-navy-950 border-2 border-royal-700 p-4 clip-card space-y-2">
+                                <div class="flex items-center justify-between gap-2">
+                                    <h4 class="font-bold text-base text-electric-400 uppercase">${sh.basicAttack.name}</h4>
+                                    <button onclick="rollAttack('${sh.name}', '${sh.basicAttack.name}', '${sh.basicAttack.damage}', ${sh.stats.TEC || 0})" class="bg-royal-600 hover:bg-electric-500 text-white hover:text-navy-950 font-mono font-bold text-[11px] px-2.5 py-1 clip-badge transition">
+                                        ⚔️ Atacar
+                                    </button>
+                                </div>
+                                <div class="text-xs font-mono text-slate-300 space-y-1 pt-1 border-t border-navy-800">
+                                    <div><span class="text-slate-500">DANO:</span> <span class="text-white font-bold">${sh.basicAttack.damage}</span></div>
+                                    <div><span class="text-slate-500">ALCANCE:</span> <span class="text-electric-300">${sh.basicAttack.range}</span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Passivas -->
+                        <div class="lg:col-span-7 space-y-3">
+                            <div class="flex items-center gap-2 border-b border-royal-700 pb-1.5">
+                                <span class="bg-electric-500 text-navy-950 font-display text-xs px-2 py-0.5 clip-badge">BLOCO V</span>
+                                <h3 class="font-display text-lg uppercase tracking-wider text-white">Habilidades Passivas & Traços</h3>
+                            </div>
+                            <div class="space-y-2.5">
+                                ${(sh.passives && sh.passives.length > 0) ? sh.passives.map(p => `
+                                    <div class="bg-navy-950/90 border-l-4 border-electric-400 p-3">
+                                        <div class="font-bold text-sm text-electric-300 uppercase tracking-wide">${p.name}</div>
+                                        <p class="text-xs sm:text-sm text-slate-300 mt-0.5 leading-relaxed">${p.desc}</p>
+                                    </div>
+                                `).join("") : `<p class="text-xs text-slate-500 italic">Nenhuma habilidade passiva registrada.</p>`}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6. GRIMÓRIO DE MAGIAS / HABILIDADES ATIVAS -->
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2 border-b border-royal-700 pb-1.5">
+                            <span class="bg-electric-500 text-navy-950 font-display text-xs px-2 py-0.5 clip-badge">BLOCO VI</span>
+                            <h3 class="font-display text-lg uppercase tracking-wider text-white">Grimório de Magias & Habilidades Ativas</h3>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            ${(sh.skills && sh.skills.length > 0) ? sh.skills.map(sk => {
+                                const elObj = ELEMENTS.find(e => e.key === sk.element) || { icon: "✨", label: sk.element };
+                                return `
+                                <div class="bg-navy-950 border border-royal-700 hover:border-electric-400 p-4 transition flex flex-col justify-between">
+                                    <div>
+                                        <div class="flex items-start justify-between gap-2 mb-2">
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-lg">${elObj.icon}</span>
+                                                <h4 class="font-bold text-base text-white uppercase tracking-wide">${sk.name}</h4>
+                                            </div>
+                                            <div class="flex items-center gap-1.5 shrink-0">
+                                                <span class="bg-royal-700 text-electric-300 font-mono text-[10px] font-bold px-2 py-0.5 clip-badge">
+                                                    TIER ${sk.tier}
+                                                </span>
+                                                <span class="bg-electric-500/20 border border-electric-400/50 text-electric-300 font-mono text-[11px] font-bold px-2 py-0.5">
+                                                    ${sk.cost}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-3 text-[11px] font-mono text-slate-400 mb-2">
+                                            <span>ELEMENTO: <strong class="text-electric-300">${elObj.label}</strong></span>
+                                            <span>•</span>
+                                            <span>ALCANCE: <strong class="text-slate-200">${sk.range}</strong></span>
+                                        </div>
+                                        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">${sk.effect}</p>
+                                    </div>
+                                    <div class="mt-3 pt-2 border-t border-navy-800 flex justify-end">
+                                        <button onclick="rollSkillCast('${sh.name}', '${sk.name}', '${sk.element}', ${sh.stats.MAG || 0}, ${sh.stats.TEC || 0})" class="text-[11px] font-mono uppercase text-electric-400 hover:text-white flex items-center gap-1 transition">
+                                            🎲 Rolar Conjuração / Acerto
+                                        </button>
+                                    </div>
+                                </div>
+                                `;
+                            }).join("") : `<p class="text-xs text-slate-500 italic">Nenhuma magia ativa registrada.</p>`}
+                        </div>
+                    </div>
+
+                    <!-- 7. COMPORTAMENTO TÁTICO, NEGOCIAÇÃO & DROPS -->
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2 border-b border-royal-700 pb-1.5">
+                            <span class="bg-electric-500 text-navy-950 font-display text-xs px-2 py-0.5 clip-badge">BLOCO VII</span>
+                            <h3 class="font-display text-lg uppercase tracking-wider text-white">Comportamento Tático, Negociação & Espólios</h3>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-navy-950 border border-royal-800 p-4">
+                                <div class="text-[11px] font-mono uppercase text-electric-400 mb-1">Personalidade & Tática</div>
+                                <div class="inline-block bg-royal-700 text-white text-xs font-bold px-2.5 py-0.5 clip-badge mb-2">
+                                    ${sh.personality}
+                                </div>
+                                <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">${sh.tactics}</p>
+                            </div>
+                            <div class="bg-navy-950 border border-royal-800 p-4">
+                                <div class="text-[11px] font-mono uppercase text-electric-400 mb-1">Negociação (Hold Up)</div>
+                                <p class="text-xs sm:text-sm text-slate-300 leading-relaxed italic mt-2">
+                                    "${sh.negotiation || 'Esta Shadow não demonstra interesse em dialogar.'}"
+                                </p>
+                            </div>
+                            <div class="bg-navy-950 border border-royal-800 p-4">
+                                <div class="text-[11px] font-mono uppercase text-electric-400 mb-2">Drops & Materiais de Fusão</div>
+                                <div class="flex flex-wrap gap-2">
+                                    ${(sh.drops && sh.drops.length > 0) ? sh.drops.map(item => `
+                                        <span class="bg-navy-900 border border-amber-500/40 text-amber-300 font-mono text-xs px-2.5 py-1 clip-badge">
+                                            ◆ ${item}
+                                        </span>
+                                    `).join("") : `<span class="text-xs text-slate-500">Sem espólios listados</span>`}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // =========================================================================
+        // FORMULÁRIO: CRIAR / EDITAR SHADOW
+        // =========================================================================
+        function openEditor(editId = null) {
+            const form = document.getElementById("shadow-form");
+            form.reset();
+            document.getElementById("form-passives-list").innerHTML = "";
+            document.getElementById("form-skills-list").innerHTML = "";
+
+            if (editId) {
+                const sh = shadows.find(s => s.id === editId);
+                if (!sh) return;
+
+                document.getElementById("editor-heading").textContent = `Editando: ${sh.name}`;
+                document.getElementById("form-id").value = sh.id;
+                document.getElementById("form-name").value = sh.name;
+                document.getElementById("form-title").value = sh.title;
+                document.getElementById("form-arcana").value = sh.arcana;
+                document.getElementById("form-level").value = sh.level;
+                document.getElementById("form-rank").value = sh.rank;
+                document.getElementById("form-icon").value = sh.icon || "👁️";
+                document.getElementById("form-exp").value = sh.exp;
+                document.getElementById("form-yen").value = sh.yen;
+
+                document.getElementById("form-for").value = sh.stats.FOR;
+                document.getElementById("form-tec").value = sh.stats.TEC;
+                document.getElementById("form-vit").value = sh.stats.VIT;
+                document.getElementById("form-mag").value = sh.stats.MAG;
+                document.getElementById("form-agi").value = sh.stats.AGI;
+                document.getElementById("form-sor").value = sh.stats.SOR;
+
+                document.getElementById("form-hp").value = sh.vitals.hp;
+                document.getElementById("form-energy").value = sh.vitals.energy;
+                document.getElementById("form-evasion").value = sh.vitals.evasion;
+                document.getElementById("form-dr").value = sh.vitals.dr;
+                document.getElementById("form-initiative").value = sh.vitals.initiative;
+
+                ELEMENTS.forEach(el => {
+                    const sel = document.getElementById(`aff-${el.key}`);
+                    if (sel) sel.value = (sh.affinities && sh.affinities[el.key]) || "-";
+                });
+
+                document.getElementById("form-basic-name").value = sh.basicAttack.name;
+                document.getElementById("form-basic-damage").value = sh.basicAttack.damage;
+                document.getElementById("form-basic-range").value = sh.basicAttack.range;
+
+                (sh.passives || []).forEach(p => addPassiveRow(p.name, p.desc));
+                (sh.skills || []).forEach(sk => addSkillRow(sk));
+
+                document.getElementById("form-personality").value = sh.personality;
+                document.getElementById("form-tactics").value = sh.tactics;
+                document.getElementById("form-negotiation").value = sh.negotiation || "";
+                document.getElementById("form-drops").value = (sh.drops || []).join(", ");
+            } else {
+                document.getElementById("editor-heading").textContent = "Catalogar Nova Shadow";
+                document.getElementById("form-id").value = "";
+                ELEMENTS.forEach(el => {
+                    const sel = document.getElementById(`aff-${el.key}`);
+                    if (sel) sel.value = "-";
+                });
+                addPassiveRow("Instinto do Metaverso", "Recebe +1 em testes de Percepção dentro de Palácios.");
+                addSkillRow({ name: "Agi", element: "Fogo", cost: "2 Energia", range: "Curto (9m)", tier: "I", effect: "Causa 2d6 + MAG de dano de Fogo a 1 alvo." });
+            }
+
+            switchView("editor");
+        }
+
+        function applyGdcFormulas() {
+            const lvl = parseInt(document.getElementById("form-level").value) || 1;
+            const vit = parseInt(document.getElementById("form-vit").value) || 1;
+            const agi = parseInt(document.getElementById("form-agi").value) || 1;
+            const rank = document.getElementById("form-rank").value;
+
+            // Fórmula GDC base: PV = 25 + ((5 + VIT) * Nv) com multiplicador por Rank
+            let rankMult = 1;
+            if (rank === "Mini-Chefe") rankMult = 1.4;
+            if (rank === "Chefe") rankMult = 2.0;
+            if (rank === "Guardião") rankMult = 2.5;
+
+            const hp = Math.round((25 + ((5 + vit) * lvl)) * rankMult);
+            const energy = vit + Math.floor(lvl / 2);
+            const evasion = 10 + agi;
+            const dr = Math.floor(vit / 2);
+            const init = agi >= 0 ? `+${agi}` : `${agi}`;
+
+            document.getElementById("form-hp").value = hp;
+            document.getElementById("form-energy").value = energy;
+            document.getElementById("form-evasion").value = evasion;
+            document.getElementById("form-dr").value = dr;
+            document.getElementById("form-initiative").value = init;
+
+            showToast("Status Vitais calculados pelas fórmulas do GDC!", "info");
+        }
+
+        function autoCalculateVitalsHint() {
+            // Mantém liberdade manual, mas pode ser acionado pelo botão
+        }
+
+        function addPassiveRow(name = "", desc = "") {
+            const list = document.getElementById("form-passives-list");
+            const row = document.createElement("div");
+            row.className = "passive-row grid grid-cols-1 sm:grid-cols-12 gap-2 bg-navy-950 p-3 border border-royal-800 items-center";
+            row.innerHTML = `
+                <div class="sm:col-span-4">
+                    <input type="text" placeholder="Nome da Passiva" value="${name}" class="p-name w-full bg-navy-900 border border-royal-700 text-white text-xs px-2.5 py-2 outline-none" required>
+                </div>
+                <div class="sm:col-span-7">
+                    <input type="text" placeholder="Efeito mecânico..." value="${desc}" class="p-desc w-full bg-navy-900 border border-royal-700 text-white text-xs px-2.5 py-2 outline-none" required>
+                </div>
+                <div class="sm:col-span-1 text-right">
+                    <button type="button" onclick="this.closest('.passive-row').remove()" class="text-rose-400 hover:text-rose-300 font-bold text-xs px-2 py-1">✕</button>
+                </div>
+            `;
+            list.appendChild(row);
+        }
+
+        function addSkillRow(sk = { name: "", element: "Fogo", cost: "2 Energia", range: "Curto (9m)", tier: "I", effect: "" }) {
+            const list = document.getElementById("form-skills-list");
+            const row = document.createElement("div");
+            row.className = "skill-row bg-navy-950 p-3.5 border border-royal-800 space-y-2.5";
+            row.innerHTML = `
+                <div class="grid grid-cols-2 sm:grid-cols-12 gap-2 items-center">
+                    <div class="col-span-2 sm:col-span-4">
+                        <input type="text" placeholder="Nome da Magia" value="${sk.name}" class="s-name w-full bg-navy-900 border border-royal-700 text-white text-xs px-2.5 py-2 outline-none" required>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <select class="s-element w-full bg-navy-900 border border-royal-700 text-white text-xs px-2 py-2 outline-none">
+                            ${ELEMENTS.map(el => `<option value="${el.key}" ${sk.element === el.key ? "selected" : ""}>${el.label}</option>`).join("")}
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <select class="s-tier w-full bg-navy-900 border border-royal-700 text-white text-xs font-mono px-2 py-2 outline-none">
+                            ${["I", "II", "III", "IV"].map(t => `<option value="${t}" ${sk.tier === t ? "selected" : ""}>Tier ${t}</option>`).join("")}
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <input type="text" placeholder="Custo (ex: 2 Energia)" value="${sk.cost}" class="s-cost w-full bg-navy-900 border border-royal-700 text-white text-xs font-mono px-2.5 py-2 outline-none" required>
+                    </div>
+                    <div class="sm:col-span-2 flex items-center gap-1">
+                        <input type="text" placeholder="Alcance" value="${sk.range}" class="s-range w-full bg-navy-900 border border-royal-700 text-white text-xs px-2 py-2 outline-none" required>
+                        <button type="button" onclick="this.closest('.skill-row').remove()" class="text-rose-400 hover:text-rose-300 font-bold text-sm px-1.5">✕</button>
+                    </div>
+                </div>
+                <div>
+                    <input type="text" placeholder="Descrição do efeito e dano (ex: Causa 2d6 + MAG de dano...)" value="${sk.effect}" class="s-effect w-full bg-navy-900 border border-royal-700 text-white text-xs px-2.5 py-2 outline-none" required>
+                </div>
+            `;
+            list.appendChild(row);
+        }
+
+        function saveShadowForm(e) {
+            e.preventDefault();
+            const existingId = document.getElementById("form-id").value;
+
+            const affinities = {};
+            ELEMENTS.forEach(el => {
+                affinities[el.key] = document.getElementById(`aff-${el.key}`).value;
+            });
+
+            const passives = Array.from(document.querySelectorAll(".passive-row")).map(row => ({
+                name: row.querySelector(".p-name").value.trim(),
+                desc: row.querySelector(".p-desc").value.trim()
+            })).filter(p => p.name);
+
+            const skills = Array.from(document.querySelectorAll(".skill-row")).map(row => ({
+                name: row.querySelector(".s-name").value.trim(),
+                element: row.querySelector(".s-element").value,
+                tier: row.querySelector(".s-tier").value,
+                cost: row.querySelector(".s-cost").value.trim(),
+                range: row.querySelector(".s-range").value.trim(),
+                effect: row.querySelector(".s-effect").value.trim()
+            })).filter(s => s.name);
+
+            const dropsRaw = document.getElementById("form-drops").value;
+            const drops = dropsRaw.split(",").map(d => d.trim()).filter(Boolean);
+
+            const shadowData = {
+                id: existingId || `shd-${Date.now()}`,
+                name: document.getElementById("form-name").value.trim(),
+                title: document.getElementById("form-title").value.trim(),
+                arcana: document.getElementById("form-arcana").value,
+                level: parseInt(document.getElementById("form-level").value) || 1,
+                rank: document.getElementById("form-rank").value,
+                icon: document.getElementById("form-icon").value.trim() || "👁️",
+                exp: parseInt(document.getElementById("form-exp").value) || 0,
+                yen: parseInt(document.getElementById("form-yen").value) || 0,
+                vitals: {
+                    hp: parseInt(document.getElementById("form-hp").value) || 25,
+                    energy: parseInt(document.getElementById("form-energy").value) || 0,
+                    evasion: parseInt(document.getElementById("form-evasion").value) || 10,
+                    dr: parseInt(document.getElementById("form-dr").value) || 0,
+                    initiative: document.getElementById("form-initiative").value.trim() || "+0"
+                },
+                stats: {
+                    FOR: parseInt(document.getElementById("form-for").value) || 0,
+                    TEC: parseInt(document.getElementById("form-tec").value) || 0,
+                    VIT: parseInt(document.getElementById("form-vit").value) || 0,
+                    MAG: parseInt(document.getElementById("form-mag").value) || 0,
+                    AGI: parseInt(document.getElementById("form-agi").value) || 0,
+                    SOR: parseInt(document.getElementById("form-sor").value) || 0
+                },
+                affinities,
+                basicAttack: {
+                    name: document.getElementById("form-basic-name").value.trim(),
+                    damage: document.getElementById("form-basic-damage").value.trim(),
+                    range: document.getElementById("form-basic-range").value.trim()
+                },
+                passives,
+                skills,
+                personality: document.getElementById("form-personality").value.trim(),
+                tactics: document.getElementById("form-tactics").value.trim(),
+                negotiation: document.getElementById("form-negotiation").value.trim(),
+                drops
+            };
+
+            if (existingId) {
+                const idx = shadows.findIndex(s => s.id === existingId);
+                if (idx !== -1) shadows[idx] = shadowData;
+                showToast(`Ficha de "${shadowData.name}" atualizada!`, "success");
+            } else {
+                shadows.push(shadowData);
+                showToast(`"${shadowData.name}" catalogada no Compêndio!`, "success");
+            }
+
+            saveShadowsToStorage();
+            renderCompendium();
+            openShadowSheet(shadowData.id);
+        }
+
+        // =========================================================================
+        // EXCLUSÃO, EXPORTAÇÃO E IMPORTAÇÃO JSON
+        // =========================================================================
+        function confirmDeleteShadow(id, name) {
+            openConfirmModal(
+                "Apagar Registro",
+                `Deseja remover "${name}" permanentemente do Compêndio de Sombras?`,
+                () => {
+                    shadows = shadows.filter(s => s.id !== id);
+                    saveShadowsToStorage();
+                    renderCompendium();
+                    showToast(`Shadow "${name}" removida.`, "info");
+                    switchView("compendium");
+                }
+            );
+        }
+
+        function confirmResetCompendium() {
+            openConfirmModal(
+                "Restaurar Compêndio Oficial",
+                "Isso substituirá suas alterações atuais pelas 7 Sombras padrão do livro O Grimório do Coração. Continuar?",
+                () => {
+                    shadows = JSON.parse(JSON.stringify(DEFAULT_SHADOWS));
+                    saveShadowsToStorage();
+                    renderCompendium();
+                    showToast("Compêndio restaurado para o padrão do livro!", "success");
+                    switchView("compendium");
+                }
+            );
+        }
+
+        function exportJSON() {
+            const dataStr = JSON.stringify(shadows, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `gdc-shadow-compendium-${new Date().toISOString().slice(0, 10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast("Compêndio exportado em JSON!", "success");
+        }
+
+        function importJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (!Array.isArray(imported)) throw new Error("Formato inválido");
+                    shadows = imported;
+                    saveShadowsToStorage();
+                    renderCompendium();
+                    showToast(`${imported.length} Sombras importadas com sucesso!`, "success");
+                    switchView("compendium");
+                } catch (err) {
+                    showToast("Arquivo JSON inválido ou corrompido.", "error");
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = "";
+        }
+
+        // =========================================================================
+        // ROLADOR DE DADOS INTERATIVO (GDC 2d6 / 1d20)
+        // =========================================================================
+        function rollDie(sides) {
+            return Math.floor(Math.random() * sides) + 1;
+        }
+
+        function openDiceModal(title, renderFn) {
+            document.getElementById("dice-title").textContent = title;
+            const modal = document.getElementById("dice-modal");
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+
+            const execute = () => {
+                document.getElementById("dice-body").innerHTML = renderFn();
+            };
+            execute();
+            document.getElementById("reroll-btn").onclick = execute;
+        }
+
+        function closeDiceModal() {
+            const modal = document.getElementById("dice-modal");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        }
+
+        function rollAttributeCheck(shadowName, statName, statVal) {
+            openDiceModal(`${shadowName} // Teste de ${statName}`, () => {
+                const d1 = rollDie(6);
+                const d2 = rollDie(6);
+                const total = d1 + d2 + statVal;
+                const isCrit = d1 === 6 && d2 === 6;
+                const isFumble = d1 === 1 && d2 === 1;
+
+                return `
+                    <div class="bg-navy-950 border border-royal-700 p-4 text-center">
+                        <div class="text-xs font-mono text-slate-400 uppercase mb-2">Rolagem Padrão GDC (2d6 + ${statName})</div>
+                        <div class="flex items-center justify-center gap-3 my-3">
+                            <span class="w-11 h-11 bg-royal-700 border border-electric-400 flex items-center justify-center font-mono text-xl font-bold">${d1}</span>
+                            <span class="text-electric-400 font-bold">+</span>
+                            <span class="w-11 h-11 bg-royal-700 border border-electric-400 flex items-center justify-center font-mono text-xl font-bold">${d2}</span>
+                            <span class="text-electric-400 font-bold">+</span>
+                            <span class="px-3 h-11 bg-navy-900 border border-slate-600 flex items-center justify-center font-mono text-lg text-electric-300">${statVal} (${statName})</span>
+                        </div>
+                        <div class="font-display text-5xl text-white mt-2">${total}</div>
+                        ${isCrit ? `<div class="mt-2 inline-block bg-amber-400 text-navy-950 font-extrabold text-xs px-3 py-1 clip-badge">★ SUCESSO CRÍTICO (6 DUPLO)! ★</div>` : ""}
+                        ${isFumble ? `<div class="mt-2 inline-block bg-rose-600 text-white font-extrabold text-xs px-3 py-1 clip-badge">✖ FALHA CRÍTICA (1 DUPLO)!</div>` : ""}
+                    </div>
+                `;
+            });
+        }
+
+        function rollShadowInitiative() {
+            const sh = shadows.find(s => s.id === activeShadowId);
+            if (!sh) return;
+            const mod = parseInt(sh.vitals.initiative) || 0;
+
+            openDiceModal(`${sh.name} // Iniciativa`, () => {
+                const d1 = rollDie(6);
+                const d2 = rollDie(6);
+                const total = d1 + d2 + mod;
+                return `
+                    <div class="bg-navy-950 border border-royal-700 p-4 text-center">
+                        <div class="text-xs font-mono text-slate-400 uppercase mb-2">Ordem de Turno (2d6 + AGI)</div>
+                        <div class="font-mono text-sm text-electric-300 mb-2">[${d1} + ${d2}] + (${mod >= 0 ? "+" + mod : mod})</div>
+                        <div class="font-display text-5xl text-electric-400">${total}</div>
+                    </div>
+                `;
+            });
+        }
+
+        function rollAttack(shadowName, atkName, dmgFormula, tecMod) {
+            openDiceModal(`${shadowName} // ${atkName}`, () => {
+                const d1 = rollDie(6);
+                const d2 = rollDie(6);
+                const hit = d1 + d2 + tecMod;
+                const isCrit = d1 === 6 && d2 === 6;
+
+                return `
+                    <div class="bg-navy-950 border border-royal-700 p-4 space-y-3">
+                        <div class="flex justify-between items-center border-b border-navy-800 pb-2">
+                            <span class="text-xs font-mono text-slate-400">TESTE DE ACERTO (2d6 + TEC)</span>
+                            <span class="font-display text-2xl text-electric-400">${hit} ${isCrit ? "★ CRÍTICO!" : ""}</span>
+                        </div>
+                        <div class="text-xs font-mono text-slate-300">
+                            <div><span class="text-slate-500">DADOS:</span> [${d1} + ${d2}] + ${tecMod} (TEC)</div>
+                            <div class="mt-1"><span class="text-slate-500">FÓRMULA DE DANO:</span> <span class="text-amber-300 font-bold">${dmgFormula}</span></div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function rollSkillCast(shadowName, skillName, element, magMod, tecMod) {
+            openDiceModal(`${shadowName} // ${skillName}`, () => {
+                const d1 = rollDie(6);
+                const d2 = rollDie(6);
+                const mod = element === "Fisico" ? tecMod : magMod;
+                const modLabel = element === "Fisico" ? "TEC" : "MAG";
+                const total = d1 + d2 + mod;
+                const isCrit = d1 === 6 && d2 === 6;
+
+                return `
+                    <div class="bg-navy-950 border border-royal-700 p-4 text-center space-y-2">
+                        <div class="text-xs font-mono text-electric-300 uppercase">Conjuração Elemental (${element})</div>
+                        <div class="font-mono text-sm text-slate-300">[${d1} + ${d2}] + ${mod} (${modLabel})</div>
+                        <div class="font-display text-5xl text-white">${total}</div>
+                        ${isCrit ? `<div class="inline-block bg-amber-400 text-navy-950 font-extrabold text-xs px-3 py-1 clip-badge">★ ONE MORE / CRÍTICO! ★</div>` : ""}
+                    </div>
+                `;
+            });
+        }
+
+        // =========================================================================
+        // MODAIS E NOTIFICAÇÕES (TOASTS)
+        // =========================================================================
+        function showToast(message, type = "info") {
+            const container = document.getElementById("toast-container");
+            const toast = document.createElement("div");
+            const colors = {
+                success: "bg-navy-900 border-emerald-400 text-emerald-300",
+                error: "bg-navy-900 border-rose-500 text-rose-300",
+                info: "bg-navy-900 border-electric-400 text-electric-300"
+            };
+            toast.className = `pointer-events-auto border-l-4 ${colors[type] || colors.info} px-4 py-3 shadow-2xl clip-slash font-mono text-xs flex items-center justify-between gap-3 transition-all`;
+            toast.innerHTML = `<span>${message}</span>`;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = "0";
+                setTimeout(() => toast.remove(), 300);
+            }, 3200);
+        }
+
+        function openConfirmModal(title, message, onConfirm) {
+            document.getElementById("confirm-title").textContent = title;
+            document.getElementById("confirm-message").textContent = message;
+            const modal = document.getElementById("confirm-modal");
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+
+            document.getElementById("confirm-yes-btn").onclick = () => {
+                closeConfirmModal();
+                onConfirm();
+            };
+        }
+
+        function closeConfirmModal() {
+            const modal = document.getElementById("confirm-modal");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        }
+
+        // Inicializa aplicação
+        window.addEventListener("DOMContentLoaded", initApp);
+    </script>
+</body>
+</html>

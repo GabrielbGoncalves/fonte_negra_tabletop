@@ -24,6 +24,7 @@ Idioma: código, comentários, textos de interface e mensagens de commit em **po
 | `cadastro_jogador.html` | Auto-cadastro aberto, só cria Jogadores (link no login do hub) | `usuarios`, `jogadores` |
 | `loja.html` | Loja: o Mestre cadastra itens, preços e PR; o jogador compra com o próprio PR | `loja` (`itens`, `ajusteGlobal`, `pr`, `inventario`, `log`) |
 | `dice.html` | Rolagem de dados. Solo fica só no navegador; na Disputa, Mestre e jogadores montam os competidores e rolam, e todos veem o resultado (jogadores só criam disputas; apagar o histórico é do Mestre) | `dice` (`participantes`, `disputas`) |
+| `projetor.html` | Projeção de imagem para a mesa. O Mestre projeta (imagem reduzida e gravada no banco), escolhe quem vê (Todos, Mestre ou Seletivo, com a lista de jogadores de `/usuarios`) e coloca overlays do eRPG como cartões arrastáveis (iframe de `erpg.app/sheet/overlay`, posição e tamanho em %) dentro da projeção, visíveis a quem pode ver a imagem. O Modo OBS deixa só a projeção em tela cheia. Jogadores só veem a imagem e os cartões; no Seletivo (ou no modo Mestre), quem não pode ver recebe um aviso de "projeção indisponível" no quadro e volta a ver a imagem sozinho quando o Mestre libera. As regras só deixam o jogador ler `projetor/imagem` se a visibilidade permitir | `projetor` (`visibilidade`, `imagem`, `overlays`) |
 | `js/sessao.js` | Firebase, login, papel do usuário, cadastro de contas e helpers compartilhados | `mestres`, `jogadores`, `usuarios` |
 | `js/topo.js` | Componente de usuário do cabeçalho (nome, papel e botão de sair) | `usuarios/{uid}/nome` (cada conta lê o próprio) |
 | `assets/css/layout.css` | Layout compartilhado: tokens de cor, fundo, cabeçalho `.topo`, `main.conteudo`, botões, campos, `.bloco`, abas e modal | — |
@@ -42,7 +43,7 @@ Cada página tem o CSS e o JS específicos embutidos (`<style>` e `<script>` no 
 ## Arquitetura de sessão e acesso
 
 - `js/sessao.js` inicializa o Firebase e expõe `window.RPG`:
-  - `RPG.db.ref(caminho)` aceita `.on`, `.once`, `.set` e `.remove`, com a mesma assinatura do Firebase. As chamadas **esperam o login ser confirmado** antes de chegar ao banco. Use sempre `RPG.db`, nunca `firebase.database()` direto.
+  - `RPG.db.ref(caminho)` aceita `.on`, `.off`, `.once`, `.set` e `.remove`, com a mesma assinatura do Firebase. As chamadas **esperam o login ser confirmado** antes de chegar ao banco. Use sempre `RPG.db`, nunca `firebase.database()` direto.
   - `RPG.sessao`: Promise que resolve com `{ user, modo }` ou `null`.
   - `RPG.entrar(email, senha)` e `RPG.sair()`.
   - `RPG.cadastrarUsuario({ nome, email, senha, papel })`: cria a conta no Auth numa instância secundária do Firebase (o Mestre continua logado) e grava `/usuarios/{uid}` e o papel numa única atualização. Se o banco recusar, a conta recém-criada é apagada.
