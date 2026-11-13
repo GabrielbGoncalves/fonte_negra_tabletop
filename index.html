@@ -111,6 +111,15 @@
     <main class="conteudo">
         <div class="grade">
         <div class="sombra">
+            <a class="card clip-card" href="teste_grid.html">
+                <span class="tag skew-tag"><span class="unskew">Tático</span></span>
+                <h2 class="nome">Mapa Tático</h2>
+                <p class="desc txt">Grid tático da mesa: o Mestre cria o mapa e move os tokens; os jogadores acompanham.</p>
+                <span class="arquivo txt">teste_grid.html</span>
+            </a>
+        </div>
+
+        <div class="sombra">
             <a class="card clip-card" href="combat_traker.html">
                 <span class="tag skew-tag"><span class="unskew">Combate</span></span>
                 <h2 class="nome">Combat Tracker</h2>
@@ -120,29 +129,20 @@
         </div>
 
         <div class="sombra">
-            <a class="card clip-card" href="conversor.html">
-                <span class="tag skew-tag"><span class="unskew">Utilidade</span></span>
-                <h2 class="nome">Conversor</h2>
-                <p class="desc txt">Conversor de fichas e atributos entre sistemas (Don't Forget TTRPG para P5 / GDC Engine).</p>
-                <span class="arquivo txt">conversor.html</span>
+            <a class="card clip-card" href="dice.html">
+                <span class="tag skew-tag"><span class="unskew">FRDS</span></span>
+                <h2 class="nome">Rolagem de Dados</h2>
+                <p class="desc txt">Sistema de rolagem de dados virtuais, solo ou em disputas.</p>
+                <span class="arquivo txt">dice.html</span>
             </a>
         </div>
 
         <div class="sombra">
-            <a class="card clip-card" href="grid_map.html">
-                <span class="tag skew-tag"><span class="unskew">Tático</span></span>
-                <h2 class="nome">Grid Map (Player)</h2>
-                <p class="desc txt">Visualizador interativo de mapas em grid para movimentação de tokens e exploração.</p>
-                <span class="arquivo txt">grid_map.html</span>
-            </a>
-        </div>
-
-        <div class="sombra">
-            <a class="card clip-card" href="loja.html">
-                <span class="tag skew-tag"><span class="unskew">Comércio</span></span>
-                <h2 class="nome">Loja (Remédios)</h2>
-                <p class="desc txt">Loja interativa de itens e equipamentos com mecânicas de pechincha e PR.</p>
-                <span class="arquivo txt">loja.html</span>
+            <a class="card clip-card" href="projetor.html">
+                <span class="tag skew-tag"><span class="unskew">Projeção</span></span>
+                <h2 class="nome">Projetor</h2>
+                <p class="desc txt">Imagens de cena projetadas para a mesa e overlays de ficha para o OBS, com controle de quem vê.</p>
+                <span class="arquivo txt">projetor.html</span>
             </a>
         </div>
 
@@ -156,6 +156,15 @@
         </div>
 
         <div class="sombra">
+            <a class="card clip-card" href="loja.html">
+                <span class="tag skew-tag"><span class="unskew">Comércio</span></span>
+                <h2 class="nome">Loja (Remédios)</h2>
+                <p class="desc txt">Loja interativa de itens e equipamentos com mecânicas de pechincha e PR.</p>
+                <span class="arquivo txt">loja.html</span>
+            </a>
+        </div>
+
+        <div class="sombra">
             <a class="card clip-card" href="sistema_de_confidentes.html">
                 <span class="tag skew-tag"><span class="unskew">Social link</span></span>
                 <h2 class="nome">Sistema de Confidentes</h2>
@@ -165,29 +174,11 @@
         </div>
 
         <div class="sombra">
-            <a class="card clip-card" href="dice.html">
-                <span class="tag skew-tag"><span class="unskew">FRDS</span></span>
-                <h2 class="nome">Rolagem de Dados</h2>
-                <p class="desc txt">Sistema de rolagem de dados virtuais, solo ou em disputas.</p>
-                <span class="arquivo txt">dice.html</span>
-            </a>
-        </div>
-
-        <div class="sombra" id="card-editor">
-            <a class="card clip-card" href="teste_grid.html">
-                <span class="tag skew-tag restrito"><span class="unskew">Editor (Mestre)</span></span>
-                <h2 class="nome">Editor de Grid (Mapa)</h2>
-                <p class="desc txt">Ferramenta de criação de labirintos, paredes, armadilhas e exportação em XML.</p>
-                <span class="arquivo txt">teste_grid.html</span>
-            </a>
-        </div>
-
-        <div class="sombra">
-            <a class="card clip-card" href="projetor.html">
-                <span class="tag skew-tag"><span class="unskew">Projeção</span></span>
-                <h2 class="nome">Projetor</h2>
-                <p class="desc txt">Imagens de cena projetadas para a mesa e overlays de ficha para o OBS, com controle de quem vê.</p>
-                <span class="arquivo txt">projetor.html</span>
+            <a class="card clip-card" href="conversor.html">
+                <span class="tag skew-tag"><span class="unskew">Utilidade</span></span>
+                <h2 class="nome">Conversor</h2>
+                <p class="desc txt">Conversor de fichas e atributos entre sistemas (Don't Forget TTRPG para P5 / GDC Engine).</p>
+                <span class="arquivo txt">conversor.html</span>
             </a>
         </div>
 
@@ -285,7 +276,7 @@
         function aplicarModo(modo) {
             const mestre = modo === 'mestre';
             // Restrição visual; a proteção real está nas Regras do Firebase
-            [document.getElementById('card-editor'), document.getElementById('card-cadastro')].forEach((card) => {
+            [document.getElementById('card-cadastro')].forEach((card) => {
                 card.style.opacity = mestre ? '1' : '0.5';
                 card.title = mestre ? '' : 'Acesso restrito ao Mestre';
             });
