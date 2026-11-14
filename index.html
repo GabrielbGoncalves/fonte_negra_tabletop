@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://www.gstatic.com https://*.firebaseio.com https://*.firebasedatabase.app http://127.0.0.1:9000; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://*.firebaseio.com wss://*.firebaseio.com https://*.firebasedatabase.app wss://*.firebasedatabase.app https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com http://127.0.0.1:9099 http://127.0.0.1:9000 ws://127.0.0.1:9000; frame-src https://*.firebaseapp.com https://*.firebaseio.com https://erpg.app http://127.0.0.1:9000; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://www.gstatic.com https://*.firebaseio.com https://*.firebasedatabase.app http://127.0.0.1:9000; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://*.firebaseio.com wss://*.firebaseio.com https://*.firebasedatabase.app wss://*.firebasedatabase.app https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com http://127.0.0.1:9099 http://127.0.0.1:9000 ws://127.0.0.1:9000; frame-src 'self' https://*.firebaseapp.com https://*.firebaseio.com https://erpg.app http://127.0.0.1:9000; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <!-- Favicons -->
     <link rel="icon" type="image/png" href="assets/favicon/favicon-96x96.png" sizes="96x96">
@@ -59,6 +59,7 @@
             background: var(--painel); border: 2px solid var(--azul-escuro); color: var(--texto); text-decoration: none;
             padding: 16px 16px 30px; height: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 10px;
         }
+        .card { cursor: pointer; }
         .card:hover { border-color: var(--azul-claro); }
         .card:focus-visible { outline: 2px solid var(--azul-claro); outline-offset: -4px; }
         .card .tag { display: inline-block; }
@@ -66,9 +67,47 @@
         .nome { margin: 0; font-size: 1.35rem; text-transform: uppercase; letter-spacing: 1px; line-height: 1.15; }
         .desc { margin: 0; color: #cbd5e1; font-size: .92rem; line-height: 1.4; }
         .arquivo { margin-top: auto; color: var(--azul-claro); font-size: .8rem; }
+        .card .estado { color: var(--ok); font-size: .8rem; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* ---------- Guias (as ferramentas abrem em iframes da mesma origem) ---------- */
+        body.hub { height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        body.hub .topo { flex: none; transition: padding .15s; }
+        body.hub.em-guia .topo { padding: 6px 16px 8px; }
+        body.hub.em-guia .topo h1 { font-size: 1.2rem; }
+        body.hub.em-guia .topo .tagline { display: none; }
+        .guias { scrollbar-width: thin; scrollbar-color: var(--azul-escuro) transparent; }
+        .guias::-webkit-scrollbar { height: 6px; }
+        .guias::-webkit-scrollbar-track { background: transparent; }
+        .guias::-webkit-scrollbar-thumb { background: var(--azul-escuro); }
+        .barra-guias {
+            flex: none; display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+            background: #030712; border-bottom: 2px solid var(--azul-escuro);
+        }
+        .guias { flex: 1; min-width: 0; display: flex; gap: 8px; overflow-x: auto; padding: 2px 4px 4px; }
+        .guias .aba { flex: none; display: flex; align-items: center; gap: 8px; padding: 6px 14px; cursor: pointer; }
+        .guias .aba .fechar {
+            font: inherit; line-height: 1; cursor: pointer; background: none; color: inherit;
+            border: 0; padding: 0 2px; opacity: .7;
+        }
+        .guias .aba .fechar:hover { opacity: 1; color: var(--perigo); }
+        .guias .aba .titulo-aba { max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .controles-guia { flex: none; display: flex; gap: 6px; }
+        .controles-guia[hidden] { display: none; }
+        #home-view { flex: 1; overflow-y: auto; width: 100%; max-width: none; margin: 0; }
+        #home-view .grade { max-width: 1148px; margin: 0 auto; }
+        #iframes-container { flex: 1; min-height: 0; position: relative; }
+        #iframes-container[hidden], #home-view[hidden] { display: none; }
+        #iframes-container .quadro { position: absolute; inset: 0; }
+        #iframes-container .quadro[hidden] { display: none; }
+        #iframes-container iframe { width: 100%; height: 100%; border: 0; background: var(--bg); }
+        #transicao { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; pointer-events: none; overflow: hidden; }
+        #transicao[hidden] { display: none; }
+        #transicao .onda { position: absolute; inset: 0; clip-path: polygon(0 0, 0 0, -16% 100%, 0 100%); }
+        #transicao .onda-a { background: var(--azul-claro); }
+        #transicao .onda-b { background: var(--azul-escuro); }
     </style>
 </head>
-<body>
+<body class="hub">
 
     <!-- LOGIN -->
     <div id="auth-modal" class="fundo-login" role="dialog" aria-modal="true" aria-labelledby="titulo-login">
@@ -108,10 +147,19 @@
         <div class="usuario" data-usuario hidden></div>
     </header>
 
-    <main class="conteudo">
+    <!-- Barra de guias: a Central e uma guia para cada ferramenta aberta -->
+    <nav class="barra-guias" aria-label="Guias abertas">
+        <div class="guias" id="guias" role="tablist"></div>
+        <div class="controles-guia" id="controles-guia" hidden>
+            <button type="button" class="btn sec mini" id="btn-recarregar" title="Recarregar a ferramenta atual">Recarregar</button>
+            <button type="button" class="btn sec mini" id="btn-fechar-tudo" title="Fechar todas as guias">Fechar tudo</button>
+        </div>
+    </nav>
+
+    <main class="conteudo" id="home-view">
         <div class="grade">
         <div class="sombra">
-            <a class="card clip-card" href="teste_grid.html">
+            <a class="card clip-card" role="button" tabindex="0" data-arquivo="teste_grid.html">
                 <span class="tag skew-tag"><span class="unskew">Tático</span></span>
                 <h2 class="nome">Mapa Tático</h2>
                 <p class="desc txt">Grid tático da mesa: o Mestre cria o mapa e move os tokens; os jogadores acompanham.</p>
@@ -120,7 +168,7 @@
         </div>
 
         <div class="sombra">
-            <a class="card clip-card" href="combat_traker.html">
+            <a class="card clip-card" role="button" tabindex="0" data-arquivo="combat_traker.html">
                 <span class="tag skew-tag"><span class="unskew">Combate</span></span>
                 <h2 class="nome">Combat Tracker</h2>
                 <p class="desc txt">Gerenciador de turnos, iniciativa e controle de combate para os encontros do RPG.</p>
@@ -129,7 +177,7 @@
         </div>
 
         <div class="sombra">
-            <a class="card clip-card" href="dice.html">
+            <a class="card clip-card" role="button" tabindex="0" data-arquivo="dice.html">
                 <span class="tag skew-tag"><span class="unskew">FRDS</span></span>
                 <h2 class="nome">Rolagem de Dados</h2>
                 <p class="desc txt">Sistema de rolagem de dados virtuais, solo ou em disputas.</p>
@@ -138,7 +186,7 @@
         </div>
 
         <div class="sombra">
-            <a class="card clip-card" href="projetor.html">
+            <a class="card clip-card" role="button" tabindex="0" data-arquivo="projetor.html">
                 <span class="tag skew-tag"><span class="unskew">Projeção</span></span>
                 <h2 class="nome">Projetor</h2>
                 <p class="desc txt">Imagens de cena projetadas para a mesa e overlays de ficha para o OBS, com controle de quem vê.</p>
@@ -147,7 +195,7 @@
         </div>
 
         <div class="sombra">
-            <a class="card clip-card" href="map_total.html">
+            <a class="card clip-card" role="button" tabindex="0" data-arquivo="map_total.html">
                 <span class="tag skew-tag"><span class="unskew">Mapa geral</span></span>
                 <h2 class="nome">Map Total</h2>
                 <p class="desc txt">Visão macro e navegação integrada de todos os mapas e setores do mundo de jogo.</p>
@@ -156,7 +204,7 @@
         </div>
 
         <div class="sombra">
-            <a class="card clip-card" href="loja.html">
+            <a class="card clip-card" role="button" tabindex="0" data-arquivo="loja.html">
                 <span class="tag skew-tag"><span class="unskew">Comércio</span></span>
                 <h2 class="nome">Loja (Remédios)</h2>
                 <p class="desc txt">Loja interativa de itens e equipamentos com mecânicas de pechincha e PR.</p>
@@ -165,7 +213,7 @@
         </div>
 
         <div class="sombra">
-            <a class="card clip-card" href="sistema_de_confidentes.html">
+            <a class="card clip-card" role="button" tabindex="0" data-arquivo="sistema_de_confidentes.html">
                 <span class="tag skew-tag"><span class="unskew">Social link</span></span>
                 <h2 class="nome">Sistema de Confidentes</h2>
                 <p class="desc txt">Rastreador de vínculos sociais, pontos de afinidade, cenas e recompensas de rank.</p>
@@ -174,7 +222,7 @@
         </div>
 
         <div class="sombra">
-            <a class="card clip-card" href="conversor.html">
+            <a class="card clip-card" role="button" tabindex="0" data-arquivo="conversor.html">
                 <span class="tag skew-tag"><span class="unskew">Utilidade</span></span>
                 <h2 class="nome">Conversor</h2>
                 <p class="desc txt">Conversor de fichas e atributos entre sistemas (Don't Forget TTRPG para P5 / GDC Engine).</p>
@@ -183,7 +231,7 @@
         </div>
 
         <div class="sombra">
-            <a class="card clip-card" href="sala_veludo.html">
+            <a class="card clip-card" role="button" tabindex="0" data-arquivo="sala_veludo.html">
                 <span class="tag skew-tag"><span class="unskew">Velvet Room</span></span>
                 <h2 class="nome">Sala de Veludo</h2>
                 <p class="desc txt">Sala de Veludo do Grimório do Coração: invocação e fusão de Personae.</p>
@@ -192,7 +240,7 @@
         </div>
 
         <div class="sombra">
-            <a class="card clip-card" href="grimorio_coracao.html">
+            <a class="card clip-card" role="button" tabindex="0" data-arquivo="grimorio_coracao.html">
                 <span class="tag skew-tag"><span class="unskew">Bestiário</span></span>
                 <h2 class="nome">Grimório do Coração</h2>
                 <p class="desc txt">Fichas de Sombras e rolagens rápidas do Grimório do Coração.</p>
@@ -201,7 +249,7 @@
         </div>
 
         <div class="sombra" id="card-cadastro">
-            <a class="card clip-card" href="cadastro_usuarios.html">
+            <a class="card clip-card" role="button" tabindex="0" data-arquivo="cadastro_usuarios.html">
                 <span class="tag skew-tag restrito"><span class="unskew">Contas (Mestre)</span></span>
                 <h2 class="nome">Cadastro de Usuários</h2>
                 <p class="desc txt">Criação de contas para novos membros da mesa, com permissão de Mestre ou Jogador.</p>
@@ -210,6 +258,15 @@
         </div>
         </div>
     </main>
+
+    <!-- Cada ferramenta aberta é um iframe; trocar de guia só alterna a visibilidade (o estado é preservado) -->
+    <div id="iframes-container" hidden></div>
+
+    <!-- Corte da transição entre guias (ver trocarConteudo) -->
+    <div id="transicao" aria-hidden="true" hidden>
+        <div class="onda onda-a"></div>
+        <div class="onda onda-b"></div>
+    </div>
 
     <div id="aviso" class="erro" role="alert" hidden></div>
 
@@ -272,6 +329,175 @@
                 authSubmit.disabled = false;
             }
         });
+
+        // ---------- Guias ----------
+        // As ferramentas são os próprios cards da Central (<a class="card" data-arquivo="...">): título e arquivo saem deles,
+        // então uma ferramenta nova só precisa de um card. Tudo é gerenciado nesta janela: não há link para abrir em outra.
+        const guiasEl = document.getElementById('guias');
+        const controlesEl = document.getElementById('controles-guia');
+        const homeEl = document.getElementById('home-view');
+        const quadrosEl = document.getElementById('iframes-container');
+        const abertas = [];            // arquivos das guias abertas, em ordem
+        let ativa = 'central';         // 'central' ou o arquivo da guia ativa
+
+        const cardDe = (arquivo) => document.querySelector('a.card[data-arquivo="' + arquivo + '"]');
+        const tituloDe = (arquivo) => { const c = cardDe(arquivo); return c ? c.querySelector('.nome').textContent : arquivo; };
+        const quadroDe = (arquivo) => quadrosEl.querySelector('.quadro[data-arquivo="' + arquivo + '"]');
+
+        function abrirGuia(arquivo) {
+            if (!cardDe(arquivo)) return;
+            if (!abertas.includes(arquivo)) {
+                abertas.push(arquivo);
+                const quadro = document.createElement('div');
+                quadro.className = 'quadro';
+                quadro.dataset.arquivo = arquivo;
+                quadro.hidden = true;
+                const iframe = document.createElement('iframe');
+                iframe.title = tituloDe(arquivo);
+                iframe.src = arquivo;
+                quadro.appendChild(iframe);
+                quadrosEl.appendChild(quadro);
+            }
+            ativarGuia(arquivo);
+        }
+
+        // Mostra a guia ativa (é o que a transição esconde por baixo do corte)
+        function mostrarAtiva() {
+            const naCentral = ativa === 'central';
+            homeEl.hidden = !naCentral;
+            quadrosEl.hidden = naCentral;
+            controlesEl.hidden = naCentral;
+            document.body.classList.toggle('em-guia', !naCentral);
+            quadrosEl.querySelectorAll('.quadro').forEach((q) => { q.hidden = q.dataset.arquivo !== ativa; });
+        }
+
+        // ---------- Transição ----------
+        // Um corte diagonal em azul varre a área de conteúdo, o conteúdo troca por baixo e o corte sai.
+        // Entrar numa ferramenta varre da esquerda para a direita; voltar à Central, no sentido contrário.
+        // Com "reduzir movimento" ativo no sistema, a troca é imediata.
+        const ondaEl = document.getElementById('transicao');
+        const ondas = ondaEl.querySelectorAll('.onda');
+        const semMovimento = window.matchMedia('(prefers-reduced-motion: reduce)');
+        const COBRE = ['polygon(0 0, 0 0, -16% 100%, 0 100%)', 'polygon(0 0, 116% 0, 100% 100%, 0 100%)'];
+        const DESCOBRE = ['polygon(0 0, 100% 0, 100% 100%, -16% 100%)', 'polygon(116% 0, 100% 0, 100% 100%, 100% 100%)'];
+        let transicaoPendente = false;
+        let transicaoRodando = false;
+
+        // Troca o conteúdo com a transição. Cliques rápidos não empilham: vale a última guia pedida.
+        async function trocarConteudo(direcao) {
+            transicaoPendente = true;
+            if (transicaoRodando) return;
+            if (semMovimento.matches || document.hidden) {
+                transicaoPendente = false;
+                mostrarAtiva();
+                return;
+            }
+            transicaoRodando = true;
+            ondaEl.style.top = document.querySelector('.barra-guias').getBoundingClientRect().bottom + 'px';
+            ondaEl.style.transform = 'scaleX(' + direcao + ')';
+            ondaEl.hidden = false;
+            const opcoes = (extra) => Object.assign({ duration: 230, easing: 'cubic-bezier(.7, 0, .3, 1)', fill: 'forwards' }, extra);
+            try {
+                await Promise.all([...ondas].map((o, i) => o.animate({ clipPath: COBRE }, opcoes({ delay: i * 70 })).finished));
+                transicaoPendente = false;
+                mostrarAtiva();
+                await Promise.all([...ondas].map((o, i) => o.animate({ clipPath: DESCOBRE }, opcoes({ delay: i * 70 })).finished));
+            } catch (e) {
+                mostrarAtiva();
+            } finally {
+                ondas.forEach((o) => o.getAnimations().forEach((a) => a.cancel()));
+                ondaEl.hidden = true;
+                transicaoRodando = false;
+            }
+            if (transicaoPendente) trocarConteudo(ativa === 'central' ? -1 : 1);
+        }
+
+        function ativarGuia(arquivo) {
+            if (arquivo === ativa) { desenharGuias(); return; }
+            ativa = arquivo;
+            desenharGuias();               // a barra de guias responde na hora
+            trocarConteudo(arquivo === 'central' ? -1 : 1);
+        }
+
+        function fecharGuia(arquivo) {
+            const i = abertas.indexOf(arquivo);
+            if (i === -1) return;
+            abertas.splice(i, 1);
+            const quadro = quadroDe(arquivo);
+            if (quadro) quadro.remove();
+            if (ativa === arquivo) ativarGuia(abertas.length ? abertas[Math.max(0, i - 1)] : 'central');
+            else desenharGuias();
+        }
+
+        function fecharTudo() {
+            abertas.splice(0).forEach((a) => { const q = quadroDe(a); if (q) q.remove(); });
+            ativarGuia('central');
+        }
+
+        function criarAba(texto, arquivo, fechavel) {
+            const aba = document.createElement('div');
+            aba.className = 'aba' + (ativa === arquivo ? ' ativa' : '');
+            aba.setAttribute('role', 'tab');
+            aba.setAttribute('aria-selected', String(ativa === arquivo));
+            aba.tabIndex = 0;
+            const titulo = document.createElement('span');
+            titulo.className = 'titulo-aba';
+            titulo.textContent = texto;
+            aba.appendChild(titulo);
+            if (fechavel) {
+                const x = document.createElement('button');
+                x.type = 'button';
+                x.className = 'fechar';
+                x.textContent = '✕';
+                x.title = 'Fechar guia';
+                x.addEventListener('click', (e) => { e.stopPropagation(); fecharGuia(arquivo); });
+                aba.appendChild(x);
+            }
+            aba.addEventListener('click', () => ativarGuia(arquivo));
+            aba.addEventListener('keydown', (e) => {
+                if (e.target !== aba || (e.key !== 'Enter' && e.key !== ' ')) return;
+                e.preventDefault();
+                ativarGuia(arquivo);
+            });
+            return aba;
+        }
+
+        function desenharGuias() {
+            guiasEl.replaceChildren(criarAba('Central', 'central', false), ...abertas.map((a) => criarAba(tituloDe(a), a, true)));
+            // Com muitas guias abertas, mantém a ativa à vista
+            const aba = guiasEl.querySelector('.aba.ativa');
+            if (aba) aba.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+            document.querySelectorAll('a.card').forEach((card) => {
+                const aberta = abertas.includes(card.dataset.arquivo);
+                let estado = card.querySelector('.estado');
+                if (aberta && !estado) {
+                    estado = document.createElement('span');
+                    estado.className = 'estado txt';
+                    estado.textContent = '● Guia aberta';
+                    card.querySelector('.tag').after(estado);
+                } else if (!aberta && estado) {
+                    estado.remove();
+                }
+            });
+        }
+
+        homeEl.addEventListener('click', (e) => {
+            const card = e.target.closest('a.card');
+            if (card) abrirGuia(card.dataset.arquivo);
+        });
+        homeEl.addEventListener('keydown', (e) => {
+            if (e.key !== 'Enter' && e.key !== ' ') return;
+            const card = e.target.closest('a.card');
+            if (!card) return;
+            e.preventDefault();
+            abrirGuia(card.dataset.arquivo);
+        });
+        document.getElementById('btn-recarregar').addEventListener('click', () => {
+            const quadro = quadroDe(ativa);
+            if (quadro) quadro.querySelector('iframe').contentWindow.location.reload();
+        });
+        document.getElementById('btn-fechar-tudo').addEventListener('click', fecharTudo);
+        desenharGuias();
 
         function aplicarModo(modo) {
             const mestre = modo === 'mestre';

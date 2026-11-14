@@ -22,9 +22,19 @@
     'use strict';
 
     // Impede que o site seja carregado dentro de um <iframe> de terceiros (clickjacking).
+    // Exceção: o hub (index.html) abre as ferramentas em guias, que são iframes da MESMA origem.
+    // Se a página de cima for de outra origem, acessar window.top.location.origin lança erro e o carregamento é bloqueado.
+    let embutidaNoHub = false;
     if (window.top !== window.self) {
-        document.documentElement.style.display = 'none';
-        throw new Error('Carregamento em iframe bloqueado.');
+        try {
+            embutidaNoHub = window.top.location.origin === location.origin && !!window.top.document.getElementById('iframes-container');
+        } catch (e) {
+            embutidaNoHub = false;
+        }
+        if (!embutidaNoHub) {
+            document.documentElement.style.display = 'none';
+            throw new Error('Carregamento em iframe bloqueado.');
+        }
     }
 
     // Em localhost usa o Firebase Local Emulator Suite (ver firebase.json); produção nunca é tocada.
@@ -118,7 +128,7 @@
         if (!s) {
             gravarCache(null);
             if (exigeLogin) {
-                location.replace('index.html');
+                (embutidaNoHub ? window.top.location : location).replace('index.html');
                 return nuncaResolve;
             }
             return null;
