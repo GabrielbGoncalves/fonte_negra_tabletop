@@ -138,11 +138,11 @@
         }
         .ov-card {
             position: absolute; display: flex; flex-direction: column;
-            background: #000; border: 2px solid #00D4FF;
-            box-shadow: -4px 4px 0 #000, -7px 7px 0 #0046FF;
+            background: transparent; border: 2px solid #00D4FF;
+            box-shadow: none;
         }
         .ov-card.mestre { pointer-events: auto; }
-        .ov-card.mestre.travado { border-color: rgba(0, 70, 255, 0.6); box-shadow: -3px 3px 0 #000; }
+        .ov-card.mestre.travado { border-color: rgba(0, 70, 255, 0.6); }
         .ov-head {
             display: flex; align-items: center; justify-content: space-between; gap: 6px;
             background: #121B3B; border-bottom: 2px solid #0046FF; padding: 2px 8px;
@@ -153,7 +153,7 @@
         .ov-titulo { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .ov-fechar { color: #94a3b8; cursor: pointer; padding: 0 4px; }
         .ov-fechar:hover { color: #ef4444; }
-        .ov-frame { flex: 1; width: 100%; min-height: 0; border: 0; background: #000; }
+        .ov-frame { flex: 1; width: 100%; min-height: 0; border: 0; background: transparent; color-scheme: dark; /* igual ao meta color-scheme do eRPG: se diferir, o navegador pinta um fundo opaco no iframe */ }
         .ov-card:not(.mestre) .ov-frame { pointer-events: none; }
         .ov-resize { position: absolute; width: 12px; height: 12px; background: #00D4FF; border: 2px solid #000; z-index: 2; }
         .ov-card.travado .ov-resize { display: none; }
@@ -254,27 +254,8 @@
                     </div>
                 </div>
 
-                <!-- Cenários rápidos e ações (Mestre) -->
-                <div id="acoesMestre" class="grid grid-cols-1 md:grid-cols-2 gap-4" data-so-mestre>
-                    <div class="bg-p5-navy/90 p-3.5 border-l-4 border-p5-cyan p5-skew-left">
-                        <div class="p5-unskew">
-                            <span class="text-[11px] font-black uppercase text-p5-cyan tracking-widest block mb-2">
-                                <i class="fa-solid fa-bolt me-1"></i> Cenários Rápidos
-                            </span>
-                            <div class="flex flex-wrap gap-2">
-                                <button type="button" data-url="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1000&q=80" data-title="Castelo Assombrado" class="preset-btn px-2.5 py-1 bg-p5-dark hover:bg-p5-blue border border-p5-blue text-xs font-bold text-white transition">
-                                    <i class="fa-solid fa-chess-rook me-1"></i> Castelo
-                                </button>
-                                <button type="button" data-url="https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1000&q=80" data-title="Dragão Místico" class="preset-btn px-2.5 py-1 bg-p5-dark hover:bg-p5-blue border border-p5-blue text-xs font-bold text-white transition">
-                                    <i class="fa-solid fa-dragon me-1"></i> Dragão
-                                </button>
-                                <button type="button" data-url="https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=1000&q=80" data-title="Mapa da Masmorra" class="preset-btn px-2.5 py-1 bg-p5-dark hover:bg-p5-blue border border-p5-blue text-xs font-bold text-white transition">
-                                    <i class="fa-solid fa-map me-1"></i> Mapa
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
+                <!-- Ações da imagem (Mestre) -->
+                <div id="acoesMestre" class="grid grid-cols-1 gap-4" data-so-mestre>
                     <div class="bg-p5-navy/90 p-3.5 border-r-4 border-p5-blue p5-skew-right flex flex-col justify-center gap-2">
                         <div class="p5-unskew-right flex gap-2">
                             <button id="btnChangeImg" type="button" class="p5-btn flex-1 py-2 px-3 bg-p5-blue hover:bg-p5-cyan hover:text-black text-white font-black text-xs uppercase border border-black flex items-center justify-center gap-1.5">
@@ -405,7 +386,6 @@
                 document.querySelectorAll('[data-so-mestre]').forEach((el) => el.remove());
                 const col = document.getElementById('colProjecao');
                 col.classList.replace('lg:col-span-7', 'lg:col-span-12');
-                document.getElementById('dropZone').classList.remove('cursor-pointer');
                 document.getElementById('phIcone').className = 'fa-solid fa-tv text-3xl text-p5-cyan';
                 // A projeção ocupa todo o espaço que sobra na janela (abaixo do cabeçalho até o rodapé).
                 const zona = document.getElementById('dropZone');
@@ -419,9 +399,8 @@
                 // O jogador só vê a página depois de confirmado que pode acessá-la.
                 document.getElementById('mainWorkspace').style.visibility = 'hidden';
             } else {
-                document.getElementById('dropZone').classList.add('cursor-pointer');
                 document.getElementById('phTitulo').textContent = 'Arraste e solte uma imagem aqui';
-                document.getElementById('phSub').textContent = 'Ou clique na moldura para selecionar';
+                document.getElementById('phSub').textContent = 'Ou use o botão Trocar para selecionar';
             }
 
             // ---------- Estado ----------
@@ -435,7 +414,9 @@
             let jogadoresCadastrados = [];   // [{ uid, nome }]
 
             let isLocked = false;
-            let isObsClean = false;
+            // O jogador sempre vê a projeção no modo OBS (só a imagem e os cartões, em tela cheia)
+            let isObsClean = !ehMestre;
+            document.body.classList.toggle('obs-clean', isObsClean);
             let overlaysDb = {};             // id -> overlay validado
             const cartoes = {};              // id -> elemento do cartão
             let arrastandoId = null;
@@ -598,7 +579,6 @@
 
             // ================= EVENTOS DO MESTRE =================
             if (ehMestre) {
-                dropZone.addEventListener('click', () => fileInput.click());
                 document.getElementById('btnChangeImg').addEventListener('click', () => fileInput.click());
                 document.getElementById('btnRemoveImg').addEventListener('click', removeImage);
 
@@ -617,13 +597,6 @@
                 document.getElementById('btnContain').addEventListener('click', () => alterarPreferencia('ajuste', 'contain'));
                 document.getElementById('btnCover').addEventListener('click', () => alterarPreferencia('ajuste', 'cover'));
                 document.getElementById('btnCRT').addEventListener('click', () => alterarPreferencia('crt', !crtAtivo));
-
-                document.querySelectorAll('.preset-btn').forEach((btn) => {
-                    btn.addEventListener('click', () => {
-                        publicarImagem(btn.dataset.url, btn.dataset.title);
-                        logAction(`Projetando: "${btn.dataset.title}"`);
-                    });
-                });
 
                 document.querySelectorAll('.visibility-radio').forEach((radio) => {
                     radio.addEventListener('change', (e) => {
@@ -673,7 +646,7 @@
                 document.getElementById('btnObsMode').addEventListener('click', toggleObsCleanMode);
                 document.getElementById('exitObsFloatingBtn').addEventListener('click', toggleObsCleanMode);
                 window.addEventListener('keydown', (e) => {
-                    if (e.key === 'Escape' && isObsClean) toggleObsCleanMode();
+                    if (e.key === 'Escape' && isObsClean && ehMestre) toggleObsCleanMode();
                 });
 
                 // Os overlays antigos ficavam só no navegador; agora vivem no banco.
