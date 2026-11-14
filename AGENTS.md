@@ -11,7 +11,7 @@ Idioma: código, comentários, textos de interface e mensagens de commit em **po
 
 | Arquivo | Função | Nó no banco |
 |---|---|---|
-| `index.html` | Hub e tela de login | — |
+| `index.html` | Hub e tela de login; as ferramentas abrem em guias (iframes da mesma origem) | — |
 | `combat_traker.html` | Iniciativa e combate | `combat_tracker` |
 | `conversor.html` | Conversor de fichas | `conversor` |
 | `grid_map.html` | Mapa tático (jogador) | `grid_map` |
@@ -26,8 +26,8 @@ Idioma: código, comentários, textos de interface e mensagens de commit em **po
 | `dice.html` | Rolagem de dados. Solo fica só no navegador; na Disputa, Mestre e jogadores montam os competidores e rolam, e todos veem o resultado (jogadores só criam disputas; apagar o histórico é do Mestre) | `dice` (`participantes`, `disputas`) |
 | `projetor.html` | Projeção de imagem para a mesa. O Mestre projeta (imagem reduzida e gravada no banco), escolhe quem vê (Todos, Mestre ou Seletivo, com a lista de jogadores de `/usuarios`) e coloca overlays do eRPG como cartões arrastáveis (iframe de `erpg.app/sheet/overlay`, posição e tamanho em %) dentro da projeção, visíveis a quem pode ver a imagem. O Modo OBS deixa só a projeção em tela cheia. Jogadores só veem a imagem e os cartões; no Seletivo (ou no modo Mestre), quem não pode ver recebe um aviso de "projeção indisponível" no quadro e volta a ver a imagem sozinho quando o Mestre libera. As regras só deixam o jogador ler `projetor/imagem` se a visibilidade permitir | `projetor` (`visibilidade`, `imagem`, `overlays`) |
 | `js/sessao.js` | Firebase, login, papel do usuário, cadastro de contas e helpers compartilhados | `mestres`, `jogadores`, `usuarios` |
-| `js/topo.js` | Componente de usuário do cabeçalho (nome, papel e botão de sair) | `usuarios/{uid}/nome` (cada conta lê o próprio) |
-| `assets/css/layout.css` | Layout compartilhado: tokens de cor, fundo, cabeçalho `.topo`, `main.conteudo`, botões, campos, `.bloco`, abas e modal | — |
+| `js/topo.js` | Componente de usuário do cabeçalho do hub e do cadastro de jogador (nome, papel e botão de sair) | `usuarios/{uid}/nome` (cada conta lê o próprio) |
+| `assets/css/layout.css` | Layout compartilhado: tokens de cor, fundo, cabeçalho `.topo` (hub e cadastro de jogador), `main.conteudo`, botões, campos, `.bloco`, abas e modal | — |
 | `js/firebase-config.js` | **Placeholder** (`null`). No deploy, o workflow sobrescreve com a configuração real a partir dos secrets | — |
 | `.github/workflows/deploy-pages.yml` | Deploy no GitHub Pages; gera o `firebase-config.js` com `.github/scripts/gerar-firebase-config.js` | — |
 | `database.rules.json` | Regras do Realtime Database (a proteção real dos dados) | — |
@@ -36,7 +36,7 @@ Idioma: código, comentários, textos de interface e mensagens de commit em **po
 
 O Editor (`teste_grid`) e o Grid Map (`grid_map`) usam nós separados: o mapa do editor só chega aos jogadores quando o Mestre o carrega no Grid Map (colando o XML ou usando "Usar mapa do Editor"). No `grid_map`, as posições dos tokens gravadas no banco têm precedência sobre as do XML.
 
-Todas as páginas, exceto `map_total.html` (que mantém o visual próprio de HUD), seguem o layout da `loja.html`: `assets/css/layout.css` mais um cabeçalho `.topo` com o link de volta ao Hub, título (`h1`), tagline (`.tagline`) e o componente de usuário (`<div class="usuario" data-usuario hidden></div>`, preenchido por `js/topo.js`). O conteúdo fica em `<main class="conteudo">`. Nas páginas com Tailwind, as regras de controles do `layout.css` têm o prefixo `body` para vencer o preflight.
+Todas as páginas, exceto `map_total.html` (que mantém o visual próprio de HUD), seguem o layout da `loja.html`: `assets/css/layout.css` e o conteúdo em `<main class="conteudo">`. **As páginas internas não têm cabeçalho próprio** (sem link "‹ Hub", título ou usuário): elas sempre abrem dentro de uma guia do hub, que mostra o nome, o papel e o Sair. Só o `index.html` e o `cadastro_jogador.html` (aberto antes do login) usam o cabeçalho `.topo` com `js/topo.js`. Se uma página precisar de controles no topo (ex.: o saldo da loja, o Modo OBS do projetor), mantenha só eles, sem título. Nas páginas com Tailwind, as regras de controles do `layout.css` têm o prefixo `body` para vencer o preflight.
 
 Cada página tem o CSS e o JS específicos embutidos (`<style>` e `<script>` no próprio arquivo). As dependências vêm de CDN: Firebase compat 10.8.0, Tailwind Play CDN 3.4.17 em algumas páginas, Google Fonts e Font Awesome. Não existe `package.json` nem bundler. Não adicione um sem combinar com o usuário.
 
@@ -53,6 +53,7 @@ Cada página tem o CSS e o JS específicos embutidos (`<style>` e `<script>` no 
 - `localStorage['rpg_modo_sessao']` é **só um cache para a interface**. As páginas leem esse cache de forma síncrona em `const modoAtual = ...`. O `sessao.js` confere o cache contra o banco e recarrega a página se ele estiver errado.
 - Toda página inclui `<script src="js/firebase-config.js"></script>` antes de `js/sessao.js`. As páginas internas usam `<script src="js/sessao.js" data-exigir-login></script>` e, sem sessão válida, voltam para `index.html`.
 - Em `localhost`/`127.0.0.1`, o `sessao.js` ignora o `firebase-config.js` e usa uma configuração fixa do projeto demo, apontando para os emuladores.
+- O `sessao.js` bloqueia o carregamento em iframe, exceto dentro do `index.html` (mesma origem e com `#iframes-container`). Tudo é gerenciado numa janela só: os cards do hub não são links (`<a class="card" data-arquivo="...">`), não há botão nem atalho para abrir uma ferramenta em outra janela, e o Sair fica no topo do hub. As guias saem dos cards: ferramenta nova só precisa de um card com `data-arquivo`. As páginas continuam podendo ser abertas direto pela URL (necessário, por exemplo, para o overlay do OBS), mas sem cabeçalho.
 - **As verificações `if (modoAtual !== 'mestre') return;` no front são apenas UX.** Quem impede um jogador de escrever são as regras em `database.rules.json`. Nunca trate uma checagem no navegador como controle de segurança.
 
 ## Regras de segurança (obrigatórias)
@@ -72,7 +73,7 @@ Cada página tem o CSS e o JS específicos embutidos (`<style>` e `<script>` no 
 
 ## Como criar uma página nova
 
-1. Copie o `<head>` e o `<header class="topo">` da `loja.html`: CSP, `referrer`, o bloco de favicons (`assets/favicon/`), a fonte Oswald, `assets/css/layout.css`, os três scripts do Firebase com SRI, `js/firebase-config.js`, `js/sessao.js` com `data-exigir-login` e `js/topo.js` com `defer`. Escreva um título e uma tagline curtos e coloque o conteúdo em `<main class="conteudo">`, usando `.bloco`, `.btn` e os tokens de cor do layout.
+1. Copie o `<head>` da `loja.html` (a página não leva cabeçalho; o hub fornece o topo): CSP, `referrer`, o bloco de favicons (`assets/favicon/`), a fonte Oswald, `assets/css/layout.css`, os três scripts do Firebase com SRI, `js/firebase-config.js` e `js/sessao.js` com `data-exigir-login`. Coloque o conteúdo em `<main class="conteudo">`, usando `.bloco`, `.btn` e os tokens de cor do layout.
 2. No script da página, use:
    ```js
    const db = RPG.db;

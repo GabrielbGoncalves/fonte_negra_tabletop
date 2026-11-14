@@ -1,17 +1,12 @@
 /*
  * Layout compartilhado por todas as páginas (base: loja.html).
  *
- * Estrutura padrão de uma página interna:
- *   <header class="topo">
- *       <a class="voltar" href="index.html">‹ Hub</a>
- *       <div class="titulo">
- *           <h1>Nome da página</h1>
- *           <p class="tagline">Frase curta sobre a página</p>
- *       </div>
- *       <div class="espaco"></div>
- *       <div class="usuario" data-usuario hidden></div>   <- preenchido por js/topo.js
- *   </header>
+ * As páginas internas abrem sempre dentro de uma guia do hub (index.html), que já tem o
+ * topo com o usuário e o Sair. Por isso elas NÃO levam cabeçalho: só o conteúdo.
  *   <main class="conteudo"> ... </main>
+ *
+ * O cabeçalho .topo (título + componente de usuário preenchido por js/topo.js) só é usado
+ * no próprio hub e no cadastro_jogador.html, que abre antes do login.
  */
 :root {
     --bg: #020617;

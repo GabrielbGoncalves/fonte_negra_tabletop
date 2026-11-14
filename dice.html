@@ -27,7 +27,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" integrity="sha384-xtdq4MQqPj1dB5DQsuw9O7dh4kHhMP/Wp5u8O1jiaWiou13ZfJIgiccjtVK2pBhL" crossorigin="anonymous"></script>
     <script src="js/firebase-config.js"></script>
     <script src="js/sessao.js" data-exigir-login></script>
-    <script src="js/topo.js" defer></script>
 
     <!-- Tailwind Play CDN (sem SRI: o CDN não envia CORS) -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -182,16 +181,6 @@
     </style>
 </head>
 <body class="text-white font-sans min-h-screen flex flex-col justify-between selection:bg-p5-electric selection:text-black">
-
-<header class="topo">
-    <a class="voltar" href="index.html">‹ Hub</a>
-    <div class="titulo">
-        <h1>Rolagem de Dados</h1>
-        <p class="tagline">Rolagens, atalhos e disputas</p>
-    </div>
-    <div class="espaco"></div>
-    <div class="usuario" data-usuario hidden></div>
-</header>
 
 <div class="faixa-marquee" aria-label="Sistema de dados Fonte Negra">
     <div class="trilha" aria-hidden="true">

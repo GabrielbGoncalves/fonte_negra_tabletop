@@ -21,7 +21,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" integrity="sha384-xtdq4MQqPj1dB5DQsuw9O7dh4kHhMP/Wp5u8O1jiaWiou13ZfJIgiccjtVK2pBhL" crossorigin="anonymous"></script>
     <script src="js/firebase-config.js"></script>
     <script src="js/sessao.js" data-exigir-login></script>
-    <script src="js/topo.js" defer></script>
 
   <!-- Fonte Estilizada P5R Inspired -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -374,34 +373,9 @@
       font-weight: bold;
     }
 
-    /* Cabeçalho com o usuário (js/topo.js); mantém o visual da página */
-    .topo {
-      --bg: #020617; --painel: #0f172a; --azul-escuro: #1e3a8a; --azul-claro: #60a5fa;
-      --texto: #f8fafc; --aviso: #f59e0b; --perigo: #ef4444;
-      width: 100%; max-width: 1300px; margin-bottom: 20px;
-      display: flex; flex-wrap: wrap; align-items: center; gap: 14px;
-    }
-    .topo .voltar { color: var(--texto); text-decoration: none; border: 2px solid var(--p5-cyan); padding: 4px 12px; text-transform: uppercase; font-size: 13px; font-weight: 700; }
-    .topo .voltar:hover { background: var(--p5-blue); }
-    .topo .espaco { flex: 1; }
-    .usuario[hidden] { display: none; }
-    .usuario { display: flex; align-items: center; gap: 12px; background: var(--bg); border: 2px solid var(--azul-claro); padding: 6px 6px 6px 16px; transform: skewX(-12deg); }
-    .usuario > * { transform: skewX(12deg); }
-    .usuario-dados { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
-    .usuario-nome { font-weight: 700; font-size: 14px; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .usuario-papel { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--azul-claro); }
-    .usuario-papel.mestre { color: var(--aviso); }
-    .usuario .usuario-sair { font: inherit; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; background: var(--painel); color: var(--texto); border: 2px solid var(--azul-escuro); padding: 4px 12px; }
-    .usuario .usuario-sair:hover { background: #7f1d1d; border-color: var(--perigo); }
   </style>
 </head>
 <body>
-
-  <header class="topo">
-    <a class="voltar" href="index.html">‹ Hub</a>
-    <div class="espaco"></div>
-    <div class="usuario" data-usuario hidden></div>
-  </header>
 
   <div class="cabecalho-grid">
     <div class="title-banner">GRIMÓRIO GRID TÁTICO</div>

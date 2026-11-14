@@ -20,7 +20,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" integrity="sha384-xtdq4MQqPj1dB5DQsuw9O7dh4kHhMP/Wp5u8O1jiaWiou13ZfJIgiccjtVK2pBhL" crossorigin="anonymous"></script>
     <script src="js/firebase-config.js"></script>
     <script src="js/sessao.js" data-exigir-login></script>
-    <script src="js/topo.js" defer></script>
 
   <title>Sala de Veludo — O Grimório do Coração</title>
 
@@ -242,30 +241,8 @@
       background: #00f0ff;
     }
   </style>
-    <style>
-        /* Barra de acesso: único elemento do padrão do hub nesta página (o resto do layout é próprio) */
-        #barra-hub { position: relative; z-index: 60; display: flex; align-items: center; gap: 14px; padding: 8px 16px;
-            background: rgba(2, 6, 23, .92); border-bottom: 2px solid #1d4ed8; font-family: Arial, Helvetica, sans-serif; }
-        #barra-hub .voltar { color: #f8fafc; text-decoration: none; border: 2px solid #60a5fa; padding: 3px 12px; text-transform: uppercase; font-size: .85rem; letter-spacing: 1px; }
-        #barra-hub .voltar:hover { background: #3b82f6; }
-        #barra-hub .espaco { flex: 1; }
-        #barra-hub .usuario[hidden] { display: none; }
-        #barra-hub .usuario { display: flex; align-items: center; gap: 12px; background: #020617; border: 2px solid #60a5fa; padding: 4px 4px 4px 14px; }
-        #barra-hub .usuario-dados { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
-        #barra-hub .usuario-nome { font-weight: 700; font-size: .95rem; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        #barra-hub .usuario-papel { font-size: .7rem; text-transform: uppercase; letter-spacing: 1px; color: #60a5fa; }
-        #barra-hub .usuario-papel.mestre { color: #f59e0b; }
-        #barra-hub .usuario-sair { font: inherit; font-size: .8rem; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; background: #0f172a; color: #f8fafc; border: 2px solid #1e3a8a; padding: 3px 10px; }
-        #barra-hub .usuario-sair:hover { background: #7f1d1d; border-color: #ef4444; }
-    </style>
 </head>
 <body class="relative selection:bg-cyan-400 selection:text-slate-950">
-
-<header id="barra-hub">
-    <a class="voltar" href="index.html">‹ Hub</a>
-    <div class="espaco"></div>
-    <div class="usuario" data-usuario hidden></div>
-</header>
 
   <!-- Canvas de Partículas Etéreas Flutuantes -->
   <canvas id="velvet-particles" class="fixed inset-0 pointer-events-none z-0"></canvas>
