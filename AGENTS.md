@@ -20,6 +20,7 @@ Idioma: código, comentários, textos de interface e mensagens de commit em **po
 | `map_total.html` | Mapa da cidade, calendário e notas | `map_total` |
 | `sistema_de_confidentes.html` | Confidentes por jogador | `sistema_de_confidentes` |
 | `velvet_room.html` | Calculadora de fusão | `velvet_room` |
+| `suite_clinica.html` | Diagnóstico clínico e síntese alquímica. O estado fica só no `localStorage` do navegador (exportação/importação em JSON); o Terminal do Mestre abre só para quem tem o papel de Mestre | — |
 | `cadastro_usuarios.html` | Cadastro de contas (só Mestre) | `usuarios`, `mestres`, `jogadores` |
 | `cadastro_jogador.html` | Auto-cadastro aberto, só cria Jogadores (link no login do hub) | `usuarios`, `jogadores` |
 | `loja.html` | Loja: o Mestre cadastra itens, preços e PR; o jogador compra com o próprio PR | `loja` (`itens`, `ajusteGlobal`, `pr`, `inventario`, `log`) |
