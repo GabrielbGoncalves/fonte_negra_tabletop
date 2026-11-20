@@ -1,0 +1,3038 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://www.gstatic.com https://*.firebaseio.com https://*.firebasedatabase.app http://127.0.0.1:9000; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://*.firebaseio.com wss://*.firebaseio.com https://*.firebasedatabase.app wss://*.firebasedatabase.app https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com http://127.0.0.1:9099 http://127.0.0.1:9000 ws://127.0.0.1:9000; frame-src https://*.firebaseapp.com https://*.firebaseio.com https://erpg.app http://127.0.0.1:9000; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" href="assets/favicon/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/svg+xml" href="assets/favicon/favicon.svg">
+    <link rel="shortcut icon" href="assets/favicon/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-title" content="Fonte Negra">
+    <link rel="manifest" href="assets/favicon/site.webmanifest">
+
+    <!-- Firebase SDK Compat e sessão -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" integrity="sha384-4gq9w/AGf72FXdNQ3Kn3EqWP7633NbCMjpYHt8YCZyXf23o2opcuAr4cif41tLrC" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js" integrity="sha384-5PDE6CZvnNIJI5xu68GIFoOO3U73lAnRLBwPBmmKjWnYnYwKEHWr/ghtGooEOXGb" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" integrity="sha384-xtdq4MQqPj1dB5DQsuw9O7dh4kHhMP/Wp5u8O1jiaWiou13ZfJIgiccjtVK2pBhL" crossorigin="anonymous"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/sessao.js" data-exigir-login></script>
+
+    <title>LABORATÓRIO DE CONTENÇÃO & APOTECARISMO // SETOR-04</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                        occult: ['Rajdhani', 'sans-serif'],
+                    },
+                    colors: {
+                        bunker: {
+                            950: '#06080c',
+                            900: '#0b0f17',
+                            850: '#101622',
+                            800: '#161f30',
+                            700: '#233047',
+                            600: '#344666',
+                        },
+                    },
+                    animation: {
+                        'bubble-slow': 'bubble 3.2s infinite ease-in',
+                        'bubble-fast': 'bubble 1.4s infinite ease-in',
+                        'spin-cw': 'spin 8s linear infinite',
+                        'spin-ccw': 'spinReverse 8s linear infinite',
+                    },
+                    keyframes: {
+                        bubble: {
+                            '0%': { transform: 'translateY(0) scale(0.7)', opacity: '0' },
+                            '40%': { opacity: '0.85' },
+                            '100%': { transform: 'translateY(-55px) scale(1.25)', opacity: '0' },
+                        },
+                        spinReverse: {
+                            '0%': { transform: 'rotate(360deg)' },
+                            '100%': { transform: 'rotate(0deg)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #06080c;
+            background-image:
+                radial-gradient(circle at 50% 0%, rgba(6, 182, 212, 0.08) 0%, transparent 55%),
+                radial-gradient(circle at 85% 90%, rgba(37, 99, 235, 0.07) 0%, transparent 50%),
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.014) 2px, rgba(255,255,255,0.014) 4px);
+            color: #e2e8f0;
+        }
+
+        .bunker-card {
+            background: linear-gradient(165deg, #101622 0%, #090d14 100%);
+            border: 1px solid #233047;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 12px 28px -6px rgba(0, 0, 0, 0.85);
+        }
+
+        .bunker-inset {
+            background-color: #06080c;
+            border: 1px solid #1b2538;
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.9);
+        }
+
+        /* Regiões do Mapa Anatômico SVG */
+        .body-zone {
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .body-zone:hover {
+            filter: drop-shadow(0 0 8px rgba(6, 182, 212, 0.65));
+        }
+        .body-zone.zone-active {
+            fill: rgba(6, 182, 212, 0.35) !important;
+            stroke: #22d3ee !important;
+            stroke-width: 2.2 !important;
+            filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.8));
+        }
+        .body-zone.zone-has-symptom {
+            fill: rgba(245, 158, 11, 0.28);
+            stroke: #f59e0b;
+            stroke-width: 1.8;
+        }
+        .body-zone.zone-active.zone-has-symptom {
+            fill: rgba(245, 158, 11, 0.45) !important;
+            stroke: #fbbf24 !important;
+        }
+
+        .bunker-card {
+            background: linear-gradient(160deg, #13161c 0%, #0c0e12 100%);
+            border: 1px solid #282e3a;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 12px 28px -6px rgba(0, 0, 0, 0.8);
+        }
+
+        .bunker-inset {
+            background-color: #080a0d;
+            border: 1px solid #1e232d;
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.85);
+        }
+
+        /* Slider Térmico Customizado */
+        input[type=range].thermal-range {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type=range].thermal-range::-webkit-slider-runnable-track {
+            height: 10px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #38bdf8 0%, #06b6d4 22%, #10b981 45%, #f59e0b 70%, #ef4444 100%);
+            border: 1px solid #282e3a;
+        }
+        input[type=range].thermal-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 22px;
+            width: 14px;
+            border-radius: 4px;
+            background: #f8fafc;
+            border: 2px solid #07080a;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            margin-top: -7px;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #080a0d; }
+        ::-webkit-scrollbar-thumb { background: #282e3a; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #06b6d4; }
+
+        .liquid-smooth {
+            transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1), y 0.5s cubic-bezier(0.4, 0, 0.2, 1), fill 0.6s ease;
+        }
+    </style>
+</head>
+<body class="min-h-screen font-sans antialiased selection:bg-cyan-500/30 selection:text-cyan-200 pb-14">
+
+    <!-- Container de Toasts -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- ===================================================================== -->
+    <!-- HUD SUPERIOR DO TERMINAL                                              -->
+    <!-- ===================================================================== -->
+    <header class="border-b border-bunker-700 bg-bunker-900/95 backdrop-blur-md sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col xl:flex-row items-center justify-between gap-3">
+            <!-- Identificação do Setor -->
+            <div class="flex items-center gap-3 w-full xl:w-auto">
+                <div class="w-11 h-11 rounded bg-cyan-500/10 border border-cyan-500/40 flex items-center justify-center text-cyan-400 shadow-[0_0_18px_rgba(6,182,212,0.18)] shrink-0">
+                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 3h6m-5 0v5.172a2 2 0 01-.586 1.414l-4.828 4.828A2 2 0 004 15.828V19a2 2 0 002 2h12a2 2 0 002-2v-3.172a2 2 0 00-.586-1.414l-4.828-4.828A2 2 0 0114 8.172V3" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.5 16h11" />
+                        <circle cx="12" cy="18.5" r="0.7" fill="currentColor" />
+                    </svg>
+                </div>
+                <div class="min-w-0">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-[10px] font-mono uppercase tracking-widest px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">BIOMETRIA ONLINE</span>
+                        <span class="text-[11px] font-mono text-slate-400 truncate">BUNKER SUBTERRÂNEO // SETOR-04</span>
+                    </div>
+                    <h1 class="font-occult text-lg sm:text-xl font-bold tracking-wider text-slate-100 uppercase truncate">
+                        SUÍTE DE DIAGNÓSTICO CLÍNICO & SÍNTESE ALQUÍMICA
+                    </h1>
+                </div>
+            </div>
+
+            <!-- Navegação das 4 Abas Principais -->
+            <nav class="flex items-center bg-bunker-950 p-1 rounded border border-bunker-700 w-full xl:w-auto overflow-x-auto gap-1">
+                <button id="nav-diagnosis" onclick="switchMainTab('diagnosis')" class="flex-1 xl:flex-none flex items-center justify-center gap-2 px-3 py-2 rounded text-xs font-mono font-semibold transition-all bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 whitespace-nowrap">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    1. PRONTUÁRIO & DIAGNÓSTICO
+                </button>
+
+                <button id="nav-workbench" onclick="switchMainTab('workbench')" class="flex-1 xl:flex-none flex items-center justify-center gap-2 px-3 py-2 rounded text-xs font-mono font-semibold transition-all text-slate-400 hover:text-slate-200 whitespace-nowrap">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                    </svg>
+                    2. BANCADA DE SÍNTESE
+                </button>
+
+                <button id="nav-journal" onclick="switchMainTab('journal')" class="flex-1 xl:flex-none flex items-center justify-center gap-2 px-3 py-2 rounded text-xs font-mono font-semibold transition-all text-slate-400 hover:text-slate-200 whitespace-nowrap">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                    3. DIÁRIO & PISTAS
+                    <span id="badge-clues-count" class="px-1.5 py-0.2 rounded text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/40">0</span>
+                </button>
+
+                <button id="nav-gm" onclick="openGMModalOrTab()" class="flex-1 xl:flex-none flex items-center justify-center gap-2 px-3 py-2 rounded text-xs font-mono font-semibold transition-all text-slate-400 hover:text-rose-300 whitespace-nowrap">
+                    <svg id="gm-padlock-icon" class="w-4 h-4 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    4. TERMINAL DO MESTRE
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Barra de Status do Paciente em Quarentena (Sem dar spoiler do nome da doença!) -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-5">
+        <div class="bunker-card rounded p-4 border-l-4 border-l-cyan-500 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div class="space-y-1">
+                <div class="flex flex-wrap items-center gap-2 text-[11px] font-mono text-cyan-400 uppercase tracking-wider">
+                    <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+                    CÂMARA DE QUARENTENA 01 // PACIENTE EM OBSERVAÇÃO
+                    <span id="hud-patient-status-badge" class="px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/40">
+                        DIAGNÓSTICO PENDENTE
+                    </span>
+                </div>
+                <h2 id="hud-patient-name" class="text-lg sm:text-xl font-occult font-bold text-white uppercase tracking-wide">
+                    Sujeito #07 — Cabo Marcus Vance (Batedor de Superfície)
+                </h2>
+                <p id="hud-patient-notes" class="text-xs sm:text-sm text-slate-400 max-w-4xl">
+                    Resgatado próximo às fendas de ventilação do Nível -3. Apresenta quadro progressivo não identificado. Examine as regiões do corpo no mapa anatômico e consulte as DTs de exame clínico antes de sintetizar um composto.
+                </p>
+            </div>
+            <div class="flex items-center gap-3 self-end md:self-center shrink-0">
+                <div class="bg-bunker-950/90 px-3 py-2 rounded border border-bunker-800 text-right font-mono">
+                    <div class="text-[10px] text-slate-500">HIPÓTESE ATUAL</div>
+                    <div id="hud-hypothesis-label" class="text-xs font-bold text-amber-400">Nenhuma selecionada</div>
+                </div>
+                <div class="bg-bunker-950/90 px-3 py-2 rounded border border-bunker-800 text-right font-mono">
+                    <div class="text-[10px] text-slate-500">LOTES</div>
+                    <div id="hud-batch-count" class="text-sm font-bold text-cyan-400">00</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- ABA 1: PRONTUÁRIO & DIAGNÓSTICO (MAPA ANATÔMICO + DTs)                -->
+    <!-- ===================================================================== -->
+    <main id="tab-diagnosis" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- COLUNA 1: MAPA ANATÔMICO INTERATIVO SVG (4 Cols) -->
+            <section class="lg:col-span-4 bunker-card rounded p-5 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between border-b border-bunker-700 pb-3 mb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-cyan-400 font-mono text-sm font-bold">[MAPA]</span>
+                            <h3 class="font-mono text-sm font-bold uppercase tracking-wider text-slate-200">Varredura Anatômica</h3>
+                        </div>
+                        <span class="text-[10px] font-mono text-slate-400">Clique na região</span>
+                    </div>
+
+                    <!-- Container do Diagrama Corporal Holo-Scan -->
+                    <div class="bunker-inset rounded p-3 relative flex flex-col items-center justify-center border border-bunker-800">
+                        <div class="absolute inset-0 opacity-15 pointer-events-none" style="background-image: linear-gradient(to right, #06b6d4 1px, transparent 1px), linear-gradient(to bottom, #06b6d4 1px, transparent 1px); background-size: 20px 20px;"></div>
+                        
+                        <svg id="anatomical-body-svg" viewBox="0 0 260 440" class="w-full max-w-[250px] h-auto z-10 select-none">
+                            <!-- Contorno geral de referência (Pele / Sistema Nervoso Periférico) -->
+                            <g id="zone-pele_nervoso" onclick="selectBodyZone('pele_nervoso')" class="body-zone" fill="rgba(15, 23, 42, 0.5)" stroke="#334155" stroke-width="1.5">
+                                <rect x="14" y="10" width="232" height="420" rx="6" fill="rgba(6, 182, 212, 0.03)" stroke="#1e293b" stroke-dasharray="4 4" />
+                                <text x="24" y="28" fill="#64748b" font-family="JetBrains Mono, monospace" font-size="9">AURA / PELE & SIST. NERVOSO</text>
+                            </g>
+
+                            <!-- 1. Cabeça / Mente -->
+                            <g id="zone-cabeca_mente" onclick="selectBodyZone('cabeca_mente')" class="body-zone" fill="rgba(30, 41, 59, 0.75)" stroke="#06b6d4" stroke-width="1.5">
+                                <path d="M110 38 C110 22, 150 22, 150 38 L152 62 C152 75, 140 82, 130 82 C120 82, 108 75, 108 62 Z" />
+                                <circle cx="130" cy="46" r="10" fill="none" stroke="rgba(34,211,238,0.4)" stroke-width="1" />
+                            </g>
+
+                            <!-- 2. Pescoço / Garganta -->
+                            <g id="zone-pescoco_garganta" onclick="selectBodyZone('pescoco_garganta')" class="body-zone" fill="rgba(30, 41, 59, 0.75)" stroke="#06b6d4" stroke-width="1.5">
+                                <rect x="118" y="83" width="24" height="20" rx="3" />
+                            </g>
+
+                            <!-- 3. Tórax / Pulmões -->
+                            <g id="zone-torax_pulmoes" onclick="selectBodyZone('torax_pulmoes')" class="body-zone" fill="rgba(30, 41, 59, 0.75)" stroke="#06b6d4" stroke-width="1.5">
+                                <path d="M90 105 L170 105 L164 172 L96 172 Z" />
+                                <!-- Silhueta dos Pulmões -->
+                                <path d="M104 115 Q122 115 123 145 Q123 162 103 160 Q98 140 104 115 Z" fill="rgba(6,182,212,0.12)" stroke="#22d3ee" stroke-width="1" />
+                                <path d="M156 115 Q138 115 137 145 Q137 162 157 160 Q162 140 156 115 Z" fill="rgba(6,182,212,0.12)" stroke="#22d3ee" stroke-width="1" />
+                            </g>
+
+                            <!-- 4. Coração / Sistema Sanguíneo -->
+                            <g id="zone-coracao_sangue" onclick="selectBodyZone('coracao_sangue')" class="body-zone" fill="rgba(225, 29, 72, 0.25)" stroke="#f43f5e" stroke-width="1.6">
+                                <circle cx="137" cy="136" r="13" />
+                                <path d="M137 128 L142 135 L137 144 L132 135 Z" fill="#fb7185" stroke="none" />
+                            </g>
+
+                            <!-- 5. Abdômen / Vísceras -->
+                            <g id="zone-abdomen_visceras" onclick="selectBodyZone('abdomen_visceras')" class="body-zone" fill="rgba(30, 41, 59, 0.75)" stroke="#06b6d4" stroke-width="1.5">
+                                <path d="M97 175 L163 175 L158 242 L102 242 Z" />
+                                <ellipse cx="130" cy="208" rx="18" ry="14" fill="none" stroke="rgba(34,211,238,0.35)" stroke-width="1" stroke-dasharray="3 2" />
+                            </g>
+
+                            <!-- 6. Braços / Mãos (Esquerdo e Direito) -->
+                            <g id="zone-bracos_maos" onclick="selectBodyZone('bracos_maos')" class="body-zone" fill="rgba(30, 41, 59, 0.75)" stroke="#06b6d4" stroke-width="1.5">
+                                <!-- Braço Esquerdo -->
+                                <path d="M87 107 L66 114 L52 185 L44 242 L58 245 L72 188 L88 135 Z" />
+                                <!-- Braço Direito -->
+                                <path d="M173 107 L194 114 L208 185 L216 242 L202 245 L188 188 L172 135 Z" />
+                            </g>
+
+                            <!-- 7. Pernas / Mobilidade -->
+                            <g id="zone-pernas_mobilidade" onclick="selectBodyZone('pernas_mobilidade')" class="body-zone" fill="rgba(30, 41, 59, 0.75)" stroke="#06b6d4" stroke-width="1.5">
+                                <!-- Perna Esquerda -->
+                                <path d="M102 245 L127 245 L124 335 L120 412 L101 412 L103 335 Z" />
+                                <!-- Perna Direita -->
+                                <path d="M133 245 L158 245 L157 335 L159 412 L140 412 L136 335 Z" />
+                            </g>
+                        </svg>
+
+                        <!-- Botões Rápidos de Seleção de Região (Acessível no Mobile) -->
+                        <div id="zone-quick-pills" class="flex flex-wrap justify-center gap-1.5 mt-3 z-10">
+                            <!-- Gerado via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Legenda do Mapa -->
+                <div class="mt-3 pt-3 border-t border-bunker-800 flex items-center justify-between text-[11px] font-mono text-slate-400">
+                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-cyan-500/40 border border-cyan-400"></span> Selecionada</span>
+                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-amber-500/40 border border-amber-400"></span> Sintoma Anotado</span>
+                </div>
+            </section>
+
+            <!-- COLUNA 2: INSPEÇÃO DA REGIÃO & DTs DE EXAME CLÍNICO (4 Cols) -->
+            <section class="lg:col-span-4 bunker-card rounded p-5 flex flex-col justify-between space-y-4">
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between border-b border-bunker-700 pb-3">
+                        <div>
+                            <span class="text-[10px] font-mono text-cyan-400 uppercase block">Região Selecionada</span>
+                            <h3 id="insp-zone-title" class="font-occult text-lg font-bold text-white uppercase">Coração / Sistema Sanguíneo</h3>
+                        </div>
+                        <div class="px-2.5 py-1 rounded bg-bunker-950 border border-amber-500/40 text-right font-mono">
+                            <span class="text-[9px] text-slate-400 block">EXAME CLÍNICO</span>
+                            <span id="insp-zone-dt" class="text-xs font-bold text-amber-400">Medicina DT 14</span>
+                        </div>
+                    </div>
+
+                    <!-- Achados Narrativos Revelados para esta Região -->
+                    <div class="bunker-inset rounded p-3 border border-bunker-800 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[11px] font-mono uppercase text-cyan-300 font-bold">Observações & Achados Locais</span>
+                            <span class="text-[10px] font-mono text-slate-500">Peça o teste ao Mestre</span>
+                        </div>
+                        <div id="insp-revealed-findings" class="space-y-2 text-xs text-slate-300">
+                            <!-- Achados revelados pelo Mestre ou dicas locais -->
+                        </div>
+                    </div>
+
+                    <!-- Anotação de Sintomas Suspeitos pelos Jogadores nesta Região -->
+                    <div class="space-y-2">
+                        <label class="block text-[11px] font-mono uppercase text-slate-400 font-bold">
+                            Anotar Sintoma Observado Nesta Região:
+                        </label>
+                        <div class="flex gap-1.5">
+                            <select id="insp-symptom-preset" class="flex-1 bunker-inset rounded px-2.5 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-cyan-500">
+                                <!-- Populado com banco de sintomas -->
+                            </select>
+                            <button onclick="addSuspectedSymptomFromPreset()" class="px-3 py-2 rounded bg-amber-500 hover:bg-amber-400 text-bunker-950 font-mono font-bold text-xs shrink-0">
+                                + Marcar
+                            </button>
+                        </div>
+
+                        <div class="flex gap-1.5 pt-1">
+                            <input type="text" id="insp-custom-symptom" onkeydown="if(event.key==='Enter') addCustomSuspectedSymptom()" placeholder="Ou digite sintoma livre..." class="flex-1 bunker-inset rounded px-2.5 py-1.5 text-xs font-mono text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500">
+                            <button onclick="addCustomSuspectedSymptom()" class="px-2.5 py-1.5 rounded bg-bunker-800 hover:bg-bunker-700 border border-bunker-600 text-xs font-mono text-slate-200">
+                                Anotar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Lista de Sintomas Marcados nesta Região -->
+                    <div>
+                        <span class="text-[10px] font-mono uppercase text-slate-500 block mb-1.5">Sintomas Marcados Aqui:</span>
+                        <div id="insp-zone-pinned-list" class="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                            <!-- Sintomas anotados pelos jogadores nesta região -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-3 border-t border-bunker-800 flex items-center justify-between text-[11px] font-mono">
+                    <span class="text-slate-400">Total anotado no corpo: <strong id="insp-total-pinned" class="text-amber-400">0</strong></span>
+                    <button onclick="clearPlayerAnnotations()" class="text-slate-500 hover:text-rose-400 underline">Limpar marcações</button>
+                </div>
+            </section>
+
+            <!-- COLUNA 3: CONCLUSÃO DIAGNÓSTICA & DTs DE IDENTIFICAÇÃO (4 Cols) -->
+            <section class="lg:col-span-4 bunker-card rounded p-5 flex flex-col justify-between space-y-5">
+                <div class="space-y-4">
+                    <div class="flex items-center gap-2 border-b border-bunker-700 pb-3">
+                        <span class="text-cyan-400 font-mono text-sm font-bold">[DIAGNÓSTICO]</span>
+                        <h3 class="font-mono text-sm font-bold uppercase tracking-wider text-slate-200">Conclusão Clínica</h3>
+                    </div>
+
+                    <!-- Resumo de todos os sintomas mapeados pelo grupo -->
+                    <div class="bunker-inset rounded p-3 border border-bunker-800">
+                        <span class="text-[10px] font-mono uppercase text-slate-400 block mb-2">Quadro Sintomático Mapeado pelo Grupo:</span>
+                        <div id="diag-all-pinned-summary" class="space-y-1.5 max-h-36 overflow-y-auto pr-1 text-xs font-mono">
+                            <!-- Resumo global -->
+                        </div>
+                    </div>
+
+                    <!-- Catálogo de Patologias Conhecidas no Bunker (com DT de Diagnóstico) -->
+                    <div class="space-y-2">
+                        <label class="block text-[11px] font-mono uppercase text-amber-400 font-bold">
+                            Selecione a Patologia Diagnosticada:
+                        </label>
+                        <p class="text-[11px] text-slate-400">
+                            Compare os sintomas encontrados com os arquivos médicos do bunker. Cada patologia possui uma <strong>DT de Diagnóstico</strong> para confirmação.
+                        </p>
+                        <div id="diag-diseases-radio-list" class="space-y-2 max-h-56 overflow-y-auto pr-1">
+                            <!-- Cards de doenças candidatas com DT -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botão de Validar Hipótese Diagnóstica -->
+                <div class="space-y-2.5 pt-2 border-t border-bunker-800">
+                    <button onclick="verifyDiagnosisHypothesis()" class="w-full py-3 px-4 rounded bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-bunker-950 font-mono font-bold text-xs tracking-wider uppercase shadow-[0_0_18px_rgba(6,182,212,0.25)] transition-all active:scale-[0.98]">
+                        CONFIRMAR HIPÓTESE DIAGNÓSTICA
+                    </button>
+
+                    <!-- Feedback da Verificação Diagnóstica -->
+                    <div id="diag-verification-box" class="hidden p-3 rounded border text-xs font-mono leading-relaxed">
+                        <!-- Preenchido via JS -->
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- ===================================================================== -->
+    <!-- ABA 2: BANCADA DE SÍNTESE (VISÃO DOS JOGADORES)                       -->
+    <!-- ===================================================================== -->
+    <main id="tab-workbench" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 space-y-6">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- COLUNA 1: INVENTÁRIO DE INGREDIENTES DISPONÍVEIS (5 Cols) -->
+            <section class="lg:col-span-5 bunker-card rounded p-5 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between border-b border-bunker-700 pb-3 mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="text-cyan-400 font-mono text-sm font-bold">[01]</span>
+                            <h3 class="font-mono text-sm font-bold uppercase tracking-wider text-slate-200">Reagentes na Bancada</h3>
+                        </div>
+                        <span id="workbench-active-count" class="text-xs font-mono text-amber-400">0 ativos</span>
+                    </div>
+
+                    <div id="workbench-ingredients-list" class="space-y-2.5 max-h-[450px] overflow-y-auto pr-1">
+                        <!-- Renderizado dinamicamente -->
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-bunker-800 flex items-center justify-between text-[11px] font-mono text-slate-500">
+                    <span>* Apenas espécimes descobertos são exibidos.</span>
+                    <button onclick="clearWorkbenchInputs()" class="text-slate-400 hover:text-amber-400 underline">Zerar doses</button>
+                </div>
+            </section>
+
+            <!-- COLUNA 2: PARÂMETROS DE PROCESSO (4 Cols) -->
+            <section class="lg:col-span-4 bunker-card rounded p-5 space-y-4">
+                <div class="flex items-center gap-2 border-b border-bunker-700 pb-3">
+                    <span class="text-cyan-400 font-mono text-sm font-bold">[02]</span>
+                    <h3 class="font-mono text-sm font-bold uppercase tracking-wider text-slate-200">Parâmetros de Processo</h3>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-mono uppercase text-slate-400 mb-1">Ferramenta de Extração / Preparo</label>
+                    <select id="proc-tool" onchange="updateReactorVisuals()" class="w-full bunker-inset rounded px-3 py-2 text-xs sm:text-sm font-mono text-slate-200 focus:outline-none focus:border-cyan-500">
+                        <option value="morteiro_obsidiana">Morteiro de Obsidiana</option>
+                        <option value="bisturi_prata">Bisturi de Prata</option>
+                        <option value="prensa_hidraulica">Prensa Hidráulica</option>
+                        <option value="caldeirao_cobre">Caldeirão de Cobre</option>
+                        <option value="destilador_vidro">Destilador de Vidro</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-mono uppercase text-slate-400 mb-1">Movimento / Técnica Aplicada</label>
+                    <select id="proc-motion" onchange="updateReactorVisuals()" class="w-full bunker-inset rounded px-3 py-2 text-xs sm:text-sm font-mono text-slate-200 focus:outline-none focus:border-cyan-500">
+                        <option value="trituracao_horaria">Trituração Horária Lenta</option>
+                        <option value="agitacao_antihoraria">Agitação Anti-Horária Vigorosa</option>
+                        <option value="corte_cubos">Corte em Cubos</option>
+                        <option value="infusao_estatica">Infusão Estática</option>
+                        <option value="decantacao">Decantação</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-mono uppercase text-slate-400 mb-1">Veículo / Solvente Base</label>
+                    <select id="proc-solvent" onchange="updateReactorVisuals()" class="w-full bunker-inset rounded px-3 py-2 text-xs sm:text-sm font-mono text-slate-200 focus:outline-none focus:border-cyan-500">
+                        <option value="agua_lustral">Água Lustral Estagnada</option>
+                        <option value="vinagre_sagrado">Vinagre de Vinho Sagrado</option>
+                        <option value="alcool_90">Álcool Etílico 90%</option>
+                        <option value="oleo_abissal">Óleo Abissal</option>
+                        <option value="nenhum">Nenhum (Extração Seca)</option>
+                    </select>
+                </div>
+
+                <!-- Controle Térmico Interativo -->
+                <div class="bunker-inset rounded p-3 border border-bunker-700/80">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="text-[11px] font-mono uppercase text-slate-400">Controle Térmico</label>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="nudgeTemperature(-5)" class="w-6 h-6 rounded bg-bunker-800 hover:bg-bunker-700 border border-bunker-600 font-mono text-xs text-slate-300">-5</button>
+                            <span id="proc-temp-val" class="font-mono text-sm font-bold text-amber-400 w-14 text-center">65°C</span>
+                            <button onclick="nudgeTemperature(5)" class="w-6 h-6 rounded bg-bunker-800 hover:bg-bunker-700 border border-bunker-600 font-mono text-xs text-slate-300">+5</button>
+                        </div>
+                    </div>
+                    <input type="range" id="proc-temp" min="0" max="150" step="1" value="65" oninput="updateThermalDisplay()" class="w-full thermal-range my-1.5">
+                    <div class="flex justify-between text-[10px] font-mono">
+                        <span class="text-sky-400">0°C</span>
+                        <span id="proc-temp-zone" class="font-bold text-amber-400">MORNO / BRANDO</span>
+                        <span class="text-rose-500">150°C</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-mono uppercase text-slate-400 mb-1">Tempo de Exposição / Repouso</label>
+                    <select id="proc-time" onchange="updateReactorVisuals()" class="w-full bunker-inset rounded px-3 py-2 text-xs sm:text-sm font-mono text-slate-200 focus:outline-none focus:border-cyan-500">
+                        <option value="imediato">Imediato</option>
+                        <option value="15_min">15 Minutos</option>
+                        <option value="1_hora">1 Hora</option>
+                        <option value="3_ciclos">3 Ciclos/Horas</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- COLUNA 3: REATOR CENTRAL VISUAL & BOTÃO DE SÍNTESE (3 Cols) -->
+            <section class="lg:col-span-3 bunker-card rounded p-5 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center gap-2 border-b border-bunker-700 pb-3 mb-4">
+                        <span class="text-cyan-400 font-mono text-sm font-bold">[03]</span>
+                        <h3 class="font-mono text-sm font-bold uppercase tracking-wider text-slate-200">Reator Alquímico</h3>
+                    </div>
+
+                    <!-- Câmara Animada SVG/CSS -->
+                    <div class="bunker-inset rounded p-4 flex flex-col items-center justify-center relative overflow-hidden h-56 border border-bunker-700/70">
+                        <div class="absolute inset-0 opacity-15" style="background-image: radial-gradient(#06b6d4 1px, transparent 1px); background-size: 14px 14px;"></div>
+                        
+                        <svg id="reactor-rune-ring" viewBox="0 0 100 100" class="w-40 h-40 absolute text-cyan-500/15 transition-all duration-700">
+                            <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="4 3" />
+                            <polygon points="50,8 88,72 12,72" fill="none" stroke="currentColor" stroke-width="0.8" />
+                            <polygon points="50,92 88,28 12,28" fill="none" stroke="currentColor" stroke-width="0.8" />
+                        </svg>
+
+                        <div class="relative w-28 h-36 flex items-end justify-center z-10">
+                            <svg viewBox="0 0 120 150" class="w-full h-full drop-shadow-[0_0_15px_rgba(0,0,0,0.95)]">
+                                <defs>
+                                    <clipPath id="reactor-clip">
+                                        <path d="M44 16 L76 16 L76 46 L109 124 Q113 138 98 138 L22 138 Q7 138 11 124 L44 46 Z" />
+                                    </clipPath>
+                                </defs>
+                                <path d="M44 16 L76 16 L76 46 L109 124 Q113 138 98 138 L22 138 Q7 138 11 124 L44 46 Z" fill="#090b0e" />
+                                
+                                <g clip-path="url(#reactor-clip)">
+                                    <rect id="reactor-liquid" x="0" y="138" width="120" height="0" fill="#06b6d4" class="liquid-smooth opacity-90" />
+                                    <circle id="r-bubble-1" cx="44" cy="128" r="3" fill="#ffffff" class="opacity-0" />
+                                    <circle id="r-bubble-2" cx="68" cy="132" r="2.5" fill="#ffffff" class="opacity-0" style="animation-delay: 0.6s;" />
+                                    <circle id="r-bubble-3" cx="56" cy="122" r="3.5" fill="#ffffff" class="opacity-0" style="animation-delay: 1.2s;" />
+                                </g>
+
+                                <path d="M44 16 L76 16 L76 46 L109 124 Q113 138 98 138 L22 138 Q7 138 11 124 L44 46 Z" fill="none" stroke="#64748b" stroke-width="2.5" />
+                                <rect x="40" y="10" width="40" height="6" rx="2" fill="#334155" stroke="#64748b" stroke-width="1.5" />
+                                <line x1="48" y1="75" x2="57" y2="75" stroke="#94a3b8" stroke-width="1.5" />
+                                <line x1="42" y1="95" x2="55" y2="95" stroke="#94a3b8" stroke-width="1.5" />
+                                <line x1="35" y1="115" x2="51" y2="115" stroke="#94a3b8" stroke-width="1.5" />
+                            </svg>
+                        </div>
+
+                        <div id="reactor-status-label" class="mt-2 font-mono text-[10px] tracking-wider text-slate-400 text-center z-10 uppercase">
+                            Câmara Vazia
+                        </div>
+                    </div>
+
+                    <!-- Alvo Terapêutico Selecionado -->
+                    <div class="mt-3 p-2.5 rounded bg-bunker-950 border border-bunker-800 text-[11px] font-mono text-slate-400 space-y-1">
+                        <div class="flex justify-between">
+                            <span>Solvente:</span>
+                            <span id="tele-solvent" class="text-slate-200 truncate max-w-[130px]">Água Lustral</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Temperatura:</span>
+                            <span id="tele-temp" class="text-amber-400 font-bold">65°C</span>
+                        </div>
+                        <div class="flex justify-between pt-1 border-t border-bunker-800">
+                            <span>Alvo Clínico:</span>
+                            <span id="tele-target-disease" class="text-cyan-400 truncate max-w-[130px]">Não definido</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botão Principal -->
+                <div class="mt-4">
+                    <button onclick="runSynthesis()" class="w-full py-3.5 px-4 rounded bg-gradient-to-r from-cyan-600 to-emerald-500 hover:from-cyan-500 hover:to-emerald-400 text-bunker-950 font-mono font-bold text-xs sm:text-sm tracking-wider uppercase shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_28px_rgba(16,185,129,0.5)] transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        SINTETIZAR & ADMINISTRAR
+                    </button>
+                </div>
+            </section>
+        </div>
+
+        <!-- RELATÓRIO IMEDIATO DA SÍNTESE -->
+        <section id="synthesis-report-card" class="hidden bunker-card rounded p-6 border-2 transition-all">
+            <div class="flex flex-col lg:flex-row items-start justify-between gap-6">
+                <div class="space-y-3 flex-1">
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        <span id="rep-badge" class="px-3 py-1 rounded font-mono text-xs font-bold uppercase tracking-wider">CLASSIFICAÇÃO</span>
+                        <span id="rep-batch" class="font-mono text-xs text-slate-400">LOTE #01</span>
+                    </div>
+                    <h3 id="rep-title" class="text-xl sm:text-2xl font-occult font-bold text-white uppercase">Título do Resultado</h3>
+                    
+                    <div class="space-y-2 text-sm text-slate-300">
+                        <p><strong class="font-mono text-xs uppercase text-slate-400 block">Observação Sensorial:</strong> <span id="rep-sensory"></span></p>
+                    </div>
+
+                    <div class="p-3.5 rounded bg-bunker-950 border border-bunker-700">
+                        <span class="text-[11px] font-mono uppercase text-amber-400 font-bold block mb-1">Efeito Mecânico no RPG & Paciente:</span>
+                        <p id="rep-mechanics" class="text-xs sm:text-sm font-mono text-slate-200 leading-relaxed"></p>
+                    </div>
+                </div>
+
+                <!-- Diagnóstico Sutil -->
+                <div class="w-full lg:w-80 bg-bunker-950/95 border border-bunker-700 rounded p-4 shrink-0">
+                    <h4 class="font-mono text-xs uppercase text-cyan-400 border-b border-bunker-800 pb-2 mb-3 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        Diagnóstico do Aparelho
+                    </h4>
+                    <ul id="rep-hints" class="space-y-2 text-xs font-mono text-slate-300">
+                        <!-- Pistas sutis geradas pelo motor -->
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===================================================================== -->
+    <!-- ABA 3: DIÁRIO DE LOTES & PISTAS DO BUNKER                             -->
+    <!-- ===================================================================== -->
+    <main id="tab-journal" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- Painel Esquerdo: Pistas & Anotações Reveladas (5 Cols) -->
+            <section class="lg:col-span-5 bunker-card rounded p-5 h-fit">
+                <div class="flex items-center justify-between border-b border-bunker-700 pb-3 mb-4">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                        </svg>
+                        <h3 class="font-mono text-sm font-bold uppercase tracking-wider text-slate-200">Pistas Clínicas & Alquímicas</h3>
+                    </div>
+                    <span id="journal-clues-total" class="text-xs font-mono text-slate-400">0 reveladas</span>
+                </div>
+
+                <div id="journal-clues-list" class="space-y-3">
+                    <!-- Pistas visíveis aos jogadores -->
+                </div>
+            </section>
+
+            <!-- Painel Direito: Histórico de Lotes Sintetizados (7 Cols) -->
+            <section class="lg:col-span-7 bunker-card rounded p-5">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-bunker-700 pb-3 mb-4">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <h3 class="font-mono text-sm font-bold uppercase tracking-wider text-slate-200">Registro Histórico de Lotes</h3>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <select id="log-filter" onchange="renderJournalLogs()" class="bunker-inset rounded px-2.5 py-1.5 text-xs font-mono text-slate-300 focus:outline-none">
+                            <option value="ALL">Todos os Lotes</option>
+                            <option value="CURE">Apenas Curas</option>
+                            <option value="PALLIATIVE">Paliativos</option>
+                            <option value="FAIL">Falhas & Mutações</option>
+                        </select>
+                        <button onclick="clearAllLogs()" class="px-2.5 py-1.5 rounded bg-bunker-900 hover:bg-rose-950/50 border border-bunker-700 hover:border-rose-800 text-xs font-mono text-slate-400 hover:text-rose-300 transition">
+                            Limpar
+                        </button>
+                    </div>
+                </div>
+
+                <div id="journal-logs-list" class="space-y-3 max-h-[600px] overflow-y-auto pr-1">
+                    <!-- Histórico de tentativas -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- ===================================================================== -->
+    <!-- ABA 4: TERMINAL DO MESTRE (CONTROLE TOTAL DA CAMPANHA)                -->
+    <!-- ===================================================================== -->
+    <main id="tab-gm" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 space-y-6">
+        
+        <!-- Barra de Controle do Mestre & Sub-abas -->
+        <div class="bunker-card rounded p-4 border border-rose-500/40 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+            <div class="flex flex-wrap items-center gap-1.5">
+                <button id="gm-sub-diseases" onclick="switchGMSubTab('diseases')" class="px-3 py-2 rounded font-mono text-xs font-bold uppercase bg-rose-500/20 text-rose-200 border border-rose-500/40">
+                    A) Paciente & Doenças (Diagnóstico)
+                </button>
+                <button id="gm-sub-recipe" onclick="switchGMSubTab('recipe')" class="px-3 py-2 rounded font-mono text-xs font-bold uppercase text-slate-400 hover:text-slate-200 border border-transparent">
+                    B) Receitas & Gabaritos
+                </button>
+                <button id="gm-sub-ingredients" onclick="switchGMSubTab('ingredients')" class="px-3 py-2 rounded font-mono text-xs font-bold uppercase text-slate-400 hover:text-slate-200 border border-transparent">
+                    C) Ingredientes
+                </button>
+                <button id="gm-sub-clues" onclick="switchGMSubTab('clues')" class="px-3 py-2 rounded font-mono text-xs font-bold uppercase text-slate-400 hover:text-slate-200 border border-transparent">
+                    D) Pistas
+                </button>
+                <button id="gm-sub-campaign" onclick="switchGMSubTab('campaign')" class="px-3 py-2 rounded font-mono text-xs font-bold uppercase text-slate-400 hover:text-slate-200 border border-transparent">
+                    E) Campanha (JSON)
+                </button>
+            </div>
+
+            <button onclick="lockGMMode()" class="px-3 py-1.5 rounded bg-bunker-950 hover:bg-rose-950/40 border border-rose-500/40 text-xs font-mono text-rose-300 flex items-center gap-1.5 shrink-0">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                Modo Mesa (Ocultar Gabaritos)
+            </button>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SUB-ABA A: PACIENTE, DOENÇAS & MAPA DE SINTOMAS (MESTRE)          -->
+        <!-- ================================================================= -->
+        <section id="gm-panel-diseases" class="space-y-6">
+            <!-- Dados do Paciente Atual -->
+            <div class="bunker-card rounded p-5 space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-bunker-700 pb-3">
+                    <h3 class="font-mono text-sm font-bold uppercase text-cyan-400">Ficha do Paciente em Quarentena & Doença Real Ativa</h3>
+                    <button onclick="savePatientInfo()" class="px-4 py-1.5 rounded bg-cyan-500 hover:bg-cyan-400 text-bunker-950 font-mono font-bold text-xs uppercase">
+                        Salvar Paciente
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-mono text-slate-400 mb-1">Nome / Identificação do Paciente</label>
+                        <input type="text" id="gm-pat-name" class="w-full bunker-inset rounded px-3 py-2 text-xs font-mono text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-mono text-rose-400 font-bold mb-1">Doença REAL que afeta o paciente (Secreta)</label>
+                        <select id="gm-pat-active-disease" class="w-full bunker-inset rounded px-3 py-2 text-xs font-mono text-rose-200 border border-rose-500/40">
+                            <!-- Populado com doenças cadastradas -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-mono text-slate-400 mb-1">Notas Iniciais de Triagem (Visível aos Jogadores)</label>
+                        <input type="text" id="gm-pat-notes" class="w-full bunker-inset rounded px-3 py-2 text-xs font-mono text-slate-200">
+                    </div>
+                </div>
+            </div>
+
+            <!-- CRUD de Doenças & Mapeamento de Sintomas no Corpo -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Formulário Criar/Editar Doença (6 Cols) -->
+                <div class="lg:col-span-6 bunker-card rounded p-5 space-y-4">
+                    <div class="flex items-center justify-between border-b border-bunker-700 pb-3">
+                        <h3 id="gm-dis-form-title" class="font-mono text-sm font-bold uppercase text-amber-400">+ Nova Patologia / Doença</h3>
+                        <button id="gm-dis-cancel-btn" onclick="resetDiseaseForm()" class="hidden text-xs font-mono text-slate-400 hover:text-white underline">Cancelar Edição</button>
+                    </div>
+
+                    <input type="hidden" id="gm-dis-id">
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-mono text-slate-400 mb-1">Nome da Doença</label>
+                            <input type="text" id="gm-dis-name" placeholder="Ex: Peste de Cinza Vitral" class="w-full bunker-inset rounded px-3 py-2 text-xs font-mono text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-mono text-slate-400 mb-1">Código Arquivo</label>
+                            <input type="text" id="gm-dis-code" placeholder="PAT-09" class="w-full bunker-inset rounded px-3 py-2 text-xs font-mono text-white">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-mono text-amber-400 mb-1">Perícia & DT para Diagnosticar</label>
+                            <input type="text" id="gm-dis-dt" placeholder="Ex: Medicina DT 15 ou Ocultismo DT 16" class="w-full bunker-inset rounded px-3 py-2 text-xs font-mono text-amber-200">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-mono text-emerald-400 mb-1">Receita de Cura Vinculada</label>
+                            <select id="gm-dis-recipe-id" class="w-full bunker-inset rounded px-3 py-2 text-xs font-mono text-emerald-200">
+                                <!-- Populado com receitas cadastradas -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-mono text-slate-400 mb-1">Resumo Clínico (Visível no Arquivo de Patologias)</label>
+                        <textarea id="gm-dis-summary" rows="2" placeholder="Descrição geral da doença nos livros médicos do bunker..." class="w-full bunker-inset rounded px-3 py-2 text-xs font-mono text-slate-200"></textarea>
+                    </div>
+
+                    <!-- Mapeador de Sintomas Reais por Região do Corpo -->
+                    <div class="pt-3 border-t border-bunker-800 space-y-3">
+                        <span class="text-xs font-mono uppercase text-cyan-400 font-bold block">Sintomas Reais no Mapa Corporal & DTs de Exame</span>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <select id="gm-sym-zone" class="bunker-inset rounded px-2.5 py-2 text-xs font-mono text-white">
+                                <!-- Regiões do corpo -->
+                            </select>
+                            <input type="text" id="gm-sym-dt" placeholder="DT Exame (Ex: Medicina DT 14)" class="bunker-inset rounded px-2.5 py-2 text-xs font-mono text-amber-300">
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <input type="text" id="gm-sym-name" placeholder="Nome do Sintoma (Ex: Sangue Oxidado)" class="bunker-inset rounded px-2.5 py-2 text-xs font-mono text-white">
+                            <input type="text" id="gm-sym-clue" placeholder="Dica narrativa ao examinar a região..." class="bunker-inset rounded px-2.5 py-2 text-xs font-mono text-slate-300">
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <label class="flex items-center gap-2 cursor-pointer text-xs font-mono text-slate-300">
+                                <input type="checkbox" id="gm-sym-revealed" class="w-3.5 h-3.5 accent-cyan-500">
+                                <span>Já visível inicialmente ao examinar a região</span>
+                            </label>
+                            <button type="button" onclick="addSymptomToTempDisease()" class="px-3 py-1.5 rounded bg-cyan-600 hover:bg-cyan-500 text-bunker-950 font-mono font-bold text-xs">
+                                + Adicionar Sintoma
+                            </button>
+                        </div>
+
+                        <div id="gm-dis-symptoms-list" class="space-y-1.5 max-h-44 overflow-y-auto pr-1">
+                            <!-- Lista temporária de sintomas da doença em edição -->
+                        </div>
+                    </div>
+
+                    <button onclick="saveDiseaseCRUD()" class="w-full py-2.5 rounded bg-amber-500 hover:bg-amber-400 text-bunker-950 font-mono font-bold text-xs uppercase tracking-wider">
+                        Salvar Patologia & Sintomas
+                    </button>
+                </div>
+
+                <!-- Lista de Doenças Cadastradas (6 Cols) -->
+                <div class="lg:col-span-6 bunker-card rounded p-5 space-y-4">
+                    <div class="flex items-center justify-between border-b border-bunker-700 pb-3">
+                        <h3 class="font-mono text-sm font-bold uppercase text-slate-200">Patologias Cadastradas na Campanha</h3>
+                        <span id="gm-dis-count" class="text-xs font-mono text-slate-400">0 doenças</span>
+                    </div>
+
+                    <div id="gm-diseases-list" class="space-y-3 max-h-[600px] overflow-y-auto pr-1">
+                        <!-- Renderizado via JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================= -->
+        <!-- SUB-ABA B: RECEITAS & GABARITOS ALQUÍMICOS (MESTRE)               -->
+        <!-- ================================================================= -->
+        <section id="gm-panel-recipe" class="hidden space-y-6">
+            <!-- Seletor de Receita em Edição / Criar Nova -->
+            <div class="bunker-card rounded p-4 flex flex-wrap items-center justify-between gap-3">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-xs font-mono text-slate-400 uppercase">Editando Receita:</span>
+                    <select id="gm-recipe-selector" onchange="selectRecipeForEditing(this.value)" class="bunker-inset rounded px-3 py-1.5 text-xs font-mono text-emerald-300 font-bold">
+                        <!-- Populado com receitas -->
+                    </select>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="createNewRecipeSlot()" class="px-3 py-1.5 rounded bg-cyan-600 hover:bg-cyan-500 text-bunker-950 font-mono font-bold text-xs">
+                        + Nova Receita
+                    </button>
+                    <button onclick="deleteCurrentRecipe()" class="px-3 py-1.5 rounded bg-bunker-900 hover:bg-rose-950/60 border border-bunker-700 text-xs font-mono text-rose-400">
+                        Excluir Receita
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Coluna Esquerda: Nome & Ingredientes da Fórmula (6 Cols) -->
+                <div class="lg:col-span-6 bunker-card rounded p-5 space-y-5">
+                    <div class="border-b border-bunker-700 pb-3">
+                        <h3 class="font-mono text-sm font-bold uppercase text-amber-400">1. Identificação & Reagentes da Fórmula</h3>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-mono text-slate-400 mb-1">Nome do Composto / Antídoto</label>
+                        <input type="text" id="rec-name" class="w-full bunker-inset rounded px-3 py-2 text-sm font-mono text-white">
+                    </div>
+
+                    <div class="pt-3 border-t border-bunker-800 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs font-mono uppercase text-cyan-400 font-bold">Ingredientes Exatos da Cura</label>
+                            <span class="text-[10px] font-mono text-slate-500">Extras = Contaminantes</span>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <select id="rec-add-ing-select" class="flex-1 bunker-inset rounded px-3 py-2 text-xs font-mono text-white"></select>
+                            <input type="number" id="rec-add-ing-min" placeholder="Mín" class="w-20 bunker-inset rounded px-2.5 py-2 text-xs font-mono text-white">
+                            <input type="number" id="rec-add-ing-max" placeholder="Máx" class="w-20 bunker-inset rounded px-2.5 py-2 text-xs font-mono text-white">
+                            <button onclick="addIngredientToRecipe()" class="px-3 py-2 rounded bg-cyan-600 hover:bg-cyan-500 text-bunker-950 font-mono font-bold text-xs">
+                                + Incluir
+                            </button>
+                        </div>
+
+                        <div id="rec-required-list" class="space-y-2"></div>
+                    </div>
+                </div>
+
+                <!-- Coluna Direita: Parâmetros Exatos & Efeitos (6 Cols) -->
+                <div class="lg:col-span-6 bunker-card rounded p-5 space-y-4">
+                    <div class="border-b border-bunker-700 pb-3">
+                        <h3 class="font-mono text-sm font-bold uppercase text-amber-400">2. Parâmetros de Execução & Consequências</h3>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-mono text-slate-400 mb-1">Ferramenta Correta</label>
+                            <select id="rec-tool" class="w-full bunker-inset rounded px-3 py-2 text-xs font-mono text-white">
+                                <option value="morteiro_obsidiana">Morteiro de Obsidiana</option>
+                                <option value="bisturi_prata">Bisturi de Prata</option>
+                                <option value="prensa_hidraulica">Prensa Hidráulica</option>
+                                <option value="caldeirao_cobre">Caldeirão de Cobre</option>
+                                <option value="destilador_vidro">Destilador de Vidro</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-mono text-slate-400 mb-1">Movimento Correto</label>
+                            <select id="rec-motion" class="w-full bunker-inset rounded px-3 py-2 text-xs font-mono text-white">
+                                <option value="trituracao_horaria">Trituração Horária Lenta</option>
+                                <option value="agitacao_antihoraria">Agitação Anti-Horária Vigorosa</option>
+                                <option value="corte_cubos">Corte em Cubos</option>
+                                <option value="infusao_estatica">Infusão Estática</option>
+                                <option value="decantacao">Decantação</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-mono text-slate-400 mb-1">Solvente Base Correto</label>
+                            <select id="rec-solvent" class="w-full bunker-inset rounded px-3 py-2 text-xs font-mono text-white">
+                                <option value="agua_lustral">Água Lustral Estagnada</option>
+                                <option value="vinagre_sagrado">Vinagre de Vinho Sagrado</option>
+                                <option value="alcool_90">Álcool Etílico 90%</option>
+                                <option value="oleo_abissal">Óleo Abissal</option>
+                                <option value="nenhum">Nenhum (Extração Seca)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-mono text-slate-400 mb-1">Tempo de Repouso Correto</label>
+                            <select id="rec-time" class="w-full bunker-inset rounded px-3 py-2 text-xs font-mono text-white">
+                                <option value="imediato">Imediato</option>
+                                <option value="15_min">15 Minutos</option>
+                                <option value="1_hora">1 Hora</option>
+                                <option value="3_ciclos">3 Ciclos/Horas</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-mono text-sky-400 mb-1">Temperatura Mínima (°C)</label>
+                            <input type="number" id="rec-temp-min" min="0" max="150" class="w-full bunker-inset rounded px-3 py-2 text-xs font-mono text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-mono text-rose-400 mb-1">Temperatura Máxima (°C)</label>
+                            <input type="number" id="rec-temp-max" min="0" max="150" class="w-full bunker-inset rounded px-3 py-2 text-xs font-mono text-white">
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 pt-2 border-t border-bunker-800">
+                        <div>
+                            <label class="block text-[11px] font-mono text-emerald-300">Cura Perfeita (Quando aplicada na doença certa)</label>
+                            <input type="text" id="rec-msg-cure" class="w-full bunker-inset rounded px-2.5 py-1.5 text-xs font-mono text-slate-200">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-mono text-amber-300">Soro Paliativo (Acerto Parcial 70%+)</label>
+                            <input type="text" id="rec-msg-palliative" class="w-full bunker-inset rounded px-2.5 py-1.5 text-xs font-mono text-slate-200">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-mono text-rose-300">Erro de Temperatura</label>
+                            <input type="text" id="rec-msg-temp-err" class="w-full bunker-inset rounded px-2.5 py-1.5 text-xs font-mono text-slate-200">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-mono text-purple-300">Erro de Movimento</label>
+                            <input type="text" id="rec-msg-motion-err" class="w-full bunker-inset rounded px-2.5 py-1.5 text-xs font-mono text-slate-200">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-mono text-cyan-300">Contaminação / Dosagem Errada</label>
+                            <input type="text" id="rec-msg-contam-err" class="w-full bunker-inset rounded px-2.5 py-1.5 text-xs font-mono text-slate-200">
+                        </div>
+                    </div>
+
+                    <button onclick="saveRecipeConfig()" class="w-full py-3 rounded bg-emerald-500 hover:bg-emerald-400 text-bunker-950 font-mono font-bold text-xs uppercase tracking-wider shadow-lg">
+                        Salvar Receita Selecionada
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================= -->
+        <!-- SUB-ABA C: EDITOR DE INGREDIENTES (CRUD COMPLETO)                 -->
+        <!-- ================================================================= -->
+        <section id="gm-panel-ingredients" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="lg:col-span-5 bunker-card rounded p-5 space-y-4 h-fit">
+                <div class="flex items-center justify-between border-b border-bunker-700 pb-3">
+                    <h3 id="gm-ing-form-title" class="font-mono text-sm font-bold uppercase text-amber-400">+ Novo Ingrediente</h3>
+                    <button id="gm-ing-cancel-btn" onclick="resetIngredientForm()" class="hidden text-xs font-mono text-slate-400 hover:text-white underline">Cancelar Edição</button>
+                </div>
+
+                <input type="hidden" id="gm-ing-id">
+
+                <div>
+                    <label class="block text-xs font-mono text-slate-400 mb-1">Nome do Ingrediente / Espécime</label>
+                    <input type="text" id="gm-ing-name" placeholder="Ex: Musgo Fosforescente de Cripta" class="w-full bunker-inset rounded px-3 py-2 text-sm font-mono text-white">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-mono text-slate-400 mb-1">Unidade de Medida</label>
+                        <select id="gm-ing-unit" class="w-full bunker-inset rounded px-3 py-2 text-xs font-mono text-white">
+                            <option value="gramas">gramas (g)</option>
+                            <option value="ml">mililitros (ml)</option>
+                            <option value="gotas">gotas</option>
+                            <option value="pitadas">pitadas</option>
+                            <option value="unid">unidades</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-mono text-slate-400 mb-1">Categoria</label>
+                        <select id="gm-ing-category" class="w-full bunker-inset rounded px-3 py-2 text-xs font-mono text-white">
+                            <option value="Erva">Erva / Botânico</option>
+                            <option value="Mineral">Mineral / Cristal</option>
+                            <option value="Fluido Oculto">Fluido Oculto</option>
+                            <option value="Catalisador">Catalisador</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-xs font-mono text-slate-400 mb-1">Passo (+/-)</label>
+                        <input type="number" id="gm-ing-step" value="5" min="1" class="w-full bunker-inset rounded px-3 py-2 text-xs font-mono text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-mono text-slate-400 mb-1">Máx. Bancada</label>
+                        <input type="number" id="gm-ing-max" value="100" min="1" class="w-full bunker-inset rounded px-3 py-2 text-xs font-mono text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-mono text-slate-400 mb-1">Cor no Reator</label>
+                        <input type="color" id="gm-ing-color" value="#10b981" class="w-full h-9 bunker-inset rounded p-1 cursor-pointer">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-mono text-slate-400 mb-1">Descrição / Propriedade Aparente</label>
+                    <textarea id="gm-ing-desc" rows="2" placeholder="Ex: Exala um odor metálico frio..." class="w-full bunker-inset rounded px-3 py-2 text-xs font-mono text-slate-200"></textarea>
+                </div>
+
+                <label class="flex items-center gap-2.5 cursor-pointer pt-1">
+                    <input type="checkbox" id="gm-ing-available" checked class="w-4 h-4 accent-emerald-500 rounded">
+                    <span class="text-xs font-mono text-slate-300">Disponível imediatamente na bancada</span>
+                </label>
+
+                <button onclick="saveIngredientCRUD()" class="w-full py-2.5 rounded bg-amber-500 hover:bg-amber-400 text-bunker-950 font-mono font-bold text-xs uppercase tracking-wider">
+                    Salvar Ingrediente no Banco
+                </button>
+            </div>
+
+            <div class="lg:col-span-7 bunker-card rounded p-5">
+                <div class="flex items-center justify-between border-b border-bunker-700 pb-3 mb-4">
+                    <h3 class="font-mono text-sm font-bold uppercase text-slate-200">Catálogo de Ingredientes</h3>
+                    <span id="gm-ing-count" class="text-xs font-mono text-slate-400">0 itens</span>
+                </div>
+
+                <div id="gm-ingredients-list" class="space-y-2.5 max-h-[540px] overflow-y-auto pr-1"></div>
+            </div>
+        </section>
+
+        <!-- ================================================================= -->
+        <!-- SUB-ABA D: EDITOR DE PISTAS & EVIDÊNCIAS (CRUD COMPLETO)          -->
+        <!-- ================================================================= -->
+        <section id="gm-panel-clues" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="lg:col-span-5 bunker-card rounded p-5 space-y-4 h-fit">
+                <div class="flex items-center justify-between border-b border-bunker-700 pb-3">
+                    <h3 id="gm-clue-form-title" class="font-mono text-sm font-bold uppercase text-amber-400">+ Nova Pista / Evidência</h3>
+                    <button id="gm-clue-cancel-btn" onclick="resetClueForm()" class="hidden text-xs font-mono text-slate-400 hover:text-white underline">Cancelar</button>
+                </div>
+
+                <input type="hidden" id="gm-clue-id">
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-mono text-slate-400 mb-1">Título da Pista</label>
+                        <input type="text" id="gm-clue-title" placeholder="Ex: Relatório de Autópsia #04" class="w-full bunker-inset rounded px-3 py-2 text-xs font-mono text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-mono text-slate-400 mb-1">Categoria</label>
+                        <select id="gm-clue-category" class="w-full bunker-inset rounded px-2.5 py-2 text-xs font-mono text-white">
+                            <option value="Clínica">Clínica</option>
+                            <option value="Alquímica">Alquímica</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-mono text-slate-400 mb-1">Local no Bunker</label>
+                    <input type="text" id="gm-clue-location" placeholder="Ex: Terminal da Enfermaria" class="w-full bunker-inset rounded px-3 py-2 text-xs font-mono text-white">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-mono text-slate-400 mb-1">Conteúdo / Texto</label>
+                    <textarea id="gm-clue-text" rows="3" placeholder="Escreva a dica narrativa ou clínica..." class="w-full bunker-inset rounded px-3 py-2 text-xs font-mono text-slate-200"></textarea>
+                </div>
+
+                <label class="flex items-center gap-2.5 cursor-pointer">
+                    <input type="checkbox" id="gm-clue-revealed" class="w-4 h-4 accent-amber-500 rounded">
+                    <span class="text-xs font-mono text-slate-300">Revelar imediatamente aos jogadores</span>
+                </label>
+
+                <button onclick="saveClueCRUD()" class="w-full py-2.5 rounded bg-amber-500 hover:bg-amber-400 text-bunker-950 font-mono font-bold text-xs uppercase tracking-wider">
+                    Salvar Pista
+                </button>
+            </div>
+
+            <div class="lg:col-span-7 bunker-card rounded p-5">
+                <div class="flex items-center justify-between border-b border-bunker-700 pb-3 mb-4">
+                    <h3 class="font-mono text-sm font-bold uppercase text-slate-200">Gerenciador de Pistas (Tempo Real)</h3>
+                    <span class="text-xs font-mono text-slate-400">Libere pistas com 1 clique</span>
+                </div>
+
+                <div id="gm-clues-list" class="space-y-3 max-h-[540px] overflow-y-auto pr-1"></div>
+            </div>
+        </section>
+
+        <!-- ================================================================= -->
+        <!-- SUB-ABA E: CAMPANHA & JSON                                        -->
+        <!-- ================================================================= -->
+        <section id="gm-panel-campaign" class="hidden max-w-3xl mx-auto bunker-card rounded p-6 space-y-6">
+            <div class="border-b border-bunker-700 pb-3">
+                <h3 class="font-mono text-sm font-bold uppercase text-cyan-400">Portabilidade & Segurança da Campanha</h3>
+                <p class="text-xs text-slate-400 mt-1">Exporte arquivos .JSON contendo doenças, sintomas no mapa, receitas, ingredientes e lotes para alternar entre casos clínicos na sua mesa.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <button onclick="exportCampaignJSON()" class="p-4 rounded bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/40 text-left space-y-1.5 transition">
+                    <div class="font-mono text-xs font-bold text-cyan-300 uppercase">⬇ Exportar (.JSON)</div>
+                    <p class="text-[11px] text-slate-400">Baixa todo o estado clínico e alquímico atual.</p>
+                </button>
+
+                <label class="p-4 rounded bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/40 text-left space-y-1.5 transition cursor-pointer">
+                    <div class="font-mono text-xs font-bold text-emerald-300 uppercase">⬆ Importar (.JSON)</div>
+                    <p class="text-[11px] text-slate-400">Carrega um caso clínico ou campanha salva.</p>
+                    <input type="file" id="camp-import-file" accept=".json" onchange="importCampaignJSON(event)" class="hidden">
+                </label>
+
+                <button onclick="resetToDefaultCampaign()" class="p-4 rounded bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/40 text-left space-y-1.5 transition">
+                    <div class="font-mono text-xs font-bold text-rose-300 uppercase">↺ Restaurar Padrão</div>
+                    <p class="text-[11px] text-slate-400">Carrega o cenário completo com 2 doenças e receitas.</p>
+                </button>
+            </div>
+        </section>
+    </main>
+
+
+    <script>
+        // =========================================================================
+        // CONSTANTES & DICIONÁRIOS
+        // =========================================================================
+        const STORAGE_KEY = 'bunker_clinical_alchemy_v2';
+
+        const BODY_ZONES = [
+            { id: 'cabeca_mente', label: 'Cabeça / Mente', defaultDT: 'Medicina DT 13 / Ocultismo DT 14' },
+            { id: 'pescoco_garganta', label: 'Pescoço / Garganta', defaultDT: 'Medicina DT 12' },
+            { id: 'torax_pulmoes', label: 'Tórax / Pulmões', defaultDT: 'Medicina DT 14' },
+            { id: 'coracao_sangue', label: 'Coração / Sangue', defaultDT: 'Medicina DT 15' },
+            { id: 'abdomen_visceras', label: 'Abdômen / Vísceras', defaultDT: 'Medicina DT 14' },
+            { id: 'bracos_maos', label: 'Braços / Mãos', defaultDT: 'Medicina DT 11' },
+            { id: 'pernas_mobilidade', label: 'Pernas / Mobilidade', defaultDT: 'Medicina DT 12' },
+            { id: 'pele_nervoso', label: 'Pele / Sist. Nervoso', defaultDT: 'Medicina DT 13 / Investigação DT 14' }
+        ];
+
+        const SYMPTOM_PRESETS = [
+            'Veias escurecidas com aspecto metálico oxidado',
+            'Tosse seca com fuligem cinzenta fria',
+            'Calcificação vítrea nas articulações/extremidades',
+            'Hipotermia localizada e pulso arrítmico',
+            'Alucinações auditivas (sussurros abissais)',
+            'Rigidez muscular e espasmos nervosos',
+            'Lesões púrpuras que brilham no escuro',
+            'Hemorragia lenta de sangue viscoso'
+        ];
+
+        const LABELS = {
+            tools: {
+                morteiro_obsidiana: 'Morteiro de Obsidiana',
+                bisturi_prata: 'Bisturi de Prata',
+                prensa_hidraulica: 'Prensa Hidráulica',
+                caldeirao_cobre: 'Caldeirão de Cobre',
+                destilador_vidro: 'Destilador de Vidro'
+            },
+            motions: {
+                trituracao_horaria: 'Trituração Horária Lenta',
+                agitacao_antihoraria: 'Agitação Anti-Horária Vigorosa',
+                corte_cubos: 'Corte em Cubos',
+                infusao_estatica: 'Infusão Estática',
+                decantacao: 'Decantação'
+            },
+            solvents: {
+                agua_lustral: 'Água Lustral Estagnada',
+                vinagre_sagrado: 'Vinagre de Vinho Sagrado',
+                alcool_90: 'Álcool Etílico 90%',
+                oleo_abissal: 'Óleo Abissal',
+                nenhum: 'Nenhum (Extração Seca)'
+            },
+            times: {
+                imediato: 'Imediato',
+                '15_min': '15 Minutos',
+                '1_hora': '1 Hora',
+                '3_ciclos': '3 Ciclos/Horas'
+            }
+        };
+
+        // =========================================================================
+        // ESTADO PADRÃO COMPLETO (2 DOENÇAS + 2 RECEITAS + MAPA DE SINTOMAS)
+        // =========================================================================
+        function getDefaultCampaignState() {
+            return {
+                patient: {
+                    name: 'Sujeito #07 — Cabo Marcus Vance (Batedor de Superfície)',
+                    notes: 'Resgatado próximo às fendas de ventilação do Nível -3. Apresenta quadro progressivo não identificado. Examine as regiões do corpo no mapa anatômico e consulte as DTs de exame clínico.',
+                    activeDiseaseId: 'dis_ferrugem_negra',
+                    diagnosedHypothesisId: '',
+                    diagnosisConfirmed: false
+                },
+                playerAnnotations: [
+                    // { id, zoneId, text }
+                ],
+                diseases: [
+                    {
+                        id: 'dis_ferrugem_negra',
+                        code: 'PAT-04',
+                        name: 'Mal da Ferrugem Negra',
+                        diagnosisDT: 'Medicina DT 15 ou Ocultismo DT 16',
+                        recipeId: 'rec_quelante_negro',
+                        summary: 'Infecção hematológica causada por esporos metálicos subterrâneos. Oxida a hemoglobina e enrijece o sistema circulatório.',
+                        symptoms: [
+                            {
+                                id: 'sym_1',
+                                zoneId: 'coracao_sangue',
+                                name: 'Veias escurecidas com aspecto metálico oxidado',
+                                dt: 'Medicina DT 14',
+                                clue: 'Ao examinar o pulso e o tórax, percebe-se que as veias têm coloração de ferro enferrujado e o sangue coagula como limalha.',
+                                revealed: true
+                            },
+                            {
+                                id: 'sym_2',
+                                zoneId: 'bracos_maos',
+                                name: 'Hipotermia localizada e rigidez nas pontas dos dedos',
+                                dt: 'Medicina DT 12',
+                                clue: 'As mãos do paciente estão gélidas como pedra e deixam um leve resíduo acinzentado ao toque.',
+                                revealed: true
+                            },
+                            {
+                                id: 'sym_3',
+                                zoneId: 'torax_pulmoes',
+                                name: 'Tosse seca com fuligem cinzenta fria',
+                                dt: 'Medicina DT 15',
+                                clue: 'Ausculta pulmonar revela crepitação metálica; o paciente expele partículas secas sem muco.',
+                                revealed: false
+                            }
+                        ]
+                    },
+                    {
+                        id: 'dis_febre_eco',
+                        code: 'PAT-09',
+                        name: 'Febre do Eco Abissal',
+                        diagnosisDT: 'Ocultismo DT 15 ou Medicina DT 17',
+                        recipeId: 'rec_sedativo_abissal',
+                        summary: 'Parasitose psíquico-neural adquirida perto de fendas arcanas. Inflama o tronco encefálico e causa ressonância auditiva.',
+                        symptoms: [
+                            {
+                                id: 'sym_4',
+                                zoneId: 'cabeca_mente',
+                                name: 'Alucinações auditivas (sussurros abissais)',
+                                dt: 'Ocultismo DT 14',
+                                clue: 'Pupilas dilatadas em assimetria; o paciente murmura coordenadas em idioma morto.',
+                                revealed: false
+                            },
+                            {
+                                id: 'sym_5',
+                                zoneId: 'pele_nervoso',
+                                name: 'Lesões púrpuras que brilham no escuro',
+                                dt: 'Investigação DT 13',
+                                clue: 'Sob luz baixa, marcas geométricas vasculares pulsam na nuca e antebraços.',
+                                revealed: false
+                            }
+                        ]
+                    }
+                ],
+                recipes: [
+                    {
+                        id: 'rec_quelante_negro',
+                        name: 'Elixir Quelante de Obsidiana (Cura: Ferrugem Negra)',
+                        requiredIngredients: [
+                            { id: 'ing_raiz_cinza', min: 15, max: 25 },
+                            { id: 'ing_po_cornina', min: 2, max: 4 },
+                            { id: 'ing_icor_sanguessuga', min: 6, max: 10 }
+                        ],
+                        tool: 'morteiro_obsidiana',
+                        motion: 'trituracao_horaria',
+                        solvent: 'vinagre_sagrado',
+                        tempMin: 55,
+                        tempMax: 70,
+                        time: '1_hora',
+                        messages: {
+                            cure: 'CURA COMPLETA: O Elixir Quelante dissolve a oxidação metálica no sangue em 10 minutos! Erradica o Mal da Ferrugem Negra e restaura 2d8+4 PV.',
+                            palliative: 'SORO PALIATIVO: Estabiliza a circulação por 24 horas e remove Desvantagem em testes físicos, mas não elimina os esporos.',
+                            tempError: 'COLAPSO TÉRMICO: O calor inadequado vaporiza os sais metálicos! Explosão de fumaça ácida (2d6 dano ácido em 3m; Teste de CON CD 13 metade).',
+                            motionError: 'INVERSÃO DE POLARIDADE: O movimento errado cria um Veneno Necrótico espesso (3d6 dano necrótico se ingerido ou aplicado em lâmina).',
+                            contamError: 'MUTAÇÃO INSTÁVEL: Proporção ou contaminante gerou uma gosma ácida viva que escapa do frasco (CA 11, 14 PV).'
+                        }
+                    },
+                    {
+                        id: 'rec_sedativo_abissal',
+                        name: 'Tônico Silenciador Neural (Cura: Febre do Eco Abissal)',
+                        requiredIngredients: [
+                            { id: 'ing_po_cornina', min: 4, max: 6 },
+                            { id: 'ing_sal_ferrico', min: 10, max: 20 }
+                        ],
+                        tool: 'destilador_vidro',
+                        motion: 'infusao_estatica',
+                        solvent: 'agua_lustral',
+                        tempMin: 20,
+                        tempMax: 35,
+                        time: '15_min',
+                        messages: {
+                            cure: 'CURA COMPLETA: O Tônico Neural silencia a ressonância abissal e cura a Febre do Eco Abissal!',
+                            palliative: 'SORO PALIATIVO: Acalma os espasmos por 12 horas.',
+                            tempError: 'COLAPSO TÉRMICO: A fervura destruiu a estrutura psíquica do tônico.',
+                            motionError: 'INVERSÃO DE POLARIDADE: Amplifica os sussurros (1d8 dano psíquico em quem estiver perto).',
+                            contamError: 'MUTAÇÃO INSTÁVEL: Resíduo tóxico sem efeito curativo.'
+                        }
+                    }
+                ],
+                ingredients: [
+                    {
+                        id: 'ing_raiz_cinza',
+                        name: 'Raiz de Mandrágora Calcificada',
+                        unit: 'gramas',
+                        category: 'Erva',
+                        step: 5,
+                        max: 80,
+                        color: '#a3e635',
+                        desc: 'Tubérculo seco acinzentado. Absorve toxinas metálicas quando triturado lentamente em pedra vulcânica.',
+                        available: true,
+                        selectedQty: 0
+                    },
+                    {
+                        id: 'ing_po_cornina',
+                        name: 'Pó de Cornina de Sombra',
+                        unit: 'pitadas',
+                        category: 'Catalisador',
+                        step: 1,
+                        max: 15,
+                        color: '#a855f7',
+                        desc: 'Pó fino extraído de estalactites abissais. Catalisador de ligação celular.',
+                        available: true,
+                        selectedQty: 0
+                    },
+                    {
+                        id: 'ing_icor_sanguessuga',
+                        name: 'Icor de Sanguessuga Pálida',
+                        unit: 'gotas',
+                        category: 'Fluido Oculto',
+                        step: 2,
+                        max: 40,
+                        color: '#f43f5e',
+                        desc: 'Fluido translúcido rosado usado como estabilizante hematológico.',
+                        available: true,
+                        selectedQty: 0
+                    },
+                    {
+                        id: 'ing_sal_ferrico',
+                        name: 'Sal de Pirita Purificada',
+                        unit: 'gramas',
+                        category: 'Mineral',
+                        step: 5,
+                        max: 60,
+                        color: '#fbbf24',
+                        desc: 'Cristais dourados quebradiços usados em destilação fria.',
+                        available: true,
+                        selectedQty: 0
+                    },
+                    {
+                        id: 'ing_vitriol',
+                        name: 'Óleo de Vitriol Concentrado',
+                        unit: 'gotas',
+                        category: 'Fluido Oculto',
+                        step: 2,
+                        max: 30,
+                        color: '#ef4444',
+                        desc: 'Ácido alquímico fumegante. Altamente corrosivo.',
+                        available: true,
+                        selectedQty: 0
+                    },
+                    {
+                        id: 'ing_esporo_bunker',
+                        name: 'Esporo Luminescente do Setor-04',
+                        unit: 'ml',
+                        category: 'Catalisador',
+                        step: 10,
+                        max: 100,
+                        color: '#22d3ee',
+                        desc: 'Item raro trancado no cofre criogênico do laboratório.',
+                        available: false,
+                        selectedQty: 0
+                    }
+                ],
+                clues: [
+                    {
+                        id: 'clue_1',
+                        category: 'Clínica',
+                        title: 'Boletim de Campo — Expedição -3',
+                        location: 'Prancheta da Câmara de Quarentena',
+                        text: '"O batedor não apresentou marcas de mordida ou brilho púrpura na pele, descartando Febre do Eco. O sangue escuro nas ataduras tinha cheiro forte de ferro oxidado."',
+                        revealed: true
+                    },
+                    {
+                        id: 'clue_2',
+                        category: 'Alquímica',
+                        title: 'Anotação na Lousa de Ardósia',
+                        location: 'Bancada Principal do Setor-04',
+                        text: '"Para quelação sanguínea: nunca use cobre! Use Morteiro de Obsidiana em sentido horário lento, solvente de Vinagre Sagrado e fogo brando entre 55°C e 70°C por 1 Hora."',
+                        revealed: true
+                    },
+                    {
+                        id: 'clue_3',
+                        category: 'Alquímica',
+                        title: 'Fórmula Manuscrita Rasgada',
+                        location: 'Gaveta Trancada do Apotecário',
+                        text: '"Proporção exata do Elixir Quelante: 20g de Raiz de Mandrágora Calcificada, 3 pitadas de Pó de Cornina de Sombra e 8 gotas de Icor de Sanguessuga Pálida."',
+                        revealed: false
+                    }
+                ],
+                logs: []
+            };
+        }
+
+        const esc = RPG.escaparHtml;
+        // Cores vêm do estado (localStorage ou JSON importado): só aceita hexadecimal, porque vão para style/fill
+        const corSegura = (cor) => /^#[0-9a-f]{3,8}$/i.test(String(cor)) ? cor : '#64748b';
+
+        let state = loadState();
+        const modoAtual = localStorage.getItem('rpg_modo_sessao') || 'jogador';
+        let selectedBodyZoneId = 'coracao_sangue';
+        let editingRecipeId = state.recipes[0]?.id || '';
+        let tempDiseaseSymptoms = [];
+
+        function loadState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && parsed.diseases && parsed.recipes && parsed.ingredients) {
+                        return parsed;
+                    }
+                }
+            } catch (e) {
+                console.warn('Erro ao carregar localStorage:', e);
+            }
+            return getDefaultCampaignState();
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            } catch (e) {
+                console.error('Erro ao salvar estado:', e);
+            }
+        }
+
+        // =========================================================================
+        // INICIALIZAÇÃO DA INTERFACE
+        // =========================================================================
+        window.onload = function() {
+            populateStaticSelects();
+            refreshAllUI();
+        };
+
+        // Ações dos elementos gerados dinamicamente: data-acao + data-id, sem handler inline com dados interpolados
+        const ACOES = {
+            selectBodyZone: (el) => selectBodyZone(el.dataset.id),
+            removePlayerAnnotation: (el) => removePlayerAnnotation(el.dataset.id),
+            selectDiseaseHypothesis: (el) => selectDiseaseHypothesis(el.dataset.id),
+            changeWorkbenchQty: (el) => changeWorkbenchQty(el.dataset.id, Number(el.dataset.delta) || 0),
+            editDiseaseCRUD: (el) => editDiseaseCRUD(el.dataset.id),
+            deleteDiseaseCRUD: (el) => deleteDiseaseCRUD(el.dataset.id),
+            toggleSymptomReveal: (el) => toggleSymptomReveal(el.dataset.doenca, el.dataset.id),
+            removeTempDiseaseSymptom: (el) => removeTempDiseaseSymptom(el.dataset.id),
+            removeIngredientFromRecipe: (el) => removeIngredientFromRecipe(el.dataset.id),
+            toggleIngredientAvailability: (el) => toggleIngredientAvailability(el.dataset.id),
+            editIngredientCRUD: (el) => editIngredientCRUD(el.dataset.id),
+            deleteIngredientCRUD: (el) => deleteIngredientCRUD(el.dataset.id),
+            toggleClueReveal: (el) => toggleClueReveal(el.dataset.id),
+            editClueCRUD: (el) => editClueCRUD(el.dataset.id),
+            deleteClueCRUD: (el) => deleteClueCRUD(el.dataset.id)
+        };
+
+        document.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-acao]');
+            if (!el) return;
+            const acao = ACOES[el.dataset.acao];
+            if (acao) acao(el);
+        });
+
+        document.addEventListener('change', (e) => {
+            const el = e.target.closest('input[data-qtd-id]');
+            if (el) setWorkbenchQty(el.dataset.qtdId, el.value);
+        });
+
+        function populateStaticSelects() {
+            // Preset de sintomas na aba Diagnóstico
+            const presetSel = document.getElementById('insp-symptom-preset');
+            presetSel.innerHTML = SYMPTOM_PRESETS.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('');
+
+            // Regiões do corpo no formulário do Mestre
+            const gmZoneSel = document.getElementById('gm-sym-zone');
+            gmZoneSel.innerHTML = BODY_ZONES.map(z => `<option value="${esc(z.id)}">${esc(z.label)}</option>`).join('');
+
+            // Botões rápidos de região abaixo do SVG
+            const quickPills = document.getElementById('zone-quick-pills');
+            quickPills.innerHTML = BODY_ZONES.map(z => `
+                <button id="pill-${esc(z.id)}" data-acao="selectBodyZone" data-id="${esc(z.id)}" class="px-2 py-1 rounded text-[10px] font-mono border transition bg-bunker-900 border-bunker-700 text-slate-400 hover:text-cyan-300">
+                    ${esc(z.label.split('/')[0].trim())}
+                </button>
+            `).join('');
+        }
+
+        function refreshAllUI() {
+            // HUD Superior do Paciente
+            document.getElementById('hud-patient-name').textContent = state.patient.name;
+            document.getElementById('hud-patient-notes').textContent = state.patient.notes;
+            document.getElementById('hud-batch-count').textContent = String(state.logs.length).padStart(2, '0');
+
+            const hypDis = state.diseases.find(d => d.id === state.patient.diagnosedHypothesisId);
+            const hypLabel = document.getElementById('hud-hypothesis-label');
+            const statusBadge = document.getElementById('hud-patient-status-badge');
+            const teleTarget = document.getElementById('tele-target-disease');
+
+            if (hypDis) {
+                hypLabel.textContent = hypDis.name;
+                teleTarget.textContent = hypDis.name;
+                if (state.patient.diagnosisConfirmed) {
+                    statusBadge.textContent = `DIAGNÓSTICO CONFIRMADO: ${hypDis.code}`;
+                    statusBadge.className = 'px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+                } else {
+                    statusBadge.textContent = `HIPÓTESE EM ANÁLISE`;
+                    statusBadge.className = 'px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/40';
+                }
+            } else {
+                hypLabel.textContent = 'Nenhuma selecionada';
+                teleTarget.textContent = 'Não definido';
+                statusBadge.textContent = 'DIAGNÓSTICO PENDENTE';
+                statusBadge.className = 'px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/40';
+            }
+
+            // Aba 1: Diagnóstico & Mapa Corporal
+            updateBodyMapHighlights();
+            renderSelectedZoneInspector();
+            renderDiagnosisSummaryAndList();
+
+            // Aba 2: Bancada
+            renderWorkbenchIngredients();
+            updateThermalDisplay();
+            updateReactorVisuals();
+
+            // Aba 3: Diário & Pistas
+            renderJournalClues();
+            renderJournalLogs();
+
+            // Aba 4: Mestre
+            loadPatientIntoGMForm();
+            renderGMDiseasesList();
+            populateGMRecipeSelector();
+            renderGMIngredientsList();
+            renderGMCluesList();
+        }
+
+        // =========================================================================
+        // NAVEGAÇÃO ENTRE ABAS
+        // =========================================================================
+        function switchMainTab(tabName) {
+            const tabs = ['diagnosis', 'workbench', 'journal', 'gm'];
+            tabs.forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+                const btn = document.getElementById(`nav-${t}`);
+                btn.className = 'flex-1 xl:flex-none flex items-center justify-center gap-2 px-3 py-2 rounded text-xs font-mono font-semibold transition-all text-slate-400 hover:text-slate-200 whitespace-nowrap';
+            });
+
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`nav-${tabName}`);
+            if (tabName === 'gm') {
+                activeBtn.className = 'flex-1 xl:flex-none flex items-center justify-center gap-2 px-3 py-2 rounded text-xs font-mono font-semibold transition-all bg-rose-500/20 text-rose-300 border border-rose-500/40 whitespace-nowrap';
+            } else {
+                activeBtn.className = 'flex-1 xl:flex-none flex items-center justify-center gap-2 px-3 py-2 rounded text-xs font-mono font-semibold transition-all bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 whitespace-nowrap';
+            }
+        }
+
+        // O Terminal do Mestre segue o papel da conta logada (js/sessao.js), não uma senha local.
+        // É só UX: os dados desta página ficam no localStorage do navegador.
+        function openGMModalOrTab() {
+            if (modoAtual === 'mestre') {
+                switchMainTab('gm');
+            } else {
+                showToast('Acesso restrito ao Mestre.', 'rose');
+            }
+        }
+
+        function lockGMMode() {
+            switchMainTab('diagnosis');
+            showToast('Modo Mesa ativado (Gabaritos ocultos).', 'amber');
+        }
+
+        function switchGMSubTab(sub) {
+            const subs = ['diseases', 'recipe', 'ingredients', 'clues', 'campaign'];
+            subs.forEach(s => {
+                document.getElementById(`gm-panel-${s}`).classList.add('hidden');
+                const btn = document.getElementById(`gm-sub-${s}`);
+                btn.className = 'px-3 py-2 rounded font-mono text-xs font-bold uppercase text-slate-400 hover:text-slate-200 border border-transparent';
+            });
+
+            document.getElementById(`gm-panel-${sub}`).classList.remove('hidden');
+            document.getElementById(`gm-sub-${sub}`).className = 'px-3 py-2 rounded font-mono text-xs font-bold uppercase bg-rose-500/20 text-rose-200 border border-rose-500/40';
+        }
+
+        // =========================================================================
+        // ABA 1: MAPA ANATÔMICO & SISTEMA DE DIAGNÓSTICO
+        // =========================================================================
+        function selectBodyZone(zoneId) {
+            selectedBodyZoneId = zoneId;
+            updateBodyMapHighlights();
+            renderSelectedZoneInspector();
+        }
+
+        function updateBodyMapHighlights() {
+            BODY_ZONES.forEach(z => {
+                const svgEl = document.getElementById(`zone-${z.id}`);
+                const pillEl = document.getElementById(`pill-${z.id}`);
+                const hasAnnotation = state.playerAnnotations.some(a => a.zoneId === z.id);
+
+                if (svgEl) {
+                    svgEl.classList.remove('zone-active', 'zone-has-symptom');
+                    if (z.id === selectedBodyZoneId) svgEl.classList.add('zone-active');
+                    if (hasAnnotation) svgEl.classList.add('zone-has-symptom');
+                }
+
+                if (pillEl) {
+                    if (z.id === selectedBodyZoneId) {
+                        pillEl.className = 'px-2 py-1 rounded text-[10px] font-mono border transition bg-cyan-500/25 border-cyan-400 text-cyan-200 font-bold';
+                    } else if (hasAnnotation) {
+                        pillEl.className = 'px-2 py-1 rounded text-[10px] font-mono border transition bg-amber-500/20 border-amber-500/50 text-amber-300';
+                    } else {
+                        pillEl.className = 'px-2 py-1 rounded text-[10px] font-mono border transition bg-bunker-900 border-bunker-700 text-slate-400 hover:text-cyan-300';
+                    }
+                }
+            });
+        }
+
+        function renderSelectedZoneInspector() {
+            const zoneObj = BODY_ZONES.find(z => z.id === selectedBodyZoneId) || BODY_ZONES[0];
+            document.getElementById('insp-zone-title').textContent = zoneObj.label;
+
+            // Verificar se a doença ativa do paciente possui sintomas configurados nesta zona
+            const activeDisease = state.diseases.find(d => d.id === state.patient.activeDiseaseId);
+            const zoneSymptoms = activeDisease
+                ? activeDisease.symptoms.filter(s => s.zoneId === selectedBodyZoneId)
+                : [];
+
+            // Mostrar DT de exame clínico específica desta zona (ou DT padrão)
+            const dtBadge = document.getElementById('insp-zone-dt');
+            if (zoneSymptoms.length > 0 && zoneSymptoms[0].dt) {
+                dtBadge.textContent = zoneSymptoms[0].dt;
+            } else {
+                dtBadge.textContent = zoneObj.defaultDT;
+            }
+
+            // Achados narrativos revelados pelo Mestre nesta zona
+            const findingsEl = document.getElementById('insp-revealed-findings');
+            const revealedInZone = zoneSymptoms.filter(s => s.revealed);
+
+            if (revealedInZone.length > 0) {
+                findingsEl.innerHTML = revealedInZone.map(s => `
+                    <div class="p-2 rounded bg-cyan-950/30 border border-cyan-500/30 text-cyan-100">
+                        <div class="font-mono text-[10px] text-cyan-400 uppercase font-bold">Achado Clínico Confirmado:</div>
+                        <p class="mt-0.5 leading-snug">${esc(s.clue || s.name)}</p>
+                    </div>
+                `).join('');
+            } else {
+                findingsEl.innerHTML = `
+                    <p class="text-slate-500 italic">
+                        Nenhum achado clínico liberado automaticamente nesta região. Role <strong class="text-amber-400 not-italic">${esc(dtBadge.textContent)}</strong> na mesa e peça ao Mestre para descrever o exame.
+                    </p>
+                `;
+            }
+
+            // Sintomas anotados pelos jogadores nesta região
+            const pinnedHere = state.playerAnnotations.filter(a => a.zoneId === selectedBodyZoneId);
+            const pinnedContainer = document.getElementById('insp-zone-pinned-list');
+
+            if (pinnedHere.length === 0) {
+                pinnedContainer.innerHTML = `<div class="text-[11px] font-mono text-slate-600">Nenhum sintoma marcado aqui ainda.</div>`;
+            } else {
+                pinnedContainer.innerHTML = pinnedHere.map(ann => `
+                    <div class="p-2 rounded bg-amber-500/10 border border-amber-500/40 flex items-center justify-between gap-2 text-xs font-mono text-amber-200">
+                        <span class="truncate">${esc(ann.text)}</span>
+                        <button data-acao="removePlayerAnnotation" data-id="${esc(ann.id)}" class="text-rose-400 hover:text-rose-200 font-bold shrink-0">✕</button>
+                    </div>
+                `).join('');
+            }
+
+            document.getElementById('insp-total-pinned').textContent = state.playerAnnotations.length;
+        }
+
+        function addSuspectedSymptomFromPreset() {
+            const text = document.getElementById('insp-symptom-preset').value;
+            if (!text) return;
+            pushPlayerAnnotation(selectedBodyZoneId, text);
+        }
+
+        function addCustomSuspectedSymptom() {
+            const input = document.getElementById('insp-custom-symptom');
+            const text = input.value.trim();
+            if (!text) {
+                showToast('Digite um sintoma antes de anotar.', 'amber');
+                return;
+            }
+            pushPlayerAnnotation(selectedBodyZoneId, text);
+            input.value = '';
+        }
+
+        function pushPlayerAnnotation(zoneId, text) {
+            state.playerAnnotations.push({
+                id: 'ann_' + Date.now(),
+                zoneId,
+                text
+            });
+            saveState();
+            updateBodyMapHighlights();
+            renderSelectedZoneInspector();
+            renderDiagnosisSummaryAndList();
+            showToast('Sintoma registrado no mapa anatômico.', 'amber');
+        }
+
+        function removePlayerAnnotation(id) {
+            state.playerAnnotations = state.playerAnnotations.filter(a => a.id !== id);
+            saveState();
+            updateBodyMapHighlights();
+            renderSelectedZoneInspector();
+            renderDiagnosisSummaryAndList();
+        }
+
+        function clearPlayerAnnotations() {
+            state.playerAnnotations = [];
+            saveState();
+            updateBodyMapHighlights();
+            renderSelectedZoneInspector();
+            renderDiagnosisSummaryAndList();
+            showToast('Marcações do mapa corporal limpas.', 'slate');
+        }
+
+        function renderDiagnosisSummaryAndList() {
+            // Resumo global dos sintomas anotados
+            const sumContainer = document.getElementById('diag-all-pinned-summary');
+            if (state.playerAnnotations.length === 0) {
+                sumContainer.innerHTML = `<div class="text-slate-600 italic">Clique nas regiões do corpo ao lado para mapear os sintomas do paciente.</div>`;
+            } else {
+                sumContainer.innerHTML = state.playerAnnotations.map(a => {
+                    const z = BODY_ZONES.find(bz => bz.id === a.zoneId);
+                    const zLabel = z ? z.label.split('/')[0].trim() : a.zoneId;
+                    return `
+                        <div class="flex items-start gap-1.5 text-slate-300">
+                            <span class="text-amber-400 font-bold shrink-0">[${esc(zLabel)}]</span>
+                            <span>${esc(a.text)}</span>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Lista de doenças candidatas (com DT de Diagnóstico)
+            const listContainer = document.getElementById('diag-diseases-radio-list');
+            listContainer.innerHTML = state.diseases.map(dis => {
+                const isSelected = state.patient.diagnosedHypothesisId === dis.id;
+                return `
+                    <div data-acao="selectDiseaseHypothesis" data-id="${esc(dis.id)}" class="p-3 rounded border cursor-pointer transition-all ${
+                        isSelected
+                        ? 'bg-cyan-500/15 border-cyan-400 shadow-[inset_0_0_12px_rgba(6,182,212,0.12)]'
+                        : 'bg-bunker-950/80 border-bunker-800 hover:border-bunker-600'
+                    }">
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full border flex items-center justify-center ${isSelected ? 'border-cyan-400' : 'border-slate-600'}">
+                                    ${isSelected ? '<span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>' : ''}
+                                </span>
+                                <span class="text-xs font-bold text-slate-100">${esc(dis.name)}</span>
+                            </div>
+                            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30 shrink-0">
+                                ${esc(dis.diagnosisDT)}
+                            </span>
+                        </div>
+                        <p class="text-[11px] text-slate-400 mt-1.5 leading-snug">${esc(dis.summary)}</p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function selectDiseaseHypothesis(diseaseId) {
+            state.patient.diagnosedHypothesisId = diseaseId;
+            state.patient.diagnosisConfirmed = false;
+            saveState();
+            refreshAllUI();
+        }
+
+        function verifyDiagnosisHypothesis() {
+            const hypId = state.patient.diagnosedHypothesisId;
+            if (!hypId) {
+                showToast('Selecione uma patologia candidata antes de confirmar o diagnóstico!', 'amber');
+                return;
+            }
+
+            const box = document.getElementById('diag-verification-box');
+            const isCorrect = hypId === state.patient.activeDiseaseId;
+            const chosenDis = state.diseases.find(d => d.id === hypId);
+
+            box.classList.remove('hidden');
+
+            if (isCorrect) {
+                state.patient.diagnosisConfirmed = true;
+                saveState();
+                refreshAllUI();
+                box.className = 'p-3 rounded border border-emerald-500/50 bg-emerald-950/30 text-xs font-mono text-emerald-200 leading-relaxed';
+                box.innerHTML = `
+                    <strong class="text-emerald-400 block uppercase mb-1">✓ DIAGNÓSTICO CLÍNICO CONFIRMADO (${esc(chosenDis.diagnosisDT)})</strong>
+                    O quadro sintomático corresponde a <strong>${esc(chosenDis.name)}</strong>. Prossiga para a <strong>2. Bancada de Síntese</strong> para preparar o composto terapêutico adequado!
+                `;
+                showToast('Diagnóstico confirmado com sucesso!', 'emerald');
+            } else {
+                state.patient.diagnosisConfirmed = false;
+                saveState();
+                refreshAllUI();
+                box.className = 'p-3 rounded border border-rose-500/50 bg-rose-950/30 text-xs font-mono text-rose-200 leading-relaxed';
+                box.innerHTML = `
+                    <strong class="text-rose-400 block uppercase mb-1">✕ INCONSISTÊNCIA CLÍNICA DETECTADA</strong>
+                    Os exames laboratoriais não batem totalmente com <strong>${esc(chosenDis.name)}</strong>. Reavalie as regiões do corpo, peça testes nas DTs indicadas e consulte as pistas!
+                `;
+                showToast('Hipótese diagnóstica inconclusiva.', 'rose');
+            }
+        }
+
+        // =========================================================================
+        // ABA 2: BANCADA DE SÍNTESE (JOGADORES)
+        // =========================================================================
+        function renderWorkbenchIngredients() {
+            const container = document.getElementById('workbench-ingredients-list');
+            const availableItems = state.ingredients.filter(i => i.available);
+            let activeCount = 0;
+
+            if (availableItems.length === 0) {
+                container.innerHTML = `<div class="text-center py-6 text-xs font-mono text-slate-500">Nenhum reagente disponível na bancada no momento.</div>`;
+                document.getElementById('workbench-active-count').textContent = '0 ativos';
+                return;
+            }
+
+            container.innerHTML = availableItems.map(item => {
+                if (item.selectedQty > 0) activeCount++;
+                const isSelected = item.selectedQty > 0;
+                const cor = corSegura(item.color);
+                const passo = Math.max(1, parseInt(item.step, 10) || 1);
+
+                return `
+                    <div class="p-3 rounded border transition-all ${
+                        isSelected
+                        ? 'bg-cyan-500/10 border-cyan-500/50 shadow-[inset_0_0_12px_rgba(6,182,212,0.08)]'
+                        : 'bg-bunker-950/80 border-bunker-800 hover:border-bunker-700'
+                    }">
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${cor}; box-shadow: 0 0 6px ${cor}"></span>
+                                    <span class="text-xs sm:text-sm font-semibold text-slate-100 truncate">${esc(item.name)}</span>
+                                </div>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-bunker-800 text-slate-400 border border-bunker-700">${esc(item.category)}</span>
+                                    <span class="text-[10px] font-mono text-slate-500">Máx: ${esc(item.max)} ${esc(item.unit)}</span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-1 shrink-0">
+                                <button data-acao="changeWorkbenchQty" data-id="${esc(item.id)}" data-delta="${-passo}" class="w-7 h-7 rounded bg-bunker-800 hover:bg-bunker-700 border border-bunker-600 text-slate-200 font-mono font-bold flex items-center justify-center active:scale-95">-</button>
+                                <div class="flex flex-col items-center">
+                                    <input type="number" min="0" max="${esc(item.max)}" value="${esc(item.selectedQty)}" data-qtd-id="${esc(item.id)}" class="w-14 text-center bg-bunker-900 border border-bunker-700 rounded py-1 font-mono text-xs font-bold ${isSelected ? 'text-cyan-300' : 'text-slate-400'} focus:outline-none focus:border-cyan-500">
+                                    <span class="text-[9px] font-mono text-slate-500 mt-0.5">${esc(item.unit)}</span>
+                                </div>
+                                <button data-acao="changeWorkbenchQty" data-id="${esc(item.id)}" data-delta="${passo}" class="w-7 h-7 rounded bg-bunker-800 hover:bg-bunker-700 border border-bunker-600 text-cyan-400 font-mono font-bold flex items-center justify-center active:scale-95">+</button>
+                            </div>
+                        </div>
+                        ${item.desc ? `<p class="text-[11px] text-slate-400 mt-2 pt-1.5 border-t border-bunker-800/80 leading-snug">${esc(item.desc)}</p>` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('workbench-active-count').textContent = `${activeCount} ativo(s)`;
+        }
+
+        function changeWorkbenchQty(id, delta) {
+            const item = state.ingredients.find(i => i.id === id);
+            if (!item) return;
+            item.selectedQty = Math.max(0, Math.min(item.max, item.selectedQty + delta));
+            renderWorkbenchIngredients();
+            updateReactorVisuals();
+        }
+
+        function setWorkbenchQty(id, val) {
+            const item = state.ingredients.find(i => i.id === id);
+            if (!item) return;
+            const parsed = parseInt(val, 10) || 0;
+            item.selectedQty = Math.max(0, Math.min(item.max, parsed));
+            renderWorkbenchIngredients();
+            updateReactorVisuals();
+        }
+
+        function clearWorkbenchInputs() {
+            state.ingredients.forEach(i => i.selectedQty = 0);
+            renderWorkbenchIngredients();
+            updateReactorVisuals();
+            document.getElementById('synthesis-report-card').classList.add('hidden');
+            showToast('Dosagens da bancada zeradas.', 'slate');
+        }
+
+        function nudgeTemperature(delta) {
+            const slider = document.getElementById('proc-temp');
+            const next = Math.max(0, Math.min(150, parseInt(slider.value, 10) + delta));
+            slider.value = next;
+            updateThermalDisplay();
+        }
+
+        function updateThermalDisplay() {
+            const temp = parseInt(document.getElementById('proc-temp').value, 10);
+            const valEl = document.getElementById('proc-temp-val');
+            const zoneEl = document.getElementById('proc-temp-zone');
+            const teleTemp = document.getElementById('tele-temp');
+
+            valEl.textContent = `${temp}°C`;
+            teleTemp.textContent = `${temp}°C`;
+
+            if (temp <= 15) {
+                valEl.className = 'font-mono text-sm font-bold text-sky-400 w-14 text-center';
+                zoneEl.className = 'font-bold text-sky-400';
+                zoneEl.textContent = 'CRIOGÊNICO';
+            } else if (temp <= 40) {
+                valEl.className = 'font-mono text-sm font-bold text-cyan-400 w-14 text-center';
+                zoneEl.className = 'font-bold text-cyan-400';
+                zoneEl.textContent = 'FRIO / ESTASE';
+            } else if (temp <= 80) {
+                valEl.className = 'font-mono text-sm font-bold text-amber-400 w-14 text-center';
+                zoneEl.className = 'font-bold text-amber-400';
+                zoneEl.textContent = 'MORNO / BRANDO';
+            } else if (temp <= 115) {
+                valEl.className = 'font-mono text-sm font-bold text-orange-500 w-14 text-center';
+                zoneEl.className = 'font-bold text-orange-500';
+                zoneEl.textContent = 'FERVURA ATIVA';
+            } else {
+                valEl.className = 'font-mono text-sm font-bold text-rose-500 w-14 text-center';
+                zoneEl.className = 'font-bold text-rose-500';
+                zoneEl.textContent = 'INCANDESCENTE';
+            }
+
+            updateReactorVisuals();
+        }
+
+        function updateReactorVisuals() {
+            const active = state.ingredients.filter(i => i.available && i.selectedQty > 0);
+            const solvent = document.getElementById('proc-solvent').value;
+            const motion = document.getElementById('proc-motion').value;
+            const temp = parseInt(document.getElementById('proc-temp').value, 10);
+
+            document.getElementById('tele-solvent').textContent = LABELS.solvents[solvent];
+
+            const liquid = document.getElementById('reactor-liquid');
+            const statusLabel = document.getElementById('reactor-status-label');
+            const runeRing = document.getElementById('reactor-rune-ring');
+            const bubbles = [
+                document.getElementById('r-bubble-1'),
+                document.getElementById('r-bubble-2'),
+                document.getElementById('r-bubble-3')
+            ];
+
+            runeRing.classList.remove('animate-spin-cw', 'animate-spin-ccw');
+            if (motion === 'trituracao_horaria') {
+                runeRing.classList.add('animate-spin-cw');
+            } else if (motion === 'agitacao_antihoraria') {
+                runeRing.classList.add('animate-spin-ccw');
+            }
+
+            const hasLiquidBase = solvent !== 'nenhum';
+            if (active.length === 0 && !hasLiquidBase) {
+                liquid.setAttribute('y', '138');
+                liquid.setAttribute('height', '0');
+                statusLabel.textContent = 'Câmara Vazia';
+                bubbles.forEach(b => b.className.baseVal = 'opacity-0');
+                return;
+            }
+
+            const fillH = Math.min(94, (hasLiquidBase ? 26 : 10) + active.length * 16);
+            liquid.setAttribute('y', String(138 - fillH));
+            liquid.setAttribute('height', String(fillH));
+
+            let liquidColor = '#06b6d4';
+            if (active.length > 0) {
+                liquidColor = corSegura(active[active.length - 1].color);
+            } else if (solvent === 'vinagre_sagrado') {
+                liquidColor = '#f59e0b';
+            } else if (solvent === 'oleo_abissal') {
+                liquidColor = '#6366f1';
+            }
+            liquid.setAttribute('fill', liquidColor);
+
+            if (temp >= 85) {
+                bubbles.forEach(b => b.className.baseVal = 'animate-bubble-fast');
+                statusLabel.textContent = 'Ebulição Intensa na Retorta';
+            } else if (temp >= 45 && active.length > 0) {
+                bubbles.forEach(b => b.className.baseVal = 'animate-bubble-slow');
+                statusLabel.textContent = 'Reação Alquímica Ativa';
+            } else {
+                bubbles.forEach(b => b.className.baseVal = 'opacity-0');
+                statusLabel.textContent = 'Suspensão Estável';
+            }
+        }
+
+        // =========================================================================
+        // MOTOR DE AVALIAÇÃO INTEGRADO (DIAGNÓSTICO + ALQUIMIA)
+        // =========================================================================
+        function runSynthesis() {
+            const active = state.ingredients.filter(i => i.available && i.selectedQty > 0);
+            if (active.length === 0) {
+                showToast('Adicione pelo menos um ingrediente antes de sintetizar!', 'amber');
+                return;
+            }
+
+            // Descobrir a receita alvo vinculada à doença REAL do paciente
+            const realDisease = state.diseases.find(d => d.id === state.patient.activeDiseaseId) || state.diseases[0];
+            const targetRecipe = state.recipes.find(r => r.id === realDisease?.recipeId) || state.recipes[0];
+
+            const tool = document.getElementById('proc-tool').value;
+            const motion = document.getElementById('proc-motion').value;
+            const solvent = document.getElementById('proc-solvent').value;
+            const temp = parseInt(document.getElementById('proc-temp').value, 10);
+            const time = document.getElementById('proc-time').value;
+
+            let totalChecks = 0;
+            let passedChecks = 0;
+            let subtleHints = [];
+            let flags = {
+                tempError: false,
+                motionError: false,
+                contamOrRatioError: false
+            };
+
+            // 1. Verificar Ingredientes Exatos da Receita Real
+            targetRecipe.requiredIngredients.forEach(req => {
+                totalChecks += 2;
+                const found = active.find(a => a.id === req.id);
+                const ingObj = state.ingredients.find(i => i.id === req.id);
+                const ingName = ingObj ? ingObj.name : 'Reagente essencial';
+
+                if (!found) {
+                    flags.contamOrRatioError = true;
+                    subtleHints.push(`Falta um componente estrutural necessário para combater a patologia real do paciente.`);
+                } else {
+                    passedChecks += 1;
+                    if (found.selectedQty >= req.min && found.selectedQty <= req.max) {
+                        passedChecks += 1;
+                    } else if (found.selectedQty < req.min) {
+                        flags.contamOrRatioError = true;
+                        subtleHints.push(`Concentração insuficiente de "${ingName}" para estabilizar a reação.`);
+                    } else {
+                        flags.contamOrRatioError = true;
+                        subtleHints.push(`Excesso saturado de "${ingName}" precipitou no fundo do frasco.`);
+                    }
+                }
+            });
+
+            // 2. Verificar Contaminantes
+            active.forEach(sel => {
+                const isReq = targetRecipe.requiredIngredients.some(r => r.id === sel.id);
+                if (!isReq) {
+                    flags.contamOrRatioError = true;
+                    totalChecks += 1;
+                    subtleHints.push(`Resíduo estranho detectado: "${sel.name}" causou reação cruzada.`);
+                }
+            });
+
+            // 3. Ferramenta, Movimento, Solvente, Temperatura, Tempo
+            totalChecks += 5;
+            if (tool === targetRecipe.tool) passedChecks += 1;
+            else subtleHints.push(`A preparação com ${LABELS.tools[tool]} deixou micro-impurezas ou oxidou o extrato.`);
+
+            if (motion === targetRecipe.motion) passedChecks += 1;
+            else {
+                flags.motionError = true;
+                subtleHints.push(`O padrão de agitação (${LABELS.motions[motion]}) gerou turbilhonamento arcano reverso.`);
+            }
+
+            if (solvent === targetRecipe.solvent) passedChecks += 1;
+            else subtleHints.push(`O veículo base (${LABELS.solvents[solvent]}) não dissolveu os princípios ativos.`);
+
+            if (temp >= targetRecipe.tempMin && temp <= targetRecipe.tempMax) passedChecks += 1;
+            else {
+                flags.tempError = true;
+                subtleHints.push(temp > targetRecipe.tempMax
+                    ? `Degradação térmica pelo excesso de calor (${temp}°C).`
+                    : `Energia térmica insuficiente (${temp}°C) para ativar os reagentes.`);
+            }
+
+            if (time === targetRecipe.time) passedChecks += 1;
+            else subtleHints.push(`O tempo de exposição (${LABELS.times[time]}) não permitiu a maturação ideal.`);
+
+            const accuracy = totalChecks > 0 ? Math.round((passedChecks / totalChecks) * 100) : 0;
+            const isPerfectFormula = passedChecks === totalChecks && !flags.contamOrRatioError;
+
+            let resultCategory = 'FAIL';
+            let badgeText = '';
+            let badgeStyle = '';
+            let cardBorder = '';
+            let title = '';
+            let sensory = '';
+            let mechanics = '';
+
+            if (isPerfectFormula) {
+                resultCategory = 'CURE';
+                badgeText = 'CURA PERFEITA';
+                badgeStyle = 'bg-emerald-500 text-bunker-950';
+                cardBorder = 'border-emerald-500 bg-emerald-950/20';
+                title = targetRecipe.name;
+                sensory = 'Líquido cristalino de brilho dourado-esmeralda, aroma limpo de ozônio e ervas secas, viscosidade perfeitamente homogênea.';
+                mechanics = targetRecipe.messages.cure;
+                subtleHints = ['Ressonância alquímica e compatibilidade clínica perfeitas (100%).'];
+            } else if (accuracy >= 70 && !flags.tempError && !flags.motionError) {
+                resultCategory = 'PALLIATIVE';
+                badgeText = 'SORO PALIATIVO';
+                badgeStyle = 'bg-amber-500 text-bunker-950';
+                cardBorder = 'border-amber-500 bg-amber-950/20';
+                title = 'Composto Supressor Temporário';
+                sensory = 'Solução âmbar levemente turva, morna ao toque, com pequenas faíscas estáticas na superfície.';
+                mechanics = targetRecipe.messages.palliative;
+            } else if (flags.tempError) {
+                resultCategory = 'FAIL';
+                badgeText = 'REAÇÃO CATÁSTROFE';
+                badgeStyle = 'bg-rose-600 text-white';
+                cardBorder = 'border-rose-500 bg-rose-950/25';
+                title = 'Ruptura Térmica & Vapor Cáustico';
+                sensory = 'Ebulição violenta acompanhada de fumaça acre sulfurosa e resíduo carbonizado nas paredes do vidro.';
+                mechanics = targetRecipe.messages.tempError;
+            } else if (flags.motionError) {
+                resultCategory = 'FAIL';
+                badgeText = 'INSTÁVEL / MUTAÇÃO';
+                badgeStyle = 'bg-purple-600 text-white';
+                cardBorder = 'border-purple-500 bg-purple-950/25';
+                title = 'Icor de Inversão Arcana';
+                sensory = 'O líquido escurece para um negro oleoso que absorve a luz ambiente e exala frio intenso.';
+                mechanics = targetRecipe.messages.motionError;
+            } else {
+                resultCategory = 'FAIL';
+                badgeText = 'FALHA TÓXICA';
+                badgeStyle = 'bg-cyan-600 text-white';
+                cardBorder = 'border-cyan-500 bg-cyan-950/25';
+                title = 'Composto Contaminado / Incompatível';
+                sensory = 'Massa gelatinosa irregular com bolhas erráticas e odor pungente de reagentes não-ligados.';
+                mechanics = targetRecipe.messages.contamError;
+            }
+
+            // Registrar no Diário
+            const batchNum = String(state.logs.length + 1).padStart(2, '0');
+            const hypDis = state.diseases.find(d => d.id === state.patient.diagnosedHypothesisId);
+            const newLog = {
+                id: 'log_' + Date.now(),
+                batch: batchNum,
+                timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+                category: resultCategory,
+                badgeText,
+                badgeStyle,
+                title,
+                mechanics,
+                targetDiseaseName: hypDis ? hypDis.name : 'Não diagnosticada',
+                ingredientsSummary: active.map(a => `${a.name} (${a.selectedQty} ${a.unit})`).join(', '),
+                tool: LABELS.tools[tool],
+                motion: LABELS.motions[motion],
+                solvent: LABELS.solvents[solvent],
+                temp: `${temp}°C`,
+                time: LABELS.times[time]
+            };
+
+            state.logs.unshift(newLog);
+            saveState();
+            document.getElementById('hud-batch-count').textContent = batchNum;
+
+            // Renderizar Banner de Resultado
+            const card = document.getElementById('synthesis-report-card');
+            card.className = `bunker-card rounded p-6 border-2 transition-all ${cardBorder}`;
+            
+            const badgeEl = document.getElementById('rep-badge');
+            badgeEl.textContent = badgeText;
+            badgeEl.className = `px-3 py-1 rounded font-mono text-xs font-bold uppercase tracking-wider ${badgeStyle}`;
+
+            document.getElementById('rep-batch').textContent = `LOTE #${batchNum} • ${newLog.timestamp} • Alvo: ${newLog.targetDiseaseName}`;
+            document.getElementById('rep-title').textContent = title;
+            document.getElementById('rep-sensory').textContent = sensory;
+            document.getElementById('rep-mechanics').textContent = mechanics;
+
+            const hintsEl = document.getElementById('rep-hints');
+            hintsEl.innerHTML = subtleHints.slice(0, 4).map(h => `
+                <li class="flex items-start gap-2">
+                    <span class="text-cyan-400 font-bold">›</span>
+                    <span>${esc(h)}</span>
+                </li>
+            `).join('');
+
+            card.classList.remove('hidden');
+            card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+            renderJournalLogs();
+        }
+
+        // =========================================================================
+        // ABA 3: DIÁRIO DE LOTES & PISTAS
+        // =========================================================================
+        function renderJournalClues() {
+            const container = document.getElementById('journal-clues-list');
+            const revealed = state.clues.filter(c => c.revealed);
+            document.getElementById('journal-clues-total').textContent = `${revealed.length} revelada(s)`;
+            document.getElementById('badge-clues-count').textContent = revealed.length;
+
+            if (revealed.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 px-4 text-xs font-mono text-slate-500 border border-dashed border-bunker-700 rounded">
+                        Nenhuma anotação ou pista descoberta no bunker ainda.
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = revealed.map(clue => `
+                <div class="p-3.5 rounded bg-bunker-950 border border-amber-500/30 space-y-1.5">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="font-mono text-xs font-bold text-amber-400">${esc(clue.title)}</span>
+                        <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-bunker-800 text-cyan-300 border border-bunker-700">${esc(clue.category || 'Evidência')}</span>
+                    </div>
+                    <div class="text-[10px] font-mono text-slate-500 uppercase">📍 ${esc(clue.location)}</div>
+                    <p class="text-xs text-slate-300 italic leading-relaxed pt-1 border-t border-bunker-800/80">${esc(clue.text)}</p>
+                </div>
+            `).join('');
+        }
+
+        function renderJournalLogs() {
+            const container = document.getElementById('journal-logs-list');
+            const filter = document.getElementById('log-filter').value;
+
+            let filtered = state.logs;
+            if (filter !== 'ALL') {
+                filtered = state.logs.filter(l => l.category === filter);
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-10 text-xs font-mono text-slate-500 border border-dashed border-bunker-700 rounded">
+                        Nenhum lote encontrado para este filtro.
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(log => `
+                <div class="p-4 rounded bg-bunker-950 border border-bunker-800 hover:border-bunker-700 transition space-y-2">
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-bunker-800 pb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="font-mono text-xs font-bold text-cyan-400">LOTE #${esc(log.batch)}</span>
+                            <span class="text-[11px] font-mono text-slate-500">[${esc(log.timestamp)}]</span>
+                            <span class="text-xs font-bold text-slate-200">${esc(log.title)}</span>
+                        </div>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase ${esc(log.badgeStyle)}">
+                            ${esc(log.badgeText)}
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-[11px] font-mono text-slate-400">
+                        <div class="sm:col-span-2"><strong class="text-slate-300">Ingredientes:</strong> ${esc(log.ingredientsSummary)}</div>
+                        <div><strong class="text-slate-300">Ferramenta:</strong> ${esc(log.tool)}</div>
+                        <div><strong class="text-slate-300">Movimento:</strong> ${esc(log.motion)}</div>
+                        <div><strong class="text-slate-300">Solvente:</strong> ${esc(log.solvent)}</div>
+                        <div><strong class="text-slate-300">Temp / Tempo:</strong> ${esc(log.temp)} • ${esc(log.time)}</div>
+                    </div>
+
+                    <div class="text-xs font-mono text-slate-300 bg-bunker-900/90 p-2.5 rounded border border-bunker-800">
+                        ${esc(log.mechanics)}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function clearAllLogs() {
+            state.logs = [];
+            saveState();
+            document.getElementById('hud-batch-count').textContent = '00';
+            document.getElementById('synthesis-report-card').classList.add('hidden');
+            renderJournalLogs();
+            showToast('Histórico de lotes limpo.', 'slate');
+        }
+
+        // =========================================================================
+        // ABA 4A: PACIENTE & DOENÇAS / SINTOMAS NO MAPA (MESTRE)
+        // =========================================================================
+        function loadPatientIntoGMForm() {
+            document.getElementById('gm-pat-name').value = state.patient.name;
+            document.getElementById('gm-pat-notes').value = state.patient.notes;
+
+            const activeSel = document.getElementById('gm-pat-active-disease');
+            activeSel.innerHTML = state.diseases.map(d => `<option value="${esc(d.id)}">${esc(d.name)} (${esc(d.code)})</option>`).join('');
+            activeSel.value = state.patient.activeDiseaseId;
+
+            const recSel = document.getElementById('gm-dis-recipe-id');
+            recSel.innerHTML = state.recipes.map(r => `<option value="${esc(r.id)}">${esc(r.name)}</option>`).join('');
+        }
+
+        function savePatientInfo() {
+            state.patient.name = document.getElementById('gm-pat-name').value.trim() || 'Sujeito Desconhecido';
+            state.patient.notes = document.getElementById('gm-pat-notes').value.trim();
+            state.patient.activeDiseaseId = document.getElementById('gm-pat-active-disease').value;
+            state.patient.diagnosisConfirmed = false;
+            saveState();
+            refreshAllUI();
+            showToast('Ficha do paciente e doença real atualizadas!', 'emerald');
+        }
+
+        function renderGMDiseasesList() {
+            const container = document.getElementById('gm-diseases-list');
+            document.getElementById('gm-dis-count').textContent = `${state.diseases.length} patologia(s)`;
+
+            container.innerHTML = state.diseases.map(dis => {
+                const isActive = state.patient.activeDiseaseId === dis.id;
+                const rec = state.recipes.find(r => r.id === dis.recipeId);
+
+                return `
+                    <div class="p-3.5 rounded bg-bunker-950 border ${isActive ? 'border-rose-500/60' : 'border-bunker-800'} space-y-2.5">
+                        <div class="flex flex-wrap items-start justify-between gap-2">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-mono px-1.5 py-0.5 rounded bg-bunker-800 text-cyan-300">${esc(dis.code)}</span>
+                                    <span class="text-sm font-bold text-white">${esc(dis.name)}</span>
+                                    ${isActive ? '<span class="text-[10px] font-mono px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold">ATIVA NO PACIENTE</span>' : ''}
+                                </div>
+                                <div class="text-[11px] font-mono text-amber-400 mt-1">Diagnóstico: ${esc(dis.diagnosisDT)} • Cura: ${esc(rec ? rec.name : 'Nenhuma')}</div>
+                            </div>
+
+                            <div class="flex items-center gap-1.5">
+                                <button data-acao="editDiseaseCRUD" data-id="${esc(dis.id)}" class="px-2.5 py-1 rounded bg-bunker-800 hover:bg-bunker-700 text-xs font-mono text-amber-300">Editar</button>
+                                <button data-acao="deleteDiseaseCRUD" data-id="${esc(dis.id)}" class="px-2.5 py-1 rounded bg-bunker-900 hover:bg-rose-950/60 text-xs font-mono text-rose-400">Excluir</button>
+                            </div>
+                        </div>
+
+                        <!-- Sintomas Mapeados no Corpo (Com botão rápido para o Mestre revelar ao vivo!) -->
+                        <div class="space-y-1.5 pt-2 border-t border-bunker-800/80">
+                            <span class="text-[10px] font-mono uppercase text-slate-500 block">Sintomas Reais no Mapa Corporal (Clique para revelar após teste):</span>
+                            ${dis.symptoms.map(s => {
+                                const z = BODY_ZONES.find(bz => bz.id === s.zoneId);
+                                return `
+                                    <div class="p-2 rounded bg-bunker-900/90 border border-bunker-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-mono">
+                                        <div>
+                                            <span class="text-cyan-400 font-bold">[${esc(z ? z.label : s.zoneId)}]</span>
+                                            <span class="text-slate-200">${esc(s.name)}</span>
+                                            <span class="text-amber-400 ml-1">(${esc(s.dt)})</span>
+                                        </div>
+                                        <button data-acao="toggleSymptomReveal" data-doenca="${esc(dis.id)}" data-id="${esc(s.id)}" class="px-2 py-0.5 rounded text-[10px] font-bold border shrink-0 ${
+                                            s.revealed
+                                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                                            : 'bg-bunker-950 text-slate-400 border-bunker-700 hover:text-cyan-300'
+                                        }">
+                                            ${s.revealed ? '👁 Revelado no Mapa' : '🔒 Oculto (Revelar)'}
+                                        </button>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function addSymptomToTempDisease() {
+            const zoneId = document.getElementById('gm-sym-zone').value;
+            const dt = document.getElementById('gm-sym-dt').value.trim() || 'Medicina DT 14';
+            const name = document.getElementById('gm-sym-name').value.trim();
+            const clue = document.getElementById('gm-sym-clue').value.trim();
+            const revealed = document.getElementById('gm-sym-revealed').checked;
+
+            if (!name) {
+                showToast('Informe o nome do sintoma.', 'amber');
+                return;
+            }
+
+            tempDiseaseSymptoms.push({
+                id: 'sym_' + Date.now(),
+                zoneId,
+                dt,
+                name,
+                clue,
+                revealed
+            });
+
+            document.getElementById('gm-sym-name').value = '';
+            document.getElementById('gm-sym-clue').value = '';
+            renderTempDiseaseSymptoms();
+        }
+
+        function removeTempDiseaseSymptom(symId) {
+            tempDiseaseSymptoms = tempDiseaseSymptoms.filter(s => s.id !== symId);
+            renderTempDiseaseSymptoms();
+        }
+
+        function renderTempDiseaseSymptoms() {
+            const container = document.getElementById('gm-dis-symptoms-list');
+            if (tempDiseaseSymptoms.length === 0) {
+                container.innerHTML = `<div class="text-[11px] font-mono text-slate-600">Nenhum sintoma adicionado a esta patologia ainda.</div>`;
+                return;
+            }
+
+            container.innerHTML = tempDiseaseSymptoms.map(s => {
+                const z = BODY_ZONES.find(bz => bz.id === s.zoneId);
+                return `
+                    <div class="p-2 rounded bg-bunker-950 border border-bunker-800 flex items-center justify-between gap-2 text-xs font-mono">
+                        <div class="truncate">
+                            <span class="text-cyan-400">[${esc(z ? z.label.split('/')[0].trim() : s.zoneId)}]</span>
+                            <span class="text-slate-200">${esc(s.name)}</span>
+                            <span class="text-amber-400">(${esc(s.dt)})</span>
+                        </div>
+                        <button data-acao="removeTempDiseaseSymptom" data-id="${esc(s.id)}" class="text-rose-400 hover:text-rose-200 font-bold">✕</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function saveDiseaseCRUD() {
+            const idField = document.getElementById('gm-dis-id').value;
+            const name = document.getElementById('gm-dis-name').value.trim();
+            if (!name) {
+                showToast('Informe o nome da patologia.', 'amber');
+                return;
+            }
+
+            const payload = {
+                name,
+                code: document.getElementById('gm-dis-code').value.trim() || 'PAT-XX',
+                diagnosisDT: document.getElementById('gm-dis-dt').value.trim() || 'Medicina DT 15',
+                recipeId: document.getElementById('gm-dis-recipe-id').value,
+                summary: document.getElementById('gm-dis-summary').value.trim(),
+                symptoms: [...tempDiseaseSymptoms]
+            };
+
+            if (idField) {
+                const idx = state.diseases.findIndex(d => d.id === idField);
+                if (idx !== -1) state.diseases[idx] = { ...state.diseases[idx], ...payload };
+                showToast('Patologia atualizada!', 'emerald');
+            } else {
+                state.diseases.push({ id: 'dis_' + Date.now(), ...payload });
+                showToast('Nova patologia cadastrada!', 'emerald');
+            }
+
+            saveState();
+            resetDiseaseForm();
+            refreshAllUI();
+        }
+
+        function editDiseaseCRUD(id) {
+            const dis = state.diseases.find(d => d.id === id);
+            if (!dis) return;
+
+            document.getElementById('gm-dis-form-title').textContent = '✎ Editar Patologia';
+            document.getElementById('gm-dis-cancel-btn').classList.remove('hidden');
+            document.getElementById('gm-dis-id').value = dis.id;
+            document.getElementById('gm-dis-name').value = dis.name;
+            document.getElementById('gm-dis-code').value = dis.code;
+            document.getElementById('gm-dis-dt').value = dis.diagnosisDT;
+            document.getElementById('gm-dis-recipe-id').value = dis.recipeId;
+            document.getElementById('gm-dis-summary').value = dis.summary || '';
+            tempDiseaseSymptoms = JSON.parse(JSON.stringify(dis.symptoms || []));
+            renderTempDiseaseSymptoms();
+        }
+
+        function resetDiseaseForm() {
+            document.getElementById('gm-dis-form-title').textContent = '+ Nova Patologia / Doença';
+            document.getElementById('gm-dis-cancel-btn').classList.add('hidden');
+            document.getElementById('gm-dis-id').value = '';
+            document.getElementById('gm-dis-name').value = '';
+            document.getElementById('gm-dis-code').value = '';
+            document.getElementById('gm-dis-dt').value = '';
+            document.getElementById('gm-dis-summary').value = '';
+            tempDiseaseSymptoms = [];
+            renderTempDiseaseSymptoms();
+        }
+
+        function toggleSymptomReveal(diseaseId, symptomId) {
+            const dis = state.diseases.find(d => d.id === diseaseId);
+            if (!dis) return;
+            const sym = dis.symptoms.find(s => s.id === symptomId);
+            if (!sym) return;
+            sym.revealed = !sym.revealed;
+            saveState();
+            refreshAllUI();
+            showToast(sym.revealed ? `Achado clínico revelado no mapa corporal!` : `Achado clínico ocultado.`, 'cyan');
+        }
+
+        function deleteDiseaseCRUD(id) {
+            if (state.diseases.length <= 1) {
+                showToast('Mantenha pelo menos 1 patologia cadastrada.', 'rose');
+                return;
+            }
+            state.diseases = state.diseases.filter(d => d.id !== id);
+            if (state.patient.activeDiseaseId === id) {
+                state.patient.activeDiseaseId = state.diseases[0].id;
+            }
+            saveState();
+            refreshAllUI();
+            showToast('Patologia removida.', 'rose');
+        }
+
+        // =========================================================================
+        // ABA 4B: RECEITAS & GABARITOS ALQUÍMICOS (MESTRE)
+        // =========================================================================
+        function populateGMRecipeSelector() {
+            const sel = document.getElementById('gm-recipe-selector');
+            sel.innerHTML = state.recipes.map(r => `<option value="${esc(r.id)}">${esc(r.name)}</option>`).join('');
+            if (!state.recipes.some(r => r.id === editingRecipeId)) {
+                editingRecipeId = state.recipes[0]?.id || '';
+            }
+            sel.value = editingRecipeId;
+            loadRecipeIntoGMForm();
+        }
+
+        function selectRecipeForEditing(recId) {
+            editingRecipeId = recId;
+            loadRecipeIntoGMForm();
+        }
+
+        function createNewRecipeSlot() {
+            const newId = 'rec_' + Date.now();
+            state.recipes.push({
+                id: newId,
+                name: 'Novo Composto Alquímico',
+                requiredIngredients: state.ingredients[0] ? [{ id: state.ingredients[0].id, min: 5, max: 15 }] : [],
+                tool: 'morteiro_obsidiana',
+                motion: 'trituracao_horaria',
+                solvent: 'agua_lustral',
+                tempMin: 50,
+                tempMax: 70,
+                time: '15_min',
+                messages: {
+                    cure: 'CURA COMPLETA: O composto erradica a enfermidade alvo.',
+                    palliative: 'SORO PALIATIVO: Estabiliza os sintomas por 24 horas.',
+                    tempError: 'COLAPSO TÉRMICO: Explosão de vapor ácido na bancada!',
+                    motionError: 'INVERSÃO DE POLARIDADE: Gera veneno necrótico.',
+                    contamError: 'MUTAÇÃO INSTÁVEL: Reação contaminada sem efeito curativo.'
+                }
+            });
+            editingRecipeId = newId;
+            saveState();
+            refreshAllUI();
+            showToast('Nova receita criada!', 'emerald');
+        }
+
+        function deleteCurrentRecipe() {
+            if (state.recipes.length <= 1) {
+                showToast('Mantenha pelo menos 1 receita cadastrada.', 'rose');
+                return;
+            }
+            state.recipes = state.recipes.filter(r => r.id !== editingRecipeId);
+            editingRecipeId = state.recipes[0].id;
+            saveState();
+            refreshAllUI();
+            showToast('Receita excluída.', 'rose');
+        }
+
+        function loadRecipeIntoGMForm() {
+            const r = state.recipes.find(rec => rec.id === editingRecipeId) || state.recipes[0];
+            if (!r) return;
+
+            document.getElementById('rec-name').value = r.name;
+            document.getElementById('rec-tool').value = r.tool;
+            document.getElementById('rec-motion').value = r.motion;
+            document.getElementById('rec-solvent').value = r.solvent;
+            document.getElementById('rec-time').value = r.time;
+            document.getElementById('rec-temp-min').value = r.tempMin;
+            document.getElementById('rec-temp-max').value = r.tempMax;
+
+            document.getElementById('rec-msg-cure').value = r.messages.cure;
+            document.getElementById('rec-msg-palliative').value = r.messages.palliative;
+            document.getElementById('rec-msg-temp-err').value = r.messages.tempError;
+            document.getElementById('rec-msg-motion-err').value = r.messages.motionError;
+            document.getElementById('rec-msg-contam-err').value = r.messages.contamError;
+
+            renderRecipeRequiredList(r);
+        }
+
+        function renderRecipeRequiredList(recipeObj) {
+            const r = recipeObj || state.recipes.find(rec => rec.id === editingRecipeId);
+            const container = document.getElementById('rec-required-list');
+            if (!r || r.requiredIngredients.length === 0) {
+                container.innerHTML = `<div class="text-xs font-mono text-slate-500 py-2">Nenhum ingrediente exigido na fórmula ainda.</div>`;
+                return;
+            }
+
+            container.innerHTML = r.requiredIngredients.map(req => {
+                const ing = state.ingredients.find(i => i.id === req.id);
+                const name = ing ? ing.name : req.id;
+                const unit = ing ? ing.unit : '';
+
+                return `
+                    <div class="p-2.5 rounded bg-bunker-950 border border-bunker-800 flex items-center justify-between gap-2 text-xs font-mono">
+                        <div>
+                            <span class="text-slate-200 font-bold">${esc(name)}</span>
+                            <span class="text-cyan-400 ml-2">[${esc(req.min)} a ${esc(req.max)} ${esc(unit)}]</span>
+                        </div>
+                        <button data-acao="removeIngredientFromRecipe" data-id="${esc(req.id)}" class="text-rose-400 hover:text-rose-300 px-2 py-0.5 rounded bg-bunker-900">
+                            Remover
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function addIngredientToRecipe() {
+            const r = state.recipes.find(rec => rec.id === editingRecipeId);
+            if (!r) return;
+
+            const id = document.getElementById('rec-add-ing-select').value;
+            const min = parseInt(document.getElementById('rec-add-ing-min').value, 10);
+            const max = parseInt(document.getElementById('rec-add-ing-max').value, 10);
+
+            if (!id || isNaN(min) || isNaN(max) || min < 0 || max < min) {
+                showToast('Informe valores Mín e Máx válidos (Máx >= Mín).', 'amber');
+                return;
+            }
+
+            const existing = r.requiredIngredients.find(req => req.id === id);
+            if (existing) {
+                existing.min = min;
+                existing.max = max;
+            } else {
+                r.requiredIngredients.push({ id, min, max });
+            }
+
+            document.getElementById('rec-add-ing-min').value = '';
+            document.getElementById('rec-add-ing-max').value = '';
+            saveState();
+            renderRecipeRequiredList(r);
+            showToast('Ingrediente adicionado à fórmula.', 'emerald');
+        }
+
+        function removeIngredientFromRecipe(id) {
+            const r = state.recipes.find(rec => rec.id === editingRecipeId);
+            if (!r) return;
+            r.requiredIngredients = r.requiredIngredients.filter(req => req.id !== id);
+            saveState();
+            renderRecipeRequiredList(r);
+        }
+
+        function saveRecipeConfig() {
+            const idx = state.recipes.findIndex(rec => rec.id === editingRecipeId);
+            if (idx === -1) return;
+
+            if (state.recipes[idx].requiredIngredients.length === 0) {
+                showToast('Adicione pelo menos 1 ingrediente obrigatório na receita!', 'rose');
+                return;
+            }
+
+            const tMin = parseInt(document.getElementById('rec-temp-min').value, 10) || 0;
+            const tMax = parseInt(document.getElementById('rec-temp-max').value, 10) || 100;
+
+            state.recipes[idx] = {
+                ...state.recipes[idx],
+                name: document.getElementById('rec-name').value.trim() || 'Composto Alquímico',
+                tool: document.getElementById('rec-tool').value,
+                motion: document.getElementById('rec-motion').value,
+                solvent: document.getElementById('rec-solvent').value,
+                time: document.getElementById('rec-time').value,
+                tempMin: Math.min(tMin, tMax),
+                tempMax: Math.max(tMin, tMax),
+                messages: {
+                    cure: document.getElementById('rec-msg-cure').value.trim(),
+                    palliative: document.getElementById('rec-msg-palliative').value.trim(),
+                    tempError: document.getElementById('rec-msg-temp-err').value.trim(),
+                    motionError: document.getElementById('rec-msg-motion-err').value.trim(),
+                    contamError: document.getElementById('rec-msg-contam-err').value.trim()
+                }
+            };
+
+            saveState();
+            refreshAllUI();
+            showToast('Receita e gabarito salvos!', 'emerald');
+        }
+
+        // =========================================================================
+        // ABA 4C: CRUD DE INGREDIENTES (MESTRE)
+        // =========================================================================
+        function renderGMIngredientsList() {
+            const container = document.getElementById('gm-ingredients-list');
+            document.getElementById('gm-ing-count').textContent = `${state.ingredients.length} cadastrado(s)`;
+
+            container.innerHTML = state.ingredients.map(ing => `
+                <div class="p-3 rounded bg-bunker-950 border border-bunker-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full shrink-0" style="background-color: ${corSegura(ing.color)}"></span>
+                            <span class="text-xs sm:text-sm font-bold text-slate-100 truncate">${esc(ing.name)}</span>
+                            <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-bunker-800 text-slate-400">${esc(ing.category)}</span>
+                        </div>
+                        <div class="text-[11px] font-mono text-slate-500 mt-0.5">
+                            Unidade: ${esc(ing.unit)} • Passo: ${esc(ing.step)} • Máx: ${esc(ing.max)}
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 shrink-0">
+                        <button data-acao="toggleIngredientAvailability" data-id="${esc(ing.id)}" class="px-2.5 py-1 rounded text-[10px] font-mono font-bold border transition ${
+                            ing.available
+                            ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40'
+                            : 'bg-bunker-900 text-slate-500 border-bunker-700'
+                        }">
+                            ${ing.available ? '✓ Na Bancada' : '✕ Oculto'}
+                        </button>
+
+                        <button data-acao="editIngredientCRUD" data-id="${esc(ing.id)}" class="px-2.5 py-1 rounded bg-bunker-800 hover:bg-bunker-700 text-xs font-mono text-amber-300">
+                            Editar
+                        </button>
+                        <button data-acao="deleteIngredientCRUD" data-id="${esc(ing.id)}" class="px-2.5 py-1 rounded bg-bunker-900 hover:bg-rose-950/60 text-xs font-mono text-rose-400">
+                            Excluir
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            const select = document.getElementById('rec-add-ing-select');
+            if (select) {
+                select.innerHTML = state.ingredients.map(i => `<option value="${esc(i.id)}">${esc(i.name)} (${esc(i.unit)})</option>`).join('');
+            }
+        }
+
+        function saveIngredientCRUD() {
+            const idField = document.getElementById('gm-ing-id').value;
+            const name = document.getElementById('gm-ing-name').value.trim();
+            if (!name) {
+                showToast('Informe o nome do ingrediente.', 'amber');
+                return;
+            }
+
+            const payload = {
+                name,
+                unit: document.getElementById('gm-ing-unit').value,
+                category: document.getElementById('gm-ing-category').value,
+                step: Math.max(1, parseInt(document.getElementById('gm-ing-step').value, 10) || 1),
+                max: Math.max(1, parseInt(document.getElementById('gm-ing-max').value, 10) || 50),
+                color: document.getElementById('gm-ing-color').value,
+                desc: document.getElementById('gm-ing-desc').value.trim(),
+                available: document.getElementById('gm-ing-available').checked
+            };
+
+            if (idField) {
+                const idx = state.ingredients.findIndex(i => i.id === idField);
+                if (idx !== -1) state.ingredients[idx] = { ...state.ingredients[idx], ...payload };
+                showToast('Ingrediente atualizado!', 'emerald');
+            } else {
+                state.ingredients.push({
+                    id: 'ing_' + Date.now(),
+                    ...payload,
+                    selectedQty: 0
+                });
+                showToast('Novo ingrediente criado!', 'emerald');
+            }
+
+            saveState();
+            resetIngredientForm();
+            refreshAllUI();
+        }
+
+        function editIngredientCRUD(id) {
+            const ing = state.ingredients.find(i => i.id === id);
+            if (!ing) return;
+
+            document.getElementById('gm-ing-form-title').textContent = '✎ Editar Ingrediente';
+            document.getElementById('gm-ing-cancel-btn').classList.remove('hidden');
+            document.getElementById('gm-ing-id').value = ing.id;
+            document.getElementById('gm-ing-name').value = ing.name;
+            document.getElementById('gm-ing-unit').value = ing.unit;
+            document.getElementById('gm-ing-category').value = ing.category;
+            document.getElementById('gm-ing-step').value = ing.step;
+            document.getElementById('gm-ing-max').value = ing.max;
+            document.getElementById('gm-ing-color').value = ing.color;
+            document.getElementById('gm-ing-desc').value = ing.desc || '';
+            document.getElementById('gm-ing-available').checked = ing.available;
+        }
+
+        function resetIngredientForm() {
+            document.getElementById('gm-ing-form-title').textContent = '+ Novo Ingrediente';
+            document.getElementById('gm-ing-cancel-btn').classList.add('hidden');
+            document.getElementById('gm-ing-id').value = '';
+            document.getElementById('gm-ing-name').value = '';
+            document.getElementById('gm-ing-step').value = 5;
+            document.getElementById('gm-ing-max').value = 100;
+            document.getElementById('gm-ing-color').value = '#10b981';
+            document.getElementById('gm-ing-desc').value = '';
+            document.getElementById('gm-ing-available').checked = true;
+        }
+
+        function toggleIngredientAvailability(id) {
+            const ing = state.ingredients.find(i => i.id === id);
+            if (!ing) return;
+            ing.available = !ing.available;
+            if (!ing.available) ing.selectedQty = 0;
+            saveState();
+            refreshAllUI();
+            showToast(`"${ing.name}" ${ing.available ? 'liberado na bancada' : 'ocultado dos jogadores'}.`, 'cyan');
+        }
+
+        function deleteIngredientCRUD(id) {
+            state.ingredients = state.ingredients.filter(i => i.id !== id);
+            state.recipes.forEach(r => {
+                r.requiredIngredients = r.requiredIngredients.filter(req => req.id !== id);
+            });
+            saveState();
+            refreshAllUI();
+            showToast('Ingrediente removido da campanha.', 'rose');
+        }
+
+        // =========================================================================
+        // ABA 4D: CRUD DE PISTAS & DICAS (MESTRE)
+        // =========================================================================
+        function renderGMCluesList() {
+            const container = document.getElementById('gm-clues-list');
+            if (state.clues.length === 0) {
+                container.innerHTML = `<div class="text-xs font-mono text-slate-500 py-4 text-center">Nenhuma pista cadastrada.</div>`;
+                return;
+            }
+
+            container.innerHTML = state.clues.map(clue => `
+                <div class="p-3.5 rounded bg-bunker-950 border ${clue.revealed ? 'border-amber-500/40' : 'border-bunker-800'} space-y-2">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-mono text-xs font-bold text-slate-100">${esc(clue.title)}</span>
+                                <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-bunker-800 text-cyan-300">${esc(clue.category || 'Evidência')}</span>
+                            </div>
+                            <div class="text-[10px] font-mono text-slate-500">📍 ${esc(clue.location)}</div>
+                        </div>
+
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button data-acao="toggleClueReveal" data-id="${esc(clue.id)}" class="px-2.5 py-1 rounded text-[10px] font-mono font-bold border transition ${
+                                clue.revealed
+                                ? 'bg-amber-500 text-bunker-950 border-amber-400'
+                                : 'bg-bunker-900 text-slate-400 border-bunker-700 hover:text-amber-300'
+                            }">
+                                ${clue.revealed ? '👁 Revelada' : '🔒 Oculta (Revelar)'}
+                            </button>
+                            <button data-acao="editClueCRUD" data-id="${esc(clue.id)}" class="px-2 py-1 rounded bg-bunker-800 text-xs font-mono text-cyan-300">Editar</button>
+                            <button data-acao="deleteClueCRUD" data-id="${esc(clue.id)}" class="px-2 py-1 rounded bg-bunker-900 text-xs font-mono text-rose-400">Excluir</button>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-400 italic">${esc(clue.text)}</p>
+                </div>
+            `).join('');
+        }
+
+        function saveClueCRUD() {
+            const idField = document.getElementById('gm-clue-id').value;
+            const title = document.getElementById('gm-clue-title').value.trim();
+            const text = document.getElementById('gm-clue-text').value.trim();
+
+            if (!title || !text) {
+                showToast('Preencha o título e o texto da pista.', 'amber');
+                return;
+            }
+
+            const payload = {
+                title,
+                category: document.getElementById('gm-clue-category').value,
+                location: document.getElementById('gm-clue-location').value.trim() || 'Setor Desconhecido',
+                text,
+                revealed: document.getElementById('gm-clue-revealed').checked
+            };
+
+            if (idField) {
+                const idx = state.clues.findIndex(c => c.id === idField);
+                if (idx !== -1) state.clues[idx] = { ...state.clues[idx], ...payload };
+                showToast('Pista atualizada!', 'emerald');
+            } else {
+                state.clues.push({ id: 'clue_' + Date.now(), ...payload });
+                showToast('Nova pista criada!', 'emerald');
+            }
+
+            saveState();
+            resetClueForm();
+            refreshAllUI();
+        }
+
+        function editClueCRUD(id) {
+            const clue = state.clues.find(c => c.id === id);
+            if (!clue) return;
+
+            document.getElementById('gm-clue-form-title').textContent = '✎ Editar Pista';
+            document.getElementById('gm-clue-cancel-btn').classList.remove('hidden');
+            document.getElementById('gm-clue-id').value = clue.id;
+            document.getElementById('gm-clue-title').value = clue.title;
+            document.getElementById('gm-clue-category').value = clue.category || 'Clínica';
+            document.getElementById('gm-clue-location').value = clue.location;
+            document.getElementById('gm-clue-text').value = clue.text;
+            document.getElementById('gm-clue-revealed').checked = clue.revealed;
+        }
+
+        function resetClueForm() {
+            document.getElementById('gm-clue-form-title').textContent = '+ Nova Pista / Evidência';
+            document.getElementById('gm-clue-cancel-btn').classList.add('hidden');
+            document.getElementById('gm-clue-id').value = '';
+            document.getElementById('gm-clue-title').value = '';
+            document.getElementById('gm-clue-location').value = '';
+            document.getElementById('gm-clue-text').value = '';
+            document.getElementById('gm-clue-revealed').checked = false;
+        }
+
+        function toggleClueReveal(id) {
+            const clue = state.clues.find(c => c.id === id);
+            if (!clue) return;
+            clue.revealed = !clue.revealed;
+            saveState();
+            refreshAllUI();
+            showToast(clue.revealed ? `Pista "${clue.title}" revelada!` : `Pista "${clue.title}" ocultada.`, 'amber');
+        }
+
+        function deleteClueCRUD(id) {
+            state.clues = state.clues.filter(c => c.id !== id);
+            saveState();
+            refreshAllUI();
+            showToast('Pista excluída.', 'rose');
+        }
+
+        // =========================================================================
+        // ABA 4E: CAMPANHA & JSON
+        // =========================================================================
+        function exportCampaignJSON() {
+            const dataStr = JSON.stringify(state, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `bunker_clinica_alquimia_${Date.now()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('Arquivo .JSON da campanha exportado!', 'cyan');
+        }
+
+        function importCampaignJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (!imported.diseases || !imported.recipes || !imported.ingredients) {
+                        throw new Error('Estrutura JSON inválida.');
+                    }
+                    state = imported;
+                    editingRecipeId = state.recipes[0]?.id || '';
+                    saveState();
+                    refreshAllUI();
+                    showToast('Campanha importada com sucesso!', 'emerald');
+                } catch (err) {
+                    showToast('Erro ao importar arquivo JSON.', 'rose');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function resetToDefaultCampaign() {
+            state = getDefaultCampaignState();
+            editingRecipeId = state.recipes[0]?.id || '';
+            saveState();
+            refreshAllUI();
+            showToast('Campanha restaurada para o cenário padrão.', 'amber');
+        }
+
+        // =========================================================================
+        // TOAST SYSTEM
+        // =========================================================================
+        function showToast(message, color = 'cyan') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+
+            const styles = {
+                cyan: 'border-cyan-500/60 bg-bunker-900 text-cyan-200',
+                emerald: 'border-emerald-500/60 bg-bunker-900 text-emerald-200',
+                amber: 'border-amber-500/60 bg-bunker-900 text-amber-200',
+                rose: 'border-rose-500/60 bg-bunker-900 text-rose-200',
+                slate: 'border-slate-600 bg-bunker-900 text-slate-200'
+            };
+
+            toast.className = `pointer-events-auto px-4 py-3 rounded border shadow-2xl font-mono text-xs flex items-center gap-2 transition-all transform translate-y-2 opacity-0 ${styles[color] || styles.cyan}`;
+            toast.innerHTML = '<span class="font-bold">◈</span><span></span>';
+            toast.lastElementChild.textContent = message;
+
+            container.appendChild(toast);
+            requestAnimationFrame(() => toast.classList.remove('translate-y-2', 'opacity-0'));
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3200);
+        }
+    </script>
+</body>
+</html>
