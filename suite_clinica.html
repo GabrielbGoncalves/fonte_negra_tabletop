@@ -703,7 +703,7 @@
                             <option value="PALLIATIVE">Paliativos</option>
                             <option value="FAIL">Falhas & Mutações</option>
                         </select>
-                        <button onclick="clearAllLogs()" class="px-2.5 py-1.5 rounded bg-bunker-900 hover:bg-rose-950/50 border border-bunker-700 hover:border-rose-800 text-xs font-mono text-slate-400 hover:text-rose-300 transition">
+                        <button id="btn-limpar-lotes" onclick="clearAllLogs()" class="px-2.5 py-1.5 rounded bg-bunker-900 hover:bg-rose-950/50 border border-bunker-700 hover:border-rose-800 text-xs font-mono text-slate-400 hover:text-rose-300 transition">
                             Limpar
                         </button>
                     </div>
@@ -1456,37 +1456,194 @@
             };
         }
 
+        const db = RPG.db;
         const esc = RPG.escaparHtml;
-        // Cores vêm do estado (localStorage ou JSON importado): só aceita hexadecimal, porque vão para style/fill
+        // Cores vêm do banco ou do JSON importado: só aceita hexadecimal, porque vão para style/fill
         const corSegura = (cor) => /^#[0-9a-f]{3,8}$/i.test(String(cor)) ? cor : '#64748b';
 
-        let state = loadState();
+        // Estado sincronizado em dois nós:
+        //   suite_clinica/campanha: paciente, doenças, receitas, ingredientes e pistas (só o Mestre grava)
+        //   suite_clinica/mesa: anotações do mapa, hipótese de diagnóstico e lotes (jogadores também gravam)
+        // As dosagens e os controles da bancada ficam só no navegador de cada um.
+        const NO = 'suite_clinica';
         const modoAtual = localStorage.getItem('rpg_modo_sessao') || 'jogador';
+        let state = getDefaultCampaignState(); // trocado pelo conteúdo do banco assim que ele chega
         let selectedBodyZoneId = 'coracao_sangue';
         let editingRecipeId = state.recipes[0]?.id || '';
         let tempDiseaseSymptoms = [];
 
-        function loadState() {
-            try {
-                const raw = localStorage.getItem(STORAGE_KEY);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (parsed && parsed.diseases && parsed.recipes && parsed.ingredients) {
-                        return parsed;
-                    }
-                }
-            } catch (e) {
-                console.warn('Erro ao carregar localStorage:', e);
-            }
-            return getDefaultCampaignState();
+        const ESTILO_SELO = {
+            'CURA PERFEITA': 'bg-emerald-500 text-bunker-950',
+            'SORO PALIATIVO': 'bg-amber-500 text-bunker-950',
+            'REAÇÃO CATÁSTROFE': 'bg-rose-600 text-white',
+            'INSTÁVEL / MUTAÇÃO': 'bg-purple-600 text-white',
+            'FALHA TÓXICA': 'bg-cyan-600 text-white'
+        };
+
+        // O Realtime Database não guarda arrays vazios e pode devolver arrays como objetos
+        const lista = (v) => (Array.isArray(v) ? v : (v && typeof v === 'object' ? Object.values(v) : []))
+            .filter(x => x && typeof x === 'object');
+        const texto = (v, max) => (typeof v === 'string' ? v : (v == null ? '' : String(v))).slice(0, max);
+        const limitar = (v, min, max, padrao) => {
+            const n = Number(v);
+            return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : padrao;
+        };
+        const novoId = (prefixo) => `${prefixo}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+
+        function normalizarCampanha(c) {
+            if (!c || typeof c !== 'object') return null;
+            const p = (c.patient && typeof c.patient === 'object') ? c.patient : {};
+            return {
+                patient: {
+                    name: texto(p.name, 200),
+                    notes: texto(p.notes, 2000),
+                    activeDiseaseId: texto(p.activeDiseaseId, 80)
+                },
+                diseases: lista(c.diseases).map(d => ({ ...d, symptoms: lista(d.symptoms) })),
+                recipes: lista(c.recipes).map(r => ({
+                    ...r,
+                    requiredIngredients: lista(r.requiredIngredients),
+                    messages: (r.messages && typeof r.messages === 'object') ? r.messages : {}
+                })),
+                ingredients: lista(c.ingredients).map(i => ({
+                    ...i,
+                    step: limitar(i.step, 1, 1000, 1),
+                    max: limitar(i.max, 0, 100000, 0),
+                    available: i.available === true,
+                    selectedQty: 0
+                })),
+                clues: lista(c.clues)
+            };
         }
 
-        function saveState() {
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-            } catch (e) {
-                console.error('Erro ao salvar estado:', e);
+        // Converte as partes da mesa de um estado no formato antigo (localStorage ou JSON exportado)
+        function mesaDoEstado(obj) {
+            const anotacoes = {};
+            lista(obj.playerAnnotations).forEach(a => {
+                const zoneId = texto(a.zoneId, 40);
+                const text = texto(a.text, 200);
+                if (zoneId && text) anotacoes[novoId('ann')] = { zoneId, text };
+            });
+            const lotes = {};
+            const agora = Date.now();
+            lista(obj.logs).forEach((log, i) => {
+                lotes[novoId('log')] = loteParaBanco(log, agora - i);
+            });
+            const p = obj.patient || {};
+            return {
+                anotacoes,
+                hipotese: { id: texto(p.diagnosedHypothesisId, 80), confirmada: p.diagnosisConfirmed === true },
+                lotes
+            };
+        }
+
+        function loteParaBanco(log, t) {
+            return {
+                t,
+                batch: texto(log.batch, 10),
+                timestamp: texto(log.timestamp, 20),
+                category: ['CURE', 'PALLIATIVE', 'FAIL'].includes(log.category) ? log.category : 'FAIL',
+                badgeText: texto(log.badgeText, 40),
+                title: texto(log.title, 200),
+                mechanics: texto(log.mechanics, 2000),
+                targetDiseaseName: texto(log.targetDiseaseName, 200),
+                ingredientsSummary: texto(log.ingredientsSummary, 2000),
+                tool: texto(log.tool, 80),
+                motion: texto(log.motion, 80),
+                solvent: texto(log.solvent, 80),
+                temp: texto(log.temp, 20),
+                time: texto(log.time, 40)
+            };
+        }
+
+        // Troca a campanha em memória, mantendo as partes da mesa e as dosagens locais da bancada
+        function aplicarCampanha(c) {
+            const dosagens = {};
+            state.ingredients.forEach(i => { dosagens[i.id] = i.selectedQty; });
+            c.ingredients.forEach(i => {
+                i.selectedQty = Math.min(i.max, Math.max(0, parseInt(dosagens[i.id], 10) || 0));
+            });
+            state = {
+                ...c,
+                patient: {
+                    ...c.patient,
+                    diagnosedHypothesisId: state.patient.diagnosedHypothesisId,
+                    diagnosisConfirmed: state.patient.diagnosisConfirmed
+                },
+                playerAnnotations: state.playerAnnotations,
+                logs: state.logs
+            };
+        }
+
+        function aplicarMesa(m) {
+            const mesa = (m && typeof m === 'object') ? m : {};
+            const anotacoes = (mesa.anotacoes && typeof mesa.anotacoes === 'object') ? mesa.anotacoes : {};
+            state.playerAnnotations = Object.keys(anotacoes).sort()
+                .filter(id => anotacoes[id] && typeof anotacoes[id] === 'object')
+                .map(id => ({ id, zoneId: texto(anotacoes[id].zoneId, 40), text: texto(anotacoes[id].text, 200) }));
+
+            const hip = (mesa.hipotese && typeof mesa.hipotese === 'object') ? mesa.hipotese : {};
+            state.patient.diagnosedHypothesisId = texto(hip.id, 80);
+            state.patient.diagnosisConfirmed = hip.confirmada === true;
+
+            const lotes = (mesa.lotes && typeof mesa.lotes === 'object') ? mesa.lotes : {};
+            state.logs = Object.keys(lotes)
+                .filter(id => lotes[id] && typeof lotes[id] === 'object')
+                .map(id => ({ ...loteParaBanco(lotes[id], Number(lotes[id].t) || 0), id }))
+                .sort((a, b) => b.t - a.t);
+        }
+
+        // Só o Mestre grava a campanha (as regras do banco recusam os demais)
+        function salvarCampanha() {
+            if (modoAtual !== 'mestre') return;
+            const campanha = JSON.parse(JSON.stringify({
+                patient: {
+                    name: state.patient.name,
+                    notes: state.patient.notes,
+                    activeDiseaseId: state.patient.activeDiseaseId
+                },
+                diseases: state.diseases,
+                recipes: state.recipes,
+                ingredients: state.ingredients.map(({ selectedQty, ...i }) => i),
+                clues: state.clues
+            }));
+            db.ref(`${NO}/campanha`).set(campanha);
+        }
+
+        function gravarHipotese(id, confirmada) {
+            db.ref(`${NO}/mesa/hipotese`).set({ id: texto(id, 80), confirmada: confirmada === true });
+        }
+
+        // Troca a campanha e a mesa inteiras (importação, cenário padrão e primeira carga do Mestre)
+        function substituirTudo(obj) {
+            const c = normalizarCampanha(obj);
+            if (!c || !c.diseases.length || !c.recipes.length || !c.ingredients.length) {
+                throw new Error('Estrutura inválida.');
             }
+            aplicarCampanha(c);
+            aplicarMesa(mesaDoEstado(obj));
+            editingRecipeId = state.recipes[0]?.id || '';
+            salvarCampanha();
+            db.ref(`${NO}/mesa`).set(mesaDoEstado(obj));
+            refreshAllUI();
+        }
+
+        // Banco vazio: o Mestre publica a campanha que estava no navegador (versão antiga da página) ou a padrão
+        function semearCampanha() {
+            let antigo = null;
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                const parsed = raw ? JSON.parse(raw) : null;
+                if (parsed && parsed.diseases && parsed.recipes && parsed.ingredients) antigo = parsed;
+            } catch (e) {
+                console.warn('Erro ao ler a campanha antiga do localStorage:', e);
+            }
+            try {
+                substituirTudo(antigo || getDefaultCampaignState());
+            } catch (e) {
+                substituirTudo(getDefaultCampaignState());
+            }
+            showToast('Campanha publicada para a mesa.', 'emerald');
         }
 
         // =========================================================================
@@ -1494,7 +1651,29 @@
         // =========================================================================
         window.onload = function() {
             populateStaticSelects();
+            if (modoAtual !== 'mestre') {
+                document.getElementById('btn-limpar-lotes').classList.add('hidden');
+            }
             refreshAllUI();
+
+            let semeado = false;
+            db.ref(`${NO}/campanha`).on('value', (snap) => {
+                const c = normalizarCampanha(snap.val());
+                if (!c || !c.diseases.length || !c.recipes.length) {
+                    if (modoAtual === 'mestre' && !semeado) {
+                        semeado = true;
+                        semearCampanha();
+                    }
+                    return;
+                }
+                aplicarCampanha(c);
+                refreshAllUI();
+            }, (err) => console.error('Suíte Clínica (campanha):', err));
+
+            db.ref(`${NO}/mesa`).on('value', (snap) => {
+                aplicarMesa(snap.val());
+                refreshMesaUI();
+            }, (err) => console.error('Suíte Clínica (mesa):', err));
         };
 
         // Ações dos elementos gerados dinamicamente: data-acao + data-id, sem handler inline com dados interpolados
@@ -1547,6 +1726,40 @@
         }
 
         function refreshAllUI() {
+            renderHud();
+
+            // Aba 1: Diagnóstico & Mapa Corporal
+            updateBodyMapHighlights();
+            renderSelectedZoneInspector();
+            renderDiagnosisSummaryAndList();
+
+            // Aba 2: Bancada
+            renderWorkbenchIngredients();
+            updateThermalDisplay();
+            updateReactorVisuals();
+
+            // Aba 3: Diário & Pistas
+            renderJournalClues();
+            renderJournalLogs();
+
+            // Aba 4: Mestre
+            loadPatientIntoGMForm();
+            renderGMDiseasesList();
+            populateGMRecipeSelector();
+            renderGMIngredientsList();
+            renderGMCluesList();
+        }
+
+        // Mudanças da mesa (anotações, hipótese, lotes): não mexe na bancada nem nos formulários do Mestre
+        function refreshMesaUI() {
+            renderHud();
+            updateBodyMapHighlights();
+            renderSelectedZoneInspector();
+            renderDiagnosisSummaryAndList();
+            renderJournalLogs();
+        }
+
+        function renderHud() {
             // HUD Superior do Paciente
             document.getElementById('hud-patient-name').textContent = state.patient.name;
             document.getElementById('hud-patient-notes').textContent = state.patient.notes;
@@ -1573,27 +1786,6 @@
                 statusBadge.textContent = 'DIAGNÓSTICO PENDENTE';
                 statusBadge.className = 'px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/40';
             }
-
-            // Aba 1: Diagnóstico & Mapa Corporal
-            updateBodyMapHighlights();
-            renderSelectedZoneInspector();
-            renderDiagnosisSummaryAndList();
-
-            // Aba 2: Bancada
-            renderWorkbenchIngredients();
-            updateThermalDisplay();
-            updateReactorVisuals();
-
-            // Aba 3: Diário & Pistas
-            renderJournalClues();
-            renderJournalLogs();
-
-            // Aba 4: Mestre
-            loadPatientIntoGMForm();
-            renderGMDiseasesList();
-            populateGMRecipeSelector();
-            renderGMIngredientsList();
-            renderGMCluesList();
         }
 
         // =========================================================================
@@ -1617,7 +1809,7 @@
         }
 
         // O Terminal do Mestre segue o papel da conta logada (js/sessao.js), não uma senha local.
-        // É só UX: os dados desta página ficam no localStorage do navegador.
+        // É só UX: quem impede um jogador de gravar a campanha são as regras do banco.
         function openGMModalOrTab() {
             if (modoAtual === 'mestre') {
                 switchMainTab('gm');
@@ -1748,33 +1940,24 @@
             input.value = '';
         }
 
+        // As anotações ficam em suite_clinica/mesa: a tela é atualizada pelo listener do banco
         function pushPlayerAnnotation(zoneId, text) {
-            state.playerAnnotations.push({
-                id: 'ann_' + Date.now(),
-                zoneId,
-                text
+            db.ref(`${NO}/mesa/anotacoes/${novoId('ann')}`).set({
+                zoneId: texto(zoneId, 40),
+                text: texto(text, 200)
             });
-            saveState();
-            updateBodyMapHighlights();
-            renderSelectedZoneInspector();
-            renderDiagnosisSummaryAndList();
             showToast('Sintoma registrado no mapa anatômico.', 'amber');
         }
 
         function removePlayerAnnotation(id) {
-            state.playerAnnotations = state.playerAnnotations.filter(a => a.id !== id);
-            saveState();
-            updateBodyMapHighlights();
-            renderSelectedZoneInspector();
-            renderDiagnosisSummaryAndList();
+            if (!state.playerAnnotations.some(a => a.id === id)) return;
+            db.ref(`${NO}/mesa/anotacoes/${id}`).remove();
         }
 
         function clearPlayerAnnotations() {
-            state.playerAnnotations = [];
-            saveState();
-            updateBodyMapHighlights();
-            renderSelectedZoneInspector();
-            renderDiagnosisSummaryAndList();
+            if (state.playerAnnotations.length === 0) return;
+            if (!confirm('Limpar todas as marcações do mapa corporal? Isso apaga as anotações de toda a mesa.')) return;
+            db.ref(`${NO}/mesa/anotacoes`).remove();
             showToast('Marcações do mapa corporal limpas.', 'slate');
         }
 
@@ -1824,10 +2007,8 @@
         }
 
         function selectDiseaseHypothesis(diseaseId) {
-            state.patient.diagnosedHypothesisId = diseaseId;
-            state.patient.diagnosisConfirmed = false;
-            saveState();
-            refreshAllUI();
+            if (!state.diseases.some(d => d.id === diseaseId)) return;
+            gravarHipotese(diseaseId, false);
         }
 
         function verifyDiagnosisHypothesis() {
@@ -1844,9 +2025,7 @@
             box.classList.remove('hidden');
 
             if (isCorrect) {
-                state.patient.diagnosisConfirmed = true;
-                saveState();
-                refreshAllUI();
+                gravarHipotese(hypId, true);
                 box.className = 'p-3 rounded border border-emerald-500/50 bg-emerald-950/30 text-xs font-mono text-emerald-200 leading-relaxed';
                 box.innerHTML = `
                     <strong class="text-emerald-400 block uppercase mb-1">✓ DIAGNÓSTICO CLÍNICO CONFIRMADO (${esc(chosenDis.diagnosisDT)})</strong>
@@ -1854,9 +2033,7 @@
                 `;
                 showToast('Diagnóstico confirmado com sucesso!', 'emerald');
             } else {
-                state.patient.diagnosisConfirmed = false;
-                saveState();
-                refreshAllUI();
+                gravarHipotese(hypId, false);
                 box.className = 'p-3 rounded border border-rose-500/50 bg-rose-950/30 text-xs font-mono text-rose-200 leading-relaxed';
                 box.innerHTML = `
                     <strong class="text-rose-400 block uppercase mb-1">✕ INCONSISTÊNCIA CLÍNICA DETECTADA</strong>
@@ -2192,12 +2369,10 @@
             const batchNum = String(state.logs.length + 1).padStart(2, '0');
             const hypDis = state.diseases.find(d => d.id === state.patient.diagnosedHypothesisId);
             const newLog = {
-                id: 'log_' + Date.now(),
                 batch: batchNum,
                 timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
                 category: resultCategory,
                 badgeText,
-                badgeStyle,
                 title,
                 mechanics,
                 targetDiseaseName: hypDis ? hypDis.name : 'Não diagnosticada',
@@ -2209,8 +2384,8 @@
                 time: LABELS.times[time]
             };
 
-            state.logs.unshift(newLog);
-            saveState();
+            // O lote vai para o diário compartilhado; o listener da mesa atualiza a lista de todos
+            db.ref(`${NO}/mesa/lotes/${novoId('log')}`).set(loteParaBanco(newLog, Date.now()));
             document.getElementById('hud-batch-count').textContent = batchNum;
 
             // Renderizar Banner de Resultado
@@ -2236,8 +2411,6 @@
 
             card.classList.remove('hidden');
             card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-            renderJournalLogs();
         }
 
         // =========================================================================
@@ -2296,7 +2469,7 @@
                             <span class="text-[11px] font-mono text-slate-500">[${esc(log.timestamp)}]</span>
                             <span class="text-xs font-bold text-slate-200">${esc(log.title)}</span>
                         </div>
-                        <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase ${esc(log.badgeStyle)}">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase ${ESTILO_SELO[log.badgeText] || 'bg-slate-600 text-white'}">
                             ${esc(log.badgeText)}
                         </span>
                     </div>
@@ -2316,12 +2489,12 @@
             `).join('');
         }
 
+        // Apagar o diário compartilhado é do Mestre (as regras não deixam jogadores apagarem lotes)
         function clearAllLogs() {
-            state.logs = [];
-            saveState();
-            document.getElementById('hud-batch-count').textContent = '00';
+            if (modoAtual !== 'mestre') return;
+            if (!confirm('Apagar o histórico de lotes de toda a mesa?')) return;
+            db.ref(`${NO}/mesa/lotes`).remove();
             document.getElementById('synthesis-report-card').classList.add('hidden');
-            renderJournalLogs();
             showToast('Histórico de lotes limpo.', 'slate');
         }
 
@@ -2344,8 +2517,9 @@
             state.patient.name = document.getElementById('gm-pat-name').value.trim() || 'Sujeito Desconhecido';
             state.patient.notes = document.getElementById('gm-pat-notes').value.trim();
             state.patient.activeDiseaseId = document.getElementById('gm-pat-active-disease').value;
-            state.patient.diagnosisConfirmed = false;
-            saveState();
+            salvarCampanha();
+            // A doença real pode ter mudado: o diagnóstico da mesa volta a ser só hipótese
+            if (state.patient.diagnosisConfirmed) gravarHipotese(state.patient.diagnosedHypothesisId, false);
             refreshAllUI();
             showToast('Ficha do paciente e doença real atualizadas!', 'emerald');
         }
@@ -2483,7 +2657,7 @@
                 showToast('Nova patologia cadastrada!', 'emerald');
             }
 
-            saveState();
+            salvarCampanha();
             resetDiseaseForm();
             refreshAllUI();
         }
@@ -2522,7 +2696,7 @@
             const sym = dis.symptoms.find(s => s.id === symptomId);
             if (!sym) return;
             sym.revealed = !sym.revealed;
-            saveState();
+            salvarCampanha();
             refreshAllUI();
             showToast(sym.revealed ? `Achado clínico revelado no mapa corporal!` : `Achado clínico ocultado.`, 'cyan');
         }
@@ -2536,7 +2710,7 @@
             if (state.patient.activeDiseaseId === id) {
                 state.patient.activeDiseaseId = state.diseases[0].id;
             }
-            saveState();
+            salvarCampanha();
             refreshAllUI();
             showToast('Patologia removida.', 'rose');
         }
@@ -2580,7 +2754,7 @@
                 }
             });
             editingRecipeId = newId;
-            saveState();
+            salvarCampanha();
             refreshAllUI();
             showToast('Nova receita criada!', 'emerald');
         }
@@ -2592,7 +2766,7 @@
             }
             state.recipes = state.recipes.filter(r => r.id !== editingRecipeId);
             editingRecipeId = state.recipes[0].id;
-            saveState();
+            salvarCampanha();
             refreshAllUI();
             showToast('Receita excluída.', 'rose');
         }
@@ -2668,7 +2842,7 @@
 
             document.getElementById('rec-add-ing-min').value = '';
             document.getElementById('rec-add-ing-max').value = '';
-            saveState();
+            salvarCampanha();
             renderRecipeRequiredList(r);
             showToast('Ingrediente adicionado à fórmula.', 'emerald');
         }
@@ -2677,7 +2851,7 @@
             const r = state.recipes.find(rec => rec.id === editingRecipeId);
             if (!r) return;
             r.requiredIngredients = r.requiredIngredients.filter(req => req.id !== id);
-            saveState();
+            salvarCampanha();
             renderRecipeRequiredList(r);
         }
 
@@ -2711,7 +2885,7 @@
                 }
             };
 
-            saveState();
+            salvarCampanha();
             refreshAllUI();
             showToast('Receita e gabarito salvos!', 'emerald');
         }
@@ -2793,7 +2967,7 @@
                 showToast('Novo ingrediente criado!', 'emerald');
             }
 
-            saveState();
+            salvarCampanha();
             resetIngredientForm();
             refreshAllUI();
         }
@@ -2832,7 +3006,7 @@
             if (!ing) return;
             ing.available = !ing.available;
             if (!ing.available) ing.selectedQty = 0;
-            saveState();
+            salvarCampanha();
             refreshAllUI();
             showToast(`"${ing.name}" ${ing.available ? 'liberado na bancada' : 'ocultado dos jogadores'}.`, 'cyan');
         }
@@ -2842,7 +3016,7 @@
             state.recipes.forEach(r => {
                 r.requiredIngredients = r.requiredIngredients.filter(req => req.id !== id);
             });
-            saveState();
+            salvarCampanha();
             refreshAllUI();
             showToast('Ingrediente removido da campanha.', 'rose');
         }
@@ -2912,7 +3086,7 @@
                 showToast('Nova pista criada!', 'emerald');
             }
 
-            saveState();
+            salvarCampanha();
             resetClueForm();
             refreshAllUI();
         }
@@ -2945,14 +3119,14 @@
             const clue = state.clues.find(c => c.id === id);
             if (!clue) return;
             clue.revealed = !clue.revealed;
-            saveState();
+            salvarCampanha();
             refreshAllUI();
             showToast(clue.revealed ? `Pista "${clue.title}" revelada!` : `Pista "${clue.title}" ocultada.`, 'amber');
         }
 
         function deleteClueCRUD(id) {
             state.clues = state.clues.filter(c => c.id !== id);
-            saveState();
+            salvarCampanha();
             refreshAllUI();
             showToast('Pista excluída.', 'rose');
         }
@@ -2982,13 +3156,11 @@
             reader.onload = function(e) {
                 try {
                     const imported = JSON.parse(e.target.result);
-                    if (!imported.diseases || !imported.recipes || !imported.ingredients) {
+                    if (!imported || !imported.diseases || !imported.recipes || !imported.ingredients) {
                         throw new Error('Estrutura JSON inválida.');
                     }
-                    state = imported;
-                    editingRecipeId = state.recipes[0]?.id || '';
-                    saveState();
-                    refreshAllUI();
+                    if (!confirm('Importar esta campanha? Ela substitui a campanha, as anotações e os lotes de toda a mesa.')) return;
+                    substituirTudo(imported);
                     showToast('Campanha importada com sucesso!', 'emerald');
                 } catch (err) {
                     showToast('Erro ao importar arquivo JSON.', 'rose');
@@ -2999,10 +3171,8 @@
         }
 
         function resetToDefaultCampaign() {
-            state = getDefaultCampaignState();
-            editingRecipeId = state.recipes[0]?.id || '';
-            saveState();
-            refreshAllUI();
+            if (!confirm('Restaurar o cenário padrão? Isso substitui a campanha, as anotações e os lotes de toda a mesa.')) return;
+            substituirTudo(getDefaultCampaignState());
             showToast('Campanha restaurada para o cenário padrão.', 'amber');
         }
 

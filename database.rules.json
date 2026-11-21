@@ -232,6 +232,52 @@
       ".read": "auth != null && (root.child('mestres/' + auth.uid).val() === true || root.child('jogadores/' + auth.uid).val() === true)",
       ".write": "auth != null && root.child('mestres/' + auth.uid).val() === true"
     },
+    "suite_clinica": {
+      ".read": "auth != null && (root.child('mestres/' + auth.uid).val() === true || root.child('jogadores/' + auth.uid).val() === true)",
+      "campanha": {
+        ".write": "auth != null && root.child('mestres/' + auth.uid).val() === true"
+      },
+      "mesa": {
+        ".write": "auth != null && root.child('mestres/' + auth.uid).val() === true",
+        "anotacoes": {
+          ".write": "auth != null && root.child('jogadores/' + auth.uid).val() === true",
+          "$id": {
+            ".validate": "$id.length <= 40 && newData.hasChildren(['zoneId', 'text'])",
+            "zoneId": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 40" },
+            "text": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 200" },
+            "$other": { ".validate": false }
+          }
+        },
+        "hipotese": {
+          ".write": "auth != null && root.child('jogadores/' + auth.uid).val() === true",
+          ".validate": "newData.hasChildren(['id', 'confirmada'])",
+          "id": { ".validate": "newData.isString() && newData.val().length <= 80" },
+          "confirmada": { ".validate": "newData.isBoolean()" },
+          "$other": { ".validate": false }
+        },
+        "lotes": {
+          "$id": {
+            ".write": "auth != null && root.child('jogadores/' + auth.uid).val() === true && !data.exists() && newData.exists()",
+            ".validate": "$id.length <= 40 && newData.hasChildren(['t', 'batch', 'timestamp', 'category', 'badgeText', 'title', 'mechanics', 'targetDiseaseName', 'ingredientsSummary', 'tool', 'motion', 'solvent', 'temp', 'time'])",
+            "t": { ".validate": "newData.isNumber() && newData.val() <= now + 600000" },
+            "batch": { ".validate": "newData.isString() && newData.val().length <= 10" },
+            "timestamp": { ".validate": "newData.isString() && newData.val().length <= 20" },
+            "category": { ".validate": "newData.val() === 'CURE' || newData.val() === 'PALLIATIVE' || newData.val() === 'FAIL'" },
+            "badgeText": { ".validate": "newData.isString() && newData.val().length <= 40" },
+            "title": { ".validate": "newData.isString() && newData.val().length <= 200" },
+            "mechanics": { ".validate": "newData.isString() && newData.val().length <= 2000" },
+            "targetDiseaseName": { ".validate": "newData.isString() && newData.val().length <= 200" },
+            "ingredientsSummary": { ".validate": "newData.isString() && newData.val().length <= 2000" },
+            "tool": { ".validate": "newData.isString() && newData.val().length <= 80" },
+            "motion": { ".validate": "newData.isString() && newData.val().length <= 80" },
+            "solvent": { ".validate": "newData.isString() && newData.val().length <= 80" },
+            "temp": { ".validate": "newData.isString() && newData.val().length <= 20" },
+            "time": { ".validate": "newData.isString() && newData.val().length <= 40" },
+            "$other": { ".validate": false }
+          }
+        }
+      }
+    },
     "teste_grid": {
       ".read": "auth != null && (root.child('mestres/' + auth.uid).val() === true || root.child('jogadores/' + auth.uid).val() === true)",
       ".write": "auth != null && root.child('mestres/' + auth.uid).val() === true"
