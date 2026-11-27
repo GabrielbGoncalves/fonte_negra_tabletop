@@ -222,6 +222,7 @@
         uid: null, aba: 'loja',
         itens: [], global: null,
         pr: {}, inventario: {}, usuarios: {}, log: {},
+        atrib: {},   // jogadores atribuídos a uma ficha do HUD eRPG: { uid: { ficha, nome } }
         carregou: { itens: false, global: false }, limpou: false
     };
 
@@ -323,6 +324,7 @@
             db.ref('loja/inventario').on('value', s => { estado.inventario = s.val() || {}; renderTudo(); }, falha);
             db.ref('loja/log').on('value', s => { estado.log = s.val() || {}; renderTudo(); }, falha);
             db.ref('usuarios').on('value', s => { estado.usuarios = s.val() || {}; renderTudo(); }, falha);
+            RPG.ouvirAtribuicoes(a => { estado.atrib = a; renderTudo(); });
         } else {
             db.ref('loja/pr/' + estado.uid).on('value', s => { estado.pr = {}; estado.pr[estado.uid] = num(s.val(), 0, 0, 1000000); renderTudo(); }, falha);
             db.ref('loja/inventario/' + estado.uid).on('value', s => { estado.inventario = {}; estado.inventario[estado.uid] = s.val() || {}; renderTudo(); }, falha);
@@ -493,12 +495,14 @@
     }
 
     /* ---------- render: jogadores e inventário geral (mestre) ---------- */
+    // Só os jogadores atribuídos a uma ficha do HUD eRPG (Metaverso), com o nome da ficha.
     function listaJogadores() {
-        return Object.keys(estado.usuarios)
+        return Object.keys(estado.atrib)
             .filter(uid => estado.usuarios[uid] && estado.usuarios[uid].papel === 'jogador')
-            .map(uid => ({ uid, nome: texto(estado.usuarios[uid].nome, 80) || texto(estado.usuarios[uid].email, 80) || uid.slice(0, 6) }))
+            .map(uid => ({ uid, nome: estado.atrib[uid].nome }))
             .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
     }
+    const nomeDaFicha = uid => (estado.atrib[uid] ? estado.atrib[uid].nome : '');
 
     function renderJogadores() {
         const raiz = $('#aba-jogadores');
@@ -519,7 +523,7 @@
                 const q = num(inv[id] && inv[id].qtd, 0, 0, 9999);
                 if (q <= 0) return;
                 const g = geral[id] || (geral[id] = { nome: texto(inv[id].nome, 80), total: 0, donos: [] });
-                g.total += q; g.donos.push({ nome: nomes[uid] || (estado.usuarios[uid] && estado.usuarios[uid].nome) || uid.slice(0, 6), qtd: q });
+                g.total += q; g.donos.push({ nome: nomes[uid] || 'Sem ficha', qtd: q });
             });
         });
         const q = semAcento($('#busca-geral').value.trim());
@@ -558,7 +562,7 @@
                   '<label class="check"><input type="checkbox" data-campo="dar-estoque"> Descontar do estoque</label>' +
                   '<button class="btn mini" data-acao="dar-item" data-uid="' + esc(j.uid) + '">Dar</button></div>' : '') +
                 '</div>';
-        }).join('') : '<div class="vazio txt">Nenhum jogador cadastrado ainda.</div>';
+        }).join('') : '<div class="vazio txt">Nenhum jogador atribuído a uma ficha. O Mestre atribui no HUD eRPG do Metaverso.</div>';
     }
 
     /* ---------- render: ajustes ativos (mestre) ---------- */
@@ -593,7 +597,7 @@
     function renderLog() {
         const chaves = Object.keys(estado.log).sort((a, b) => num(estado.log[b] && estado.log[b].t, 0, 0, SEM_PRAZO) - num(estado.log[a] && estado.log[a].t, 0, 0, SEM_PRAZO)).slice(0, 80);
         $('#log').innerHTML = chaves.length
-            ? chaves.map(k => { const l = estado.log[k] || {}; return '<div class="log-linha"><time>' + esc(fmtData(num(l.t, 0, 0, SEM_PRAZO))) + '</time>' + esc(texto(l.texto, 300)) + '</div>'; }).join('')
+            ? chaves.map(k => { const l = estado.log[k] || {}; const quem = nomeDaFicha(l.uid); return '<div class="log-linha"><time>' + esc(fmtData(num(l.t, 0, 0, SEM_PRAZO))) + '</time>' + (quem ? '<b>' + esc(quem) + ':</b> ' : '') + esc(texto(l.texto, 300)) + '</div>'; }).join('')
             : '<div class="vazio txt">Nada registrado ainda.</div>';
     }
 
@@ -671,7 +675,7 @@
     }
 
     /* ---------- ações do mestre: PR e inventário ---------- */
-    const nomeJogador = uid => { const j = listaJogadores().find(x => x.uid === uid); return j ? j.nome : uid.slice(0, 6); };
+    const nomeJogador = uid => nomeDaFicha(uid) || uid.slice(0, 6);
 
     async function mudarPR(uid, modo, bloco) {
         const campo = bloco.querySelector('[data-campo="pr"]');
