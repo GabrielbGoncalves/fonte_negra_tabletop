@@ -373,7 +373,7 @@
                                 <input type="radio" name="projVis" value="custom" class="p5-checkbox proj-vis"><span class="uppercase text-[#00d4ff]">Seletivo</span>
                             </label>
                         </div>
-                        <!-- Jogadores cadastrados (lidos de /usuarios); o ponto verde indica quem está com o Metaverso aberto -->
+                        <!-- Jogadores atribuídos a uma ficha do HUD (com o nome da ficha); o ponto verde indica quem está com o Metaverso aberto -->
                         <div id="projJogadores" class="pt-2 border-t border-[#0055ff]/40 grid grid-cols-2 gap-1.5 opacity-40 pointer-events-none">
                             <p class="col-span-2 text-[11px] text-slate-400">Carregando jogadores…</p>
                         </div>
@@ -658,7 +658,7 @@
                             </div>
 
                             <div id="dcAguardando" hidden class="absolute inset-0 z-20 flex items-center justify-center text-center p-6 bg-[#020611]/80">
-                                <p class="font-display font-bold text-sm text-cyan-200">Entrando na masmorra…</p>
+                                <p id="dcAguardandoTexto" class="font-display font-bold text-sm text-cyan-200">Entrando na masmorra…</p>
                             </div>
                         </div>
 
@@ -999,7 +999,8 @@
         // SESSÃO, NAVEGAÇÃO E PRESENÇA
         // =====================================================================
         let uid = null;
-        let meuNome = 'Jogador';
+        let meuNome = 'Jogador';       // nome da ficha atribuída (ou da conta, no Mestre)
+        let meuNomeConta = 'Jogador';
         const MODULOS = ['projecao', 'investigacao', 'dungeon', 'hud'];
         let moduloAtivo = 'projecao';
         let modoLimpo = '';   // '' | 'obs' | 'imersao': só a projeção, ocupando a janela
@@ -1029,23 +1030,40 @@
         }
 
         let online = {};   // uid -> true
+        // Jogadores atribuídos a uma ficha do HUD: { uid: { ficha, nome } }. Só eles aparecem nas
+        // ferramentas, sempre com o nome da ficha (ver RPG.atribuicoes em js/sessao.js).
+        let atrib = {};
         function aoMudarOnline(snap) {
             const v = snap.val() || {};
             online = {};
             Object.keys(v).forEach((id) => { if (v[id] && typeof v[id] === 'object' && Object.keys(v[id]).length) online[id] = true; });
             if (!ehMestre && uid) online[uid] = true;
-            const n = Object.keys(online).length;
+            atualizarOnline();
+        }
+        function atualizarOnline() {
+            const n = Object.keys(online).filter((id) => atrib[id]).length;
             $('onlineBadge').textContent = `👥 ${n} online`;
             renderListaJogadores();
             renderGrupo();
             renderDungeonAll();
         }
 
+        // Chamado quando as fichas do HUD mudam (no Mestre, também a cada edição local).
+        function atualizarAtribuicoes() {
+            atrib = RPG.atribuicoes(fichas);
+            const novoNome = (!ehMestre && atrib[uid]) ? atrib[uid].nome : meuNomeConta;
+            if (novoNome !== meuNome) meuNome = novoNome;
+            garantirMeuAvatar();
+            atualizarStatusProjecao();
+            atualizarOnline();
+        }
+
         RPG.sessao.then((sessao) => {
             if (!sessao) return;
             uid = sessao.user.uid;
             RPG.perfil().then((p) => {
-                if (p && p.nome) meuNome = p.nome.slice(0, 60);
+                if (p && p.nome) meuNomeConta = p.nome.slice(0, 60);
+                if (ehMestre || !atrib[uid]) meuNome = meuNomeConta;
                 garantirMeuAvatar();
             });
             iniciarPresenca();
@@ -1106,6 +1124,7 @@
                     usuariosCarregados = true;
                     renderListaJogadores();
                     atualizarStatusProjecao();
+                    renderHudGrade();   // opções de jogador de cada ficha
                 }, (err) => console.error('Projeção (usuarios):', err));
             }
         }
@@ -1249,18 +1268,24 @@
             renderListaJogadores();
         }
 
+        // Só os jogadores atribuídos a uma ficha do HUD, com o nome da ficha.
+        const jogadoresAtribuidos = () => Object.keys(atrib)
+            .map((id) => ({ uid: id, nome: atrib[id].nome }))
+            .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+
         function renderListaJogadores() {
             const box = $('projJogadores');
-            if (!box || !usuariosCarregados) return;
+            if (!box || !hudCarregado) return;
             box.textContent = '';
-            if (!jogadoresCadastrados.length) {
+            const lista = jogadoresAtribuidos();
+            if (!lista.length) {
                 const p = document.createElement('p');
                 p.className = 'col-span-2 text-[11px] text-slate-400';
-                p.textContent = 'Nenhum jogador cadastrado.';
+                p.textContent = 'Nenhum jogador atribuído a uma ficha do HUD eRPG.';
                 box.appendChild(p);
                 return;
             }
-            jogadoresCadastrados.forEach((j) => {
+            lista.forEach((j) => {
                 const label = document.createElement('label');
                 label.className = 'flex items-center justify-between gap-2 p-1.5 bg-[#040b1a] border-l-2 border-[#00d4ff] rounded cursor-pointer';
                 label.style.margin = '0';
@@ -1289,9 +1314,7 @@
             else if (visModo === 'dm') { cor = 'bg-amber-400 animate-pulse'; txt = 'OCULTO (APENAS MESTRE)'; }
             else if (visModo === 'all') { cor = 'bg-emerald-400 animate-pulse'; txt = 'PROJETANDO (TODOS)'; }
             else {
-                const n = jogadoresCadastrados.length
-                    ? jogadoresCadastrados.filter((j) => visJogadores[j.uid] === true).length
-                    : Object.keys(visJogadores).length;
+                const n = Object.keys(atrib).filter((id) => visJogadores[id] === true).length;
                 cor = 'bg-cyan-400 animate-pulse'; txt = `PROJETANDO (${n} JOGADOR${n === 1 ? '' : 'ES'})`;
             }
             banner.textContent = txt;
@@ -2430,24 +2453,26 @@
             return true;
         }
 
-        // Grupo: jogadores online com avatar na masmorra (o próprio jogador sempre entra).
+        // Grupo: jogadores online, atribuídos a uma ficha do HUD e com avatar na masmorra (o próprio
+        // jogador atribuído sempre entra). O nome mostrado é o da ficha.
         function grupo() {
             return Object.keys(dc.jogadores)
-                .filter((id) => online[id] || id === uid)
-                .map((id) => Object.assign({ cor: corDe(id) }, dc.jogadores[id]))
+                .filter((id) => (online[id] || id === uid) && atrib[id])
+                .map((id) => Object.assign({ cor: corDe(id) }, dc.jogadores[id], { nome: atrib[id].nome }))
                 .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
         }
 
         function jogadorAtivo() {
             if (ehMestre) {
-                if (verComo !== 'mestre' && dc.jogadores[verComo] && online[verComo]) return dc.jogadores[verComo];
+                if (verComo !== 'mestre' && dc.jogadores[verComo] && online[verComo] && atrib[verComo]) return dc.jogadores[verComo];
                 return camera;
             }
-            return dc.jogadores[uid] || null;
+            return atrib[uid] ? (dc.jogadores[uid] || null) : null;
         }
 
         function explorado(p, x, y) {
-            if (ehMestre || !p) return true;
+            if (ehMestre) return true;
+            if (!p) return false;   // jogador sem avatar (ou sem ficha) não vê o mapa
             return p.nevoa.length === dc.largura * dc.altura && p.nevoa[y * dc.largura + x] === '1';
         }
 
@@ -2475,6 +2500,7 @@
         // O jogador cria o próprio avatar no início do mapa e mantém nome e névoa em dia.
         function garantirMeuAvatar() {
             if (ehMestre || !uid || !dc.carregado.mapa || !dc.carregado.jogadores || !dc.grade.length) return;
+            if (!atrib[uid]) return;   // só jogadores atribuídos a uma ficha do HUD entram na masmorra
             let p = dc.jogadores[uid];
             let mudou = false;
             // Sem avatar, fora do mapa ou dentro de uma parede: volta ao início.
@@ -2769,7 +2795,7 @@
             });
             const rot = $('selectedToolLabel');
             if (rot) {
-                if (t.startsWith('MOVE:')) { const p = dc.jogadores[t.slice(5)]; rot.textContent = 'MOVER ' + (p ? p.nome : '').toUpperCase(); }
+                if (t.startsWith('MOVE:')) { const a = atrib[t.slice(5)]; rot.textContent = 'MOVER ' + (a ? a.nome : '').toUpperCase(); }
                 else rot.textContent = NOMES_TILE[t] || t;
             }
         }
@@ -2948,6 +2974,9 @@
             if (rect.width === 0) return;
             const p = jogadorAtivo();
             $('dcAguardando').hidden = !!p;
+            $('dcAguardandoTexto').textContent = !ehMestre && hudCarregado && !atrib[uid]
+                ? 'Você ainda não tem uma ficha. Peça ao Mestre para atribuir uma no HUD eRPG.'
+                : 'Entrando na masmorra…';
             if (!p) return;
             canvas.width = rect.width;
             canvas.height = rect.height;
@@ -3191,7 +3220,9 @@
                 nome: texto(f.nome, 60, 'Ficha') || 'Ficha',
                 url: urlOverlayValida(f.url) || '',
                 altura: inteiro(f.altura, 60, 450, 140), zoom: inteiro(f.zoom, 40, 150, 100), ajusteY: inteiro(f.ajusteY, -300, 300, 0),
-                pv: texto(f.pv, 20, '—'), pe: texto(f.pe, 20, '—'), ordem: limitar(f.ordem, 0, 1e15, 0)
+                pv: texto(f.pv, 20, '—'), pe: texto(f.pe, 20, '—'), ordem: limitar(f.ordem, 0, 1e15, 0),
+                // uid do jogador desta ficha (vazio = sem jogador)
+                jogador: (typeof f.jogador === 'string' && /^[\w-]{1,128}$/.test(f.jogador)) ? f.jogador : ''
             };
         }
         const fichasOrdenadas = () => Object.keys(fichas).map((id) => Object.assign({ id: id }, fichas[id])).sort((a, b) => a.ordem - b.ordem || a.id.localeCompare(b.id));
@@ -3203,6 +3234,7 @@
                 fichas = {};
                 Object.keys(v).forEach((id) => { if (idValido(id) && v[id]) fichas[id] = normFicha(v[id]); });
                 hudCarregado = true;
+                atualizarAtribuicoes();
                 renderHudGrade();
                 renderDock();
                 renderOverlays();
@@ -3274,7 +3306,7 @@
             const lista = fichasOrdenadas();
             // O Mestre edita na própria grade: só redesenha quando muda a lista ou o recorte do overlay.
             const assinatura = ehMestre
-                ? lista.map((f) => [f.id, f.url, f.altura, f.zoom, f.ajusteY].join('|')).join(';')
+                ? lista.map((f) => [f.id, f.url, f.altura, f.zoom, f.ajusteY].join('|')).join(';') + '#' + jogadoresCadastrados.map((j) => j.uid + ':' + j.nome).join(';')
                 : JSON.stringify(lista);
             if (assinatura !== hudAssinaturaGrade) {
                 hudAssinaturaGrade = assinatura;
@@ -3325,6 +3357,14 @@
                     <button type="button" data-acao="hud-remover" data-ficha-id="${esc(f.id)}" class="grimorio-btn grimorio-btn-danger px-2 py-1 rounded text-[10px] font-bold">🗑️</button>
                 </div>
                 <div class="text-xs">
+                    <label class="text-[10px] text-[#ffd700] font-bold block mb-1">👤 Jogador desta ficha</label>
+                    <select data-ficha-campo="jogador" data-ficha-id="${esc(f.id)}" class="w-full bg-[#020611] border border-[#0066ff] rounded px-2.5 py-1.5 text-xs text-white">
+                        <option value="">— Sem jogador —</option>
+                        ${jogadoresCadastrados.map((j) => `<option value="${esc(j.uid)}">${esc(j.nome)}</option>`).join('')}
+                        ${f.jogador && !jogadoresCadastrados.some((j) => j.uid === f.jogador) ? `<option value="${esc(f.jogador)}">(conta removida)</option>` : ''}
+                    </select>
+                </div>
+                <div class="text-xs">
                     <label class="text-[10px] text-cyan-300 font-bold block mb-1">🔗 Link do overlay eRPG ou UUID da ficha</label>
                     ${campo('url', 'text', 'placeholder="https://erpg.app/sheet/overlay?id=..."', 'w-full bg-[#020611] border border-[#0066ff] rounded px-2.5 py-1.5 text-xs text-white font-mono')}
                 </div>
@@ -3356,6 +3396,20 @@
                 if (!id || !fichas[id] || !el.dataset.fichaCampo) return;
                 const f = fichas[id];
                 const c = el.dataset.fichaCampo;
+                if (c === 'jogador') {
+                    const novo = /^[\w-]{1,128}$/.test(el.value) ? el.value : '';
+                    if (novo === f.jogador) return;
+                    // Um jogador tem uma ficha só: sai da ficha anterior.
+                    if (novo) Object.keys(fichas).forEach((outro) => {
+                        if (outro !== id && fichas[outro].jogador === novo) { fichas[outro].jogador = ''; gravarFicha(outro, true); }
+                    });
+                    f.jogador = novo;
+                    gravarFicha(id, true);
+                    atualizarAtribuicoes();
+                    renderHudGrade();
+                    renderDock();
+                    return;
+                }
                 if (c === 'url') {
                     const bruto = el.value.trim();
                     const url = bruto ? formatarUrlErpg(bruto) : '';
@@ -3369,6 +3423,7 @@
                 gravarFicha(id);
                 renderDock();
                 if (c === 'nome' || c === 'url') renderOverlays();
+                if (c === 'nome') atualizarAtribuicoes();
                 if (['url', 'altura', 'zoom', 'ajusteY'].includes(c)) gravarAdiado('hud-render', id, renderHudGrade, 700);
             });
         }

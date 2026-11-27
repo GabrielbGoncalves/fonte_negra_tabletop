@@ -184,15 +184,55 @@
         await auth.signOut();
     }
 
-    // Dados para o cabeçalho (js/topo.js): nome de /usuarios/{uid}, que as Regras deixam a
-    // própria conta ler. O papel exibido vem do cache, já conferido contra o banco pela sessão.
+    // ---------- Fichas do HUD eRPG (metaverso/hud/fichas) ----------
+    // O Mestre atribui um jogador a cada ficha. Nas ferramentas só aparecem os jogadores atribuídos,
+    // e com o nome da ficha no lugar do nome da conta.
+    const NO_FICHAS = 'metaverso/hud/fichas';
+
+    // { uid: { ficha, nome } } a partir do valor do nó (ou do mesmo formato já validado).
+    // Se um jogador estiver em mais de uma ficha, vale a primeira pela ordem.
+    function atribuicoes(fichas) {
+        const lista = Object.keys((fichas && typeof fichas === 'object') ? fichas : {})
+            .filter((id) => /^[\w-]{1,40}$/.test(id) && fichas[id] && typeof fichas[id] === 'object')
+            .map((id) => ({ id, f: fichas[id], ordem: Number(fichas[id].ordem) || 0 }))
+            .sort((a, b) => a.ordem - b.ordem || a.id.localeCompare(b.id));
+        const out = {};
+        lista.forEach(({ id, f }) => {
+            const uid = f.jogador;
+            if (typeof uid !== 'string' || !/^[\w-]{1,128}$/.test(uid) || out[uid]) return;
+            const nome = (typeof f.nome === 'string' ? f.nome : '').trim().slice(0, 60) || 'Ficha';
+            out[uid] = { ficha: id, nome };
+        });
+        return out;
+    }
+
+    // Escuta as atribuições; cb recebe { uid: { ficha, nome } } a cada mudança.
+    function ouvirAtribuicoes(cb, aoFalhar) {
+        refAdiada(NO_FICHAS).on('value', (snap) => cb(atribuicoes(snap.val())), (err) => {
+            registrarErro(err);
+            if (aoFalhar) aoFalhar(err);
+        });
+    }
+
+    // Dados para o cabeçalho (js/topo.js): o nome da ficha atribuída à conta ou, sem ficha, o
+    // nome de /usuarios/{uid}, que as Regras deixam a própria conta ler. O papel exibido vem do
+    // cache, já conferido contra o banco pela sessão.
     async function perfil() {
         const user = auth.currentUser;
         if (!user) return null;
         let nome = null;
         try {
-            const snap = await comPrazo(database.ref('usuarios/' + user.uid + '/nome').once('value'), 10000, 'banco-indisponivel');
-            nome = snap.val();
+            const snap = await comPrazo(database.ref(NO_FICHAS).once('value'), 10000, 'banco-indisponivel');
+            const minha = atribuicoes(snap.val())[user.uid];
+            if (minha) nome = minha.nome;
+        } catch (err) {
+            registrarErro(err);
+        }
+        try {
+            if (!nome) {
+                const snap = await comPrazo(database.ref('usuarios/' + user.uid + '/nome').once('value'), 10000, 'banco-indisponivel');
+                nome = snap.val();
+            }
         } catch (err) {
             registrarErro(err);
         }
@@ -270,6 +310,8 @@
         entrar,
         sair,
         perfil,
+        atribuicoes,
+        ouvirAtribuicoes,
         cadastrarUsuario,
         cadastrarJogador,
         escaparHtml
