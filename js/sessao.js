@@ -152,7 +152,13 @@
             off: (...args) => { pronto.then(() => real().off(...args)); },
             once: (...args) => pronto.then(() => real().once(...args)),
             set: (valor) => pronto.then(() => real().set(valor)).catch(registrarErro),
-            remove: () => pronto.then(() => real().remove()).catch(registrarErro)
+            remove: () => pronto.then(() => real().remove()).catch(registrarErro),
+            // Para presença: o servidor executa a ação quando esta conexão cair (aba fechada, rede perdida).
+            onDisconnect: () => ({
+                set: (valor) => pronto.then(() => real().onDisconnect().set(valor)).catch(registrarErro),
+                remove: () => pronto.then(() => real().onDisconnect().remove()).catch(registrarErro),
+                cancel: () => pronto.then(() => real().onDisconnect().cancel()).catch(registrarErro)
+            })
         };
     }
 
