@@ -172,8 +172,17 @@
         .ov-shield { position: absolute; inset: 0; z-index: 100; pointer-events: auto; cursor: move; }
         .hud-frame { position: absolute; left: 0; top: 0; border: 0; background: transparent; color-scheme: dark; transform-origin: top left; pointer-events: none; }
 
-        /* Modo OBS: só a projeção, em tela cheia e sem moldura, sobre fundo transparente */
+        /* Visão do jogador: a projeção sem as molduras azuis */
+        body.visao-jogador #quadroProj { padding: 0; border: 0; box-shadow: none; background: transparent; backdrop-filter: none; }
+        body.visao-jogador #dropZone { border: 0; }
+        body.visao-jogador #molduraDeco { display: none; }
+        body.visao-jogador .ov-card { border-color: transparent; }
+
+        /* Modo OBS e Modo Imersão: só a projeção, ocupando a janela e sem moldura.
+           O OBS usa fundo transparente (captura); a Imersão usa fundo escuro e pede a tela cheia do navegador. */
         body.obs-clean { background: transparent !important; background-image: none !important; }
+        body.obs-clean.modo-imersao { background: #000 !important; }
+        body.obs-clean.modo-imersao #dropZone { background: #000; }
         body.obs-clean #barraTopo, body.obs-clean #hudDock, body.obs-clean #projCabecalho,
         body.obs-clean #projAcoes, body.obs-clean #projPainelLateral, body.obs-clean #molduraDeco,
         body.obs-clean #projPlaceholder, body.obs-clean .ov-head, body.obs-clean .ov-resize,
@@ -191,10 +200,10 @@
     <div id="fundoCustom" hidden></div>
     <div id="fundoVeu" hidden></div>
 
-    <!-- Botão flutuante para sair do modo OBS -->
-    <button id="exitObsFloatingBtn" type="button" data-so-mestre data-acao="obs" class="fixed top-3 right-3 z-[100000] bg-[#ffd700] text-black font-black italic px-4 py-2 border-2 border-black shadow-lg text-xs uppercase items-center gap-2 cursor-pointer">
+    <!-- Botão flutuante para sair do modo OBS ou da Imersão -->
+    <button id="exitObsFloatingBtn" type="button" data-acao="sair-modo" class="fixed top-3 right-3 z-[100000] bg-[#ffd700] text-black font-black italic px-4 py-2 border-2 border-black shadow-lg text-xs uppercase items-center gap-2 cursor-pointer">
         <i class="fa-solid fa-rotate-left"></i>
-        <span>SAIR DO MODO OBS (ESC)</span>
+        <span id="sairModoTexto">SAIR DO MODO OBS (ESC)</span>
     </button>
 
     <main class="conteudo mv" style="max-width:1440px;padding-top:14px">
@@ -218,6 +227,9 @@
             <div class="flex flex-wrap items-center gap-1.5 text-xs">
                 <span id="freezeIndicator" hidden class="bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase animate-pulse">⏸ Grupo travado</span>
                 <span id="onlineBadge" class="font-display font-bold text-[11px] text-emerald-300 px-2" title="Jogadores com o Metaverso aberto">👥 0 online</span>
+                <button type="button" data-so-jogador data-acao="imersao" class="grimorio-btn px-2.5 py-1.5 rounded font-display font-bold text-xs text-[#ffd700] flex items-center gap-1.5" title="Esconde o painel e deixa só a projeção ocupando a tela">
+                    <i class="fa-solid fa-film"></i> MODO IMERSÃO
+                </button>
                 <button type="button" data-acao="abrir-modal" data-modal="bgModal" class="grimorio-btn px-2.5 py-1.5 rounded font-display font-bold text-xs text-cyan-200 flex items-center gap-1.5" title="Imagem de fundo (só neste navegador)">
                     <i class="fa-solid fa-image"></i> FUNDO
                 </button>
@@ -270,6 +282,9 @@
                             </button>
                             <button type="button" data-acao="obs" class="grimorio-btn px-2.5 py-1 text-xs font-display font-bold rounded text-[#ffd700]" title="Esconde o painel e deixa só a projeção em tela cheia, para captura no OBS">
                                 <i class="fa-solid fa-video mr-1"></i> MODO OBS
+                            </button>
+                            <button type="button" data-acao="imersao" class="grimorio-btn px-2.5 py-1 text-xs font-display font-bold rounded text-[#ffd700]" title="Esconde o painel e deixa só a projeção ocupando a tela, com fundo escuro">
+                                <i class="fa-solid fa-film mr-1"></i> MODO IMERSÃO
                             </button>
                         </div>
                     </div>
@@ -324,22 +339,13 @@
                             <span id="overlayCountBadge" class="bg-[#00d4ff] text-black font-black text-xs px-2 py-0.5 rounded">0 ATIVOS</span>
                         </div>
                         <p class="text-[11px] text-slate-300 leading-snug">
-                            O overlay do eRPG vira um <strong>cartão dentro da projeção</strong>. Arraste pelo cabeçalho e redimensione pelos cantos. Quem pode ver a projeção vê os mesmos cartões.
+                            As fichas cadastradas no <strong>HUD eRPG</strong> viram <strong>cartões dentro da projeção</strong>. Arraste pelo cabeçalho e redimensione pelos cantos. Quem pode ver a projeção vê os mesmos cartões.
                         </p>
-                        <form id="overlayAddForm" class="flex flex-col gap-2">
-                            <div>
-                                <label for="erpgLinkInput" class="text-[10px] font-bold text-[#00d4ff] block mb-1">Link do overlay eRPG ou UUID da ficha</label>
-                                <input type="text" id="erpgLinkInput" required placeholder="https://erpg.app/sheet/overlay?id=..." class="w-full bg-[#020611] border border-[#0066ff] rounded px-2.5 py-1.5 text-xs text-white font-mono">
-                            </div>
-                            <div>
-                                <label for="erpgNameInput" class="text-[10px] font-bold text-slate-300 block mb-1">Nome / jogador</label>
-                                <input type="text" id="erpgNameInput" maxlength="60" placeholder="Ex.: Joker / Morgana" class="w-full bg-[#020611] border border-[#0066ff] rounded px-2.5 py-1.5 text-xs text-white">
-                            </div>
-                            <div class="flex gap-2">
-                                <button type="submit" class="grimorio-btn grimorio-btn-active flex-1 py-2 px-3 rounded font-display font-bold text-xs"><i class="fa-solid fa-plus"></i> ADICIONAR</button>
-                                <button type="button" data-acao="ov-demo" class="grimorio-btn py-2 px-3 rounded font-display font-bold text-xs" title="Testar com o link padrão do eRPG"><i class="fa-solid fa-vial"></i> DEMO</button>
-                            </div>
-                        </form>
+                        <!-- Fichas do HUD (redesenhada quando o HUD ou os overlays mudam) -->
+                        <div id="ovFichas" class="flex flex-col gap-1.5"></div>
+                        <button type="button" data-acao="modulo" data-modulo="hud" class="grimorio-btn py-1.5 px-3 rounded font-display font-bold text-xs text-[#ffd700]">
+                            <i class="fa-solid fa-gear"></i> CADASTRAR FICHAS NO HUD
+                        </button>
                         <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[#0055ff]/40">
                             <button type="button" data-acao="ov-travar" class="grimorio-btn px-3 py-1.5 rounded text-xs font-display font-bold text-[#00d4ff] flex items-center gap-1.5">
                                 <i id="lockIcon" class="fa-solid fa-lock-open"></i> <span id="lockText">DESTRAVADO</span>
@@ -901,7 +907,10 @@
         // ---------- Papel: o que só o Mestre (ou só o jogador) vê ----------
         // Isto é só interface; quem impede um jogador de escrever são as regras do banco.
         document.querySelectorAll(ehMestre ? '[data-so-jogador]' : '[data-so-mestre]').forEach((el) => el.remove());
-        if (!ehMestre) $('projColuna').classList.replace('lg:col-span-8', 'lg:col-span-12');
+        if (!ehMestre) {
+            $('projColuna').classList.replace('lg:col-span-8', 'lg:col-span-12');
+            document.body.classList.add('visao-jogador');
+        }
 
         // =====================================================================
         // UTILIDADES
@@ -993,10 +1002,10 @@
         let meuNome = 'Jogador';
         const MODULOS = ['projecao', 'investigacao', 'dungeon', 'hud'];
         let moduloAtivo = 'projecao';
-        let isObsClean = false;
+        let modoLimpo = '';   // '' | 'obs' | 'imersao': só a projeção, ocupando a janela
 
         function trocarModulo(m) {
-            if (!MODULOS.includes(m) || isObsClean) m = 'projecao';
+            if (!MODULOS.includes(m) || modoLimpo) m = 'projecao';
             moduloAtivo = m;
             MODULOS.forEach((id) => {
                 $('modulo-' + id).hidden = id !== m;
@@ -1050,7 +1059,6 @@
         // =====================================================================
         // MÓDULO 1: PROJEÇÃO (mesmo nó e mesmas regras do antigo projetor.html)
         // =====================================================================
-        const DEMO_URL = 'https://erpg.app/sheet/overlay?id=2ab8b8a6-de83-440d-887b-d8046237cf87';
         const LIMITE_IMAGEM = 1400000; // caracteres do data URL; as regras aceitam até 1.500.000
         let temImagem = false;
         let imagemAtual = null;          // última imagem vinda do banco
@@ -1061,7 +1069,8 @@
         let jogadoresCadastrados = [];   // [{ uid, nome }]
         let usuariosCarregados = false;
         let isLocked = false;
-        let overlaysDb = {};             // id -> overlay validado
+        let overlaysBrutos = null;       // último valor de projetor/overlays (null = ainda não chegou)
+        let overlaysDb = {};             // id da ficha do HUD -> overlay validado
         const cartoes = {};              // id -> elemento do cartão
         let arrastandoId = null;
 
@@ -1302,25 +1311,48 @@
 
         // A projeção do jogador ocupa todo o espaço que sobra na janela.
         function ajustarAlturaProjecao() {
-            if (ehMestre || isObsClean || moduloAtivo !== 'projecao') return;
+            if (ehMestre || modoLimpo || moduloAtivo !== 'projecao') return;
             dropZone.classList.remove('h-[430px]', 'md:h-[540px]');
             const topo = dropZone.getBoundingClientRect().top + window.scrollY;
             dropZone.style.height = Math.max(320, window.innerHeight - topo - 30) + 'px';
         }
         window.addEventListener('resize', ajustarAlturaProjecao);
 
-        function alternarObs() {
-            isObsClean = !isObsClean;
-            document.body.classList.toggle('obs-clean', isObsClean);
-            if (isObsClean) trocarModulo('projecao');
-            if (ehMestre) {
-                showToast(isObsClean ? 'Modo OBS ativo! [ESC] ou o canto superior direito para sair.' : 'Painel restaurado.', 'info');
+        // Modo OBS (fundo transparente, para captura) e Modo Imersão (fundo escuro e tela cheia do
+        // navegador): os dois deixam só a projeção. Mestre e jogadores podem usar os dois.
+        function definirModoLimpo(modo, silencioso) {
+            const anterior = modoLimpo;
+            modoLimpo = modo === 'obs' || modo === 'imersao' ? modo : '';
+            document.body.classList.toggle('obs-clean', !!modoLimpo);
+            document.body.classList.toggle('modo-imersao', modoLimpo === 'imersao');
+            $('sairModoTexto').textContent = modoLimpo === 'imersao' ? 'SAIR DA IMERSÃO (ESC)' : 'SAIR DO MODO OBS (ESC)';
+            if (modoLimpo) trocarModulo('projecao');
+            else { dropZone.style.height = ''; ajustarAlturaProjecao(); }
+
+            // Tela cheia do navegador: dentro do hub, depende de allow="fullscreen" no iframe.
+            const emTelaCheia = !!document.fullscreenElement;
+            if (modoLimpo === 'imersao' && !emTelaCheia && document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().catch(() => { /* fica só ocupando a janela */ });
+            } else if (anterior === 'imersao' && modoLimpo !== 'imersao' && emTelaCheia) {
+                document.exitFullscreen().catch(() => {});
             }
-            if (!isObsClean) { dropZone.style.height = ''; if (!ehMestre) ajustarAlturaProjecao(); }
+
+            if (silencioso || modoLimpo === anterior) return;
+            if (modoLimpo === 'obs') showToast('Modo OBS ativo! [ESC] ou o canto superior direito para sair.', 'info');
+            else if (modoLimpo === 'imersao') showToast('Modo Imersão ativo! [ESC] ou o canto superior direito para sair.', 'info');
+            else showToast('Painel restaurado.', 'info');
         }
+        // O ESC do navegador sai da tela cheia antes de chegar à página: sair dela encerra a Imersão.
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement && modoLimpo === 'imersao') definirModoLimpo('');
+        });
+        window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modoLimpo) definirModoLimpo(''); });
 
         // ---------- Overlays (iframe do eRPG dentro da projeção) ----------
-        // O Mestre grava em projetor/overlays; quem pode ver a projeção recebe os mesmos cartões.
+        // Os overlays são as fichas do HUD eRPG (metaverso/hud/fichas): o id do overlay é o id da ficha,
+        // e o link e o nome vêm da ficha. O Mestre grava em projetor/overlays a posição (e uma cópia do
+        // link e do nome, exigida pelas regras); quem pode ver a projeção recebe os mesmos cartões.
+        // Overlay sem ficha correspondente (ou ficha sem link) não aparece.
         // Posição e tamanho são porcentagens da camada, então escalam com o quadro.
         function urlOverlayValida(valor) {
             try {
@@ -1336,14 +1368,17 @@
             return urlOverlayValida(t);
         }
 
+        // As regras exigem título de 1 a 60 caracteres; o nome da ficha pode estar vazio enquanto é editado.
+        const tituloFicha = (f) => String(f.nome || '').slice(0, 60) || 'Ficha eRPG';
+
         function sanearOverlay(id, o) {
-            if (!o || typeof o !== 'object' || !/^[\w-]{1,30}$/.test(id)) return null;
-            const url = urlOverlayValida(o.url);
-            if (!url) return null;
+            if (!o || typeof o !== 'object' || !idValido(id)) return null;
+            const ficha = fichas[id];
+            if (!ficha || !ficha.url) return null;
             const w = limitar(o.w, 5, 100, 45);
             const h = limitar(o.h, 5, 100, 60);
             return {
-                id: id, url: url, titulo: String(o.titulo || 'Ficha eRPG').slice(0, 60),
+                id: id, url: ficha.url, titulo: tituloFicha(ficha),
                 x: limitar(o.x, 0, 100 - w, 5), y: limitar(o.y, 0, 100 - h, 5), w: w, h: h,
                 z: limitar(o.z, 0, 100000, 1)
             };
@@ -1358,7 +1393,14 @@
         }
 
         function aoMudarOverlays(snap) {
-            const todos = snap.val() || {};
+            const v = snap.val();
+            overlaysBrutos = (v && typeof v === 'object') ? v : {};
+            renderOverlays();
+        }
+
+        // Também roda quando o HUD muda (link ou nome de uma ficha, ficha removida).
+        function renderOverlays() {
+            const todos = overlaysBrutos || {};
             overlaysDb = {};
             Object.keys(todos).forEach((id) => { const o = sanearOverlay(id, todos[id]); if (o) overlaysDb[id] = o; });
             Object.keys(cartoes).forEach((id) => {
@@ -1366,15 +1408,24 @@
             });
             Object.keys(overlaysDb).forEach((id) => {
                 if (!cartoes[id]) criarCartao(overlaysDb[id]);
-                else if (id !== arrastandoId) posicionar(cartoes[id], overlaysDb[id]);
+                else {
+                    atualizarTituloCartao(cartoes[id], overlaysDb[id].titulo);
+                    if (id !== arrastandoId) posicionar(cartoes[id], overlaysDb[id]);
+                }
             });
             atualizarContadorOverlays();
+            renderFichasProjecao();
+            if (ehMestre) atualizarBotoesProjetar();
+            sincronizarOverlaysComHud();
         }
 
         function limparOverlays() {
             Object.keys(cartoes).forEach((id) => { cartoes[id].remove(); delete cartoes[id]; });
+            overlaysBrutos = null;
             overlaysDb = {};
             atualizarContadorOverlays();
+            renderFichasProjecao();
+            if (ehMestre) atualizarBotoesProjetar();
         }
 
         function atualizarContadorOverlays() {
@@ -1382,6 +1433,80 @@
             if (!badge) return;
             const n = Object.keys(overlaysDb).length;
             badge.textContent = `${n} ATIVO${n !== 1 ? 'S' : ''}`;
+        }
+
+        function atualizarTituloCartao(card, titulo) {
+            const span = card.querySelector('.ov-titulo');
+            if (span && span.textContent !== titulo) span.textContent = titulo;
+            const frame = card.querySelector('.ov-frame');
+            if (frame) frame.setAttribute('title', titulo);
+        }
+
+        // Só o Mestre: mantém projetor/overlays igual ao HUD (o projetor.html antigo lê o link e o nome
+        // de lá). Overlay sem ficha com link é apagado; link ou nome diferente é atualizado.
+        function sincronizarOverlaysComHud() {
+            if (!ehMestre || overlaysBrutos === null || !hudCarregado || temPendente('hud')) return;
+            Object.keys(overlaysBrutos).forEach((id) => {
+                const o = overlaysBrutos[id];
+                const ficha = idValido(id) ? fichas[id] : null;
+                if (!ficha || !ficha.url) { db.ref('projetor/overlays/' + id).remove(); return; }
+                if (!o || !overlaysDb[id]) return;
+                // RPG.db não tem update(): grava cada campo que mudou.
+                if (o.url !== ficha.url) db.ref('projetor/overlays/' + id + '/url').set(ficha.url);
+                if (o.titulo !== tituloFicha(ficha)) db.ref('projetor/overlays/' + id + '/titulo').set(tituloFicha(ficha));
+            });
+        }
+
+        // Lista do painel lateral: cada ficha do HUD com o botão de projetar ou retirar.
+        function renderFichasProjecao() {
+            const box = $('ovFichas');
+            if (!box) return;
+            box.textContent = '';
+            const lista = fichasOrdenadas();
+            if (!lista.length) {
+                const p = document.createElement('p');
+                p.className = 'text-[11px] text-slate-400';
+                p.textContent = 'Nenhuma ficha no HUD eRPG.';
+                box.appendChild(p);
+                return;
+            }
+            lista.forEach((f) => {
+                const linha = document.createElement('div');
+                linha.className = 'flex items-center justify-between gap-2 p-1.5 bg-[#040b1a] border-l-2 border-[#00d4ff] rounded';
+                const nome = document.createElement('span');
+                nome.className = 'text-[11px] font-bold text-white uppercase truncate';
+                nome.textContent = f.nome;
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.dataset.acao = 'ov-alternar';
+                btn.dataset.fichaId = f.id;
+                const ativo = !!overlaysDb[f.id];
+                if (!f.url) {
+                    btn.className = 'grimorio-btn px-2 py-0.5 rounded text-[10px] font-bold';
+                    btn.disabled = true;
+                    btn.textContent = 'SEM LINK';
+                    btn.title = 'Cadastre o link do overlay no HUD eRPG';
+                } else {
+                    btn.className = 'grimorio-btn px-2 py-0.5 rounded text-[10px] font-bold flex-none ' + (ativo ? 'grimorio-btn-danger' : 'text-[#00d4ff]');
+                    btn.textContent = ativo ? 'RETIRAR' : '📽️ PROJETAR';
+                }
+                linha.append(nome, btn);
+                box.appendChild(linha);
+            });
+        }
+
+        // Projeta a ficha do HUD como cartão, ou retira se já estiver na projeção.
+        function alternarOverlayFicha(id) {
+            const f = fichas[id];
+            if (!f || !f.url) { showToast('Cadastre o link do overlay no HUD eRPG antes de projetar.', 'error'); return; }
+            if (overlaysDb[id]) {
+                db.ref('projetor/overlays/' + id).remove();
+                logProj(`Overlay [${f.nome}] retirado.`);
+                showToast(`"${f.nome}" retirada da projeção.`, 'info');
+            } else {
+                novoOverlay(id, f);
+                showToast(`"${f.nome}" adicionada à projeção.`, 'success');
+            }
         }
 
         function criarCartao(o) {
@@ -1397,9 +1522,9 @@
                 head.addEventListener('mousedown', (e) => { if (!e.target.closest('button')) iniciarArraste(e, o.id, 'mover'); });
                 head.querySelector('.ov-fechar').addEventListener('click', () => {
                     const atual = overlaysDb[o.id] || o;
-                    if (!confirm(`Remover o overlay "${atual.titulo}"?`)) return;
+                    if (!confirm(`Retirar "${atual.titulo}" da projeção? A ficha continua no HUD.`)) return;
                     db.ref('projetor/overlays/' + o.id).remove();
-                    logProj(`Overlay [${atual.titulo}] removido.`);
+                    logProj(`Overlay [${atual.titulo}] retirado.`);
                 });
                 card.appendChild(head);
             }
@@ -1430,13 +1555,11 @@
             });
         }
 
-        function novoOverlay(url, titulo) {
-            const id = novoId('o');
+        function novoOverlay(id, ficha) {
             const n = Object.keys(overlaysDb).length;
             const z = Object.values(overlaysDb).reduce((m, v) => Math.max(m, v.z), 0) + 1;
-            const nome = String(titulo || 'Ficha eRPG').slice(0, 60) || 'Ficha eRPG';
-            gravarOverlay({ id: id, url: url, titulo: nome, x: Math.min(50, 5 + (n % 6) * 6), y: Math.min(40, 5 + (n % 6) * 6), w: 45, h: 60, z: z });
-            logProj(`Overlay [${nome}] ativo.`);
+            gravarOverlay({ id: id, url: ficha.url, titulo: tituloFicha(ficha), x: Math.min(50, 5 + (n % 6) * 6), y: Math.min(40, 5 + (n % 6) * 6), w: 45, h: 60, z: z });
+            logProj(`Overlay [${tituloFicha(ficha)}] ativo.`);
         }
 
         // Mover (pelo cabeçalho) ou redimensionar (pelos cantos); grava ao soltar o mouse.
@@ -1518,17 +1641,6 @@
                 escreverVisibilidade(visModo, novo);
                 logProj(`Visão [${cb.dataset.nome}]: ${cb.checked ? 'LIBERADA' : 'OCULTA'}`);
             });
-            $('overlayAddForm').addEventListener('submit', (e) => {
-                e.preventDefault();
-                const url = formatarUrlErpg($('erpgLinkInput').value);
-                const titulo = $('erpgNameInput').value.trim() || 'Ficha eRPG';
-                if (!url) { showToast('Use o link do overlay (https://erpg.app/sheet/overlay?id=…) ou só o UUID da ficha.', 'error'); return; }
-                novoOverlay(url, titulo);
-                $('erpgLinkInput').value = '';
-                $('erpgNameInput').value = '';
-                showToast(`Overlay "${titulo}" adicionado!`, 'success');
-            });
-            window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isObsClean) alternarObs(); });
             // Os overlays antigos ficavam só no navegador; agora vivem no banco.
             try { localStorage.removeItem('p5r_single_tab_state'); } catch (e) { /* sem armazenamento */ }
         }
@@ -3067,6 +3179,7 @@
         // =====================================================================
         const HUD = 'metaverso/hud/fichas';
         let fichas = {};          // id -> ficha validada
+        let hudCarregado = false;
         let hudAssinaturaGrade = '';
         let hudAssinaturaDock = '';
         let dockAberto = false;
@@ -3089,8 +3202,10 @@
                 const v = snap.val() || {};
                 fichas = {};
                 Object.keys(v).forEach((id) => { if (idValido(id) && v[id]) fichas[id] = normFicha(v[id]); });
+                hudCarregado = true;
                 renderHudGrade();
                 renderDock();
+                renderOverlays();
             }, (err) => console.error('HUD:', err));
             aplicarDock();
         }
@@ -3148,7 +3263,7 @@
         }
 
         function aplicarDock() {
-            $('hudDock').hidden = !dockAberto || isObsClean;
+            $('hudDock').hidden = !dockAberto || !!modoLimpo;
             $('btnToggleDock').classList.toggle('grimorio-btn-active', dockAberto);
             try { localStorage.setItem('metaverso_dock', dockAberto ? '1' : '0'); } catch (e) { /* sem armazenamento */ }
             ajustarAlturaProjecao();
@@ -3175,7 +3290,17 @@
                     if (!card) return;
                     card.querySelectorAll('[data-ficha-campo]').forEach((el) => definirValor(el, el.dataset.fichaCampo === 'url' ? f.url : f[el.dataset.fichaCampo]));
                 });
+                atualizarBotoesProjetar();
             }
+        }
+
+        // Botão de cada ficha do Mestre: projetar ou retirar da projeção.
+        function atualizarBotoesProjetar() {
+            document.querySelectorAll('#hudGrade [data-acao="hud-projetar"]').forEach((btn) => {
+                const ativo = !!overlaysDb[btn.dataset.fichaId];
+                btn.textContent = ativo ? '✖ Retirar' : '📽️ Projetar';
+                btn.title = ativo ? 'Retira esta ficha da projeção' : 'Adiciona esta ficha como cartão na projeção';
+            });
         }
 
         function cartaoFichaJogador(f) {
@@ -3243,6 +3368,7 @@
                 else f[c] = el.value.slice(0, c === 'nome' ? 60 : 20);
                 gravarFicha(id);
                 renderDock();
+                if (c === 'nome' || c === 'url') renderOverlays();
                 if (['url', 'altura', 'zoom', 'ajusteY'].includes(c)) gravarAdiado('hud-render', id, renderHudGrade, 700);
             });
         }
@@ -3317,7 +3443,9 @@
             'fechar-lightbox': () => { $('imageLightbox').hidden = true; },
             'dock': () => { dockAberto = !dockAberto; aplicarDock(); },
             'dock-abrir': () => { dockAberto = true; aplicarDock(); window.scrollTo({ top: 0, behavior: 'smooth' }); },
-            'obs': () => alternarObs(),
+            'obs': () => definirModoLimpo(modoLimpo === 'obs' ? '' : 'obs'),
+            'imersao': () => definirModoLimpo(modoLimpo === 'imersao' ? '' : 'imersao'),
+            'sair-modo': () => definirModoLimpo(''),
             'fundo-url': () => {
                 const bruto = $('fundoUrl').value.trim();
                 let url = null;
@@ -3344,7 +3472,7 @@
                 db.ref(INV + 'cena/mapa').set(imagemAtual.src);
                 trocarModulo('investigacao');
             },
-            'ov-demo': () => { novoOverlay(DEMO_URL, 'Ficha Demo eRPG'); showToast('Overlay demo adicionado na projeção!', 'info'); },
+            'ov-alternar': (el) => alternarOverlayFicha(el.dataset.fichaId),
             'ov-travar': () => alternarTrava(),
             'ov-limpar': () => {
                 if (!Object.keys(overlaysDb).length || !confirm('Remover todos os overlays?')) return;
@@ -3461,15 +3589,12 @@
                 if (!fichas[id] || !confirm(`Remover a ficha "${fichas[id].nome}"?`)) return;
                 delete fichas[id];
                 gravarAgora('hud', id, () => db.ref(HUD + '/' + id).remove());
+                if (overlaysBrutos && overlaysBrutos[id]) db.ref('projetor/overlays/' + id).remove();
                 renderHudGrade();
                 renderDock();
+                renderOverlays();
             },
-            'hud-projetar': (el) => {
-                const f = fichas[el.dataset.fichaId];
-                if (!f || !f.url) { showToast('Cadastre o link do overlay antes de projetar.', 'error'); return; }
-                novoOverlay(f.url, f.nome);
-                showToast(`"${f.nome}" adicionada à projeção.`, 'success');
-            }
+            'hud-projetar': (el) => alternarOverlayFicha(el.dataset.fichaId)
         };
 
         document.addEventListener('click', (e) => {
@@ -3495,12 +3620,9 @@
         escolherPincel('0');
         let moduloInicial = 'projecao';
         try { moduloInicial = localStorage.getItem('metaverso_modulo') || 'projecao'; } catch (e) { /* sem armazenamento */ }
-        if (location.hash === '#obs') {
-            isObsClean = true;
-            document.body.classList.add('obs-clean');
-            moduloInicial = 'projecao';
-        }
         trocarModulo(moduloInicial);
+        if (location.hash === '#obs') definirModoLimpo('obs', true);
+        renderFichasProjecao();
     })();
     </script>
 </body>
