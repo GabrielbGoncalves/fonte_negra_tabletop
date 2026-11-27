@@ -191,6 +191,90 @@
       ".read": "auth != null && (root.child('mestres/' + auth.uid).val() === true || root.child('jogadores/' + auth.uid).val() === true)",
       ".write": "auth != null && root.child('mestres/' + auth.uid).val() === true"
     },
+    "metaverso": {
+      "online": {
+        ".read": "auth != null && (root.child('mestres/' + auth.uid).val() === true || root.child('jogadores/' + auth.uid).val() === true)",
+        "$uid": {
+          "$conexao": {
+            ".write": "auth != null && auth.uid === $uid && root.child('jogadores/' + auth.uid).val() === true",
+            ".validate": "$conexao.length <= 40 && newData.val() === true"
+          }
+        }
+      },
+      "investigacao": {
+        ".write": "auth != null && root.child('mestres/' + auth.uid).val() === true",
+        "cena": {
+          ".read": "auth != null && (root.child('mestres/' + auth.uid).val() === true || root.child('jogadores/' + auth.uid).val() === true)"
+        },
+        "estado": {
+          ".read": "auth != null && (root.child('mestres/' + auth.uid).val() === true || root.child('jogadores/' + auth.uid).val() === true)"
+        },
+        "reveladas": {
+          ".read": "auth != null && (root.child('mestres/' + auth.uid).val() === true || root.child('jogadores/' + auth.uid).val() === true)"
+        },
+        "segredos": {
+          ".read": "auth != null && root.child('mestres/' + auth.uid).val() === true"
+        }
+      },
+      "dungeon": {
+        ".read": "auth != null && (root.child('mestres/' + auth.uid).val() === true || root.child('jogadores/' + auth.uid).val() === true)",
+        ".write": "auth != null && root.child('mestres/' + auth.uid).val() === true",
+        "jogadores": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid && root.child('jogadores/' + auth.uid).val() === true",
+            ".validate": "newData.hasChildren(['nome', 'x', 'y', 'dir', 'nevoa'])",
+            "nome": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 60" },
+            "x": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 34 && newData.val() % 1 === 0" },
+            "y": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 34 && newData.val() % 1 === 0" },
+            "dir": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 3 && newData.val() % 1 === 0" },
+            "nevoa": { ".validate": "newData.isString() && newData.val().length <= 1225" },
+            "$other": { ".validate": false }
+          }
+        },
+        "meta": {
+          "$celula": {
+            ".write": "auth != null && root.child('jogadores/' + auth.uid).val() === true && newData.exists()",
+            ".validate": "$celula.matches(/^[0-9]{1,2}_[0-9]{1,2}$/)",
+            "aberta": { ".validate": "newData.isBoolean()" },
+            "trancada": { ".validate": "newData.isBoolean() && (root.child('mestres/' + auth.uid).val() === true || newData.val() === false || data.val() === true)" },
+            "coletado": { ".validate": "newData.isBoolean()" },
+            "armadilha": { ".validate": "newData.isBoolean()" },
+            "inspecionado": { ".validate": "newData.isBoolean()" },
+            "$other": { ".validate": false }
+          }
+        },
+        "chaves": {
+          ".write": "auth != null && root.child('jogadores/' + auth.uid).val() === true && newData.isNumber() && (data.exists() ? (newData.val() === data.val() + 1 || newData.val() === data.val() - 1) : newData.val() === 1)",
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 99 && newData.val() % 1 === 0"
+        },
+        "bolsa": {
+          "$id": {
+            ".write": "auth != null && root.child('jogadores/' + auth.uid).val() === true && !data.exists() && newData.exists()",
+            ".validate": "$id.length <= 40 && newData.hasChildren(['icone', 'rotulo', 'quem', 'onde', 't'])",
+            "icone": { ".validate": "newData.isString() && newData.val().length <= 8" },
+            "rotulo": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 120" },
+            "quem": { ".validate": "newData.isString() && newData.val().length <= 60" },
+            "onde": { ".validate": "newData.isString() && newData.val().length <= 30" },
+            "t": { ".validate": "newData.isNumber() && newData.val() <= now + 60000" },
+            "$other": { ".validate": false }
+          }
+        },
+        "log": {
+          "$id": {
+            ".write": "auth != null && root.child('jogadores/' + auth.uid).val() === true && !data.exists() && newData.exists()",
+            ".validate": "$id.length <= 40 && newData.hasChildren(['t', 'texto', 'tom'])",
+            "t": { ".validate": "newData.isNumber() && newData.val() <= now + 60000" },
+            "texto": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 300" },
+            "tom": { ".validate": "newData.val() === 'normal' || newData.val() === 'perigo' || newData.val() === 'ouro' || newData.val() === 'ok' || newData.val() === 'roxo' || newData.val() === 'ciano' || newData.val() === 'aviso'" },
+            "$other": { ".validate": false }
+          }
+        }
+      },
+      "hud": {
+        ".read": "auth != null && (root.child('mestres/' + auth.uid).val() === true || root.child('jogadores/' + auth.uid).val() === true)",
+        ".write": "auth != null && root.child('mestres/' + auth.uid).val() === true"
+      }
+    },
     "projetor": {
       "visibilidade": {
         ".read": "auth != null && (root.child('mestres/' + auth.uid).val() === true || root.child('jogadores/' + auth.uid).val() === true)",
