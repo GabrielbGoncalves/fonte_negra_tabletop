@@ -354,6 +354,8 @@
                 quadro.hidden = true;
                 const iframe = document.createElement('iframe');
                 iframe.title = tituloDe(arquivo);
+                // Deixa a ferramenta pedir a tela cheia do navegador (Modo Imersão do Metaverso).
+                iframe.allow = 'fullscreen';
                 iframe.src = arquivo;
                 quadro.appendChild(iframe);
                 quadrosEl.appendChild(quadro);
