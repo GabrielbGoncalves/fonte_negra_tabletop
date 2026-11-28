@@ -220,7 +220,7 @@
                 <button type="button" data-acao="modulo" data-modulo="dungeon" id="nav-dungeon" class="grimorio-btn px-3 py-1.5 rounded font-display font-bold text-xs flex items-center gap-1.5">
                     <i class="fa-solid fa-dungeon text-[#00d4ff]"></i> DUNGEON CRAWLER
                 </button>
-                <button type="button" data-acao="modulo" data-modulo="hud" id="nav-hud" class="grimorio-btn px-3 py-1.5 rounded font-display font-bold text-xs flex items-center gap-1.5">
+                <button type="button" data-so-mestre data-acao="modulo" data-modulo="hud" id="nav-hud" class="grimorio-btn px-3 py-1.5 rounded font-display font-bold text-xs flex items-center gap-1.5">
                     <i class="fa-solid fa-heart-pulse text-rose-400"></i> HUD ERPG
                 </button>
             </nav>
@@ -233,7 +233,7 @@
                 <button type="button" data-acao="abrir-modal" data-modal="bgModal" class="grimorio-btn px-2.5 py-1.5 rounded font-display font-bold text-xs text-cyan-200 flex items-center gap-1.5" title="Imagem de fundo (só neste navegador)">
                     <i class="fa-solid fa-image"></i> FUNDO
                 </button>
-                <button type="button" data-acao="dock" id="btnToggleDock" class="grimorio-btn px-2.5 py-1.5 rounded font-display font-bold text-xs text-rose-300 flex items-center gap-1.5" title="Mostrar/ocultar o monitor de fichas no topo">
+                <button type="button" data-so-mestre data-acao="dock" id="btnToggleDock" class="grimorio-btn px-2.5 py-1.5 rounded font-display font-bold text-xs text-rose-300 flex items-center gap-1.5" title="Mostrar/ocultar o monitor de fichas no topo">
                     <i class="fa-solid fa-heart"></i> MONITOR
                 </button>
                 <button type="button" data-acao="abrir-modal" data-modal="bagModal" class="grimorio-btn px-2.5 py-1.5 rounded font-display font-bold text-xs text-[#ffd700] flex items-center gap-1" title="Bolsa do grupo">
@@ -243,7 +243,8 @@
         </div>
 
         <!-- ================= MONITOR DE FICHAS (DOCK) ================= -->
-        <section id="hudDock" hidden class="mb-3">
+        <!-- Só o Mestre vê o HUD eRPG e o monitor; o jogador vê os cartões só dentro da projeção -->
+        <section id="hudDock" data-so-mestre hidden class="mb-3">
             <div class="grimorio-frame rounded-xl p-2.5 border-2 border-[#00d4ff]/80">
                 <div class="flex items-center justify-between mb-2 px-1">
                     <div class="flex items-center gap-2">
@@ -768,7 +769,7 @@
         <!-- ======================================================================= -->
         <!-- MÓDULO 4: HUD / FICHAS DO eRPG                                          -->
         <!-- ======================================================================= -->
-        <section id="modulo-hud" class="modulo flex flex-col gap-4" hidden>
+        <section id="modulo-hud" data-so-mestre class="modulo flex flex-col gap-4" hidden>
             <div class="grimorio-frame rounded-xl p-4 flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <h2 class="font-display font-bold text-lg text-[#00d4ff] uppercase flex items-center gap-2">
@@ -1001,7 +1002,8 @@
         let uid = null;
         let meuNome = 'Jogador';       // nome da ficha atribuída (ou da conta, no Mestre)
         let meuNomeConta = 'Jogador';
-        const MODULOS = ['projecao', 'investigacao', 'dungeon', 'hud'];
+        // O HUD eRPG é só do Mestre (os elementos dele não existem na visão do jogador).
+        const MODULOS = ehMestre ? ['projecao', 'investigacao', 'dungeon', 'hud'] : ['projecao', 'investigacao', 'dungeon'];
         let moduloAtivo = 'projecao';
         let modoLimpo = '';   // '' | 'obs' | 'imersao': só a projeção, ocupando a janela
 
@@ -3276,6 +3278,7 @@
 
         function renderDock() {
             const grid = $('hudDockGrid');
+            if (!grid) return;
             const lista = fichasOrdenadas();
             const assinatura = JSON.stringify(lista);
             if (assinatura === hudAssinaturaDock) return;
@@ -3295,6 +3298,7 @@
         }
 
         function aplicarDock() {
+            if (!ehMestre) return;   // o monitor é só do Mestre
             $('hudDock').hidden = !dockAberto || !!modoLimpo;
             $('btnToggleDock').classList.toggle('grimorio-btn-active', dockAberto);
             try { localStorage.setItem('metaverso_dock', dockAberto ? '1' : '0'); } catch (e) { /* sem armazenamento */ }
@@ -3303,6 +3307,7 @@
 
         function renderHudGrade() {
             const grade = $('hudGrade');
+            if (!grade) return;
             const lista = fichasOrdenadas();
             // O Mestre edita na própria grade: só redesenha quando muda a lista ou o recorte do overlay.
             const assinatura = ehMestre
